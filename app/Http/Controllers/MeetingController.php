@@ -19,6 +19,7 @@ class MeetingController extends Controller
         $this->syncPastMeetings();
 
         return view('meetings');
+        FJJV:
     }
 
     public function list()
@@ -30,32 +31,32 @@ class MeetingController extends Controller
             $status = $meeting->status ?? 'upcoming';
 
             return [
-                'id'          => $meeting->id,
-                'title'       => $meeting->title,
-                'cat'         => $meeting->category,
-                'presenter'   => $meeting->presenter ?? '—',
-                'date'        => $meeting->date,
-                'time'        => $meeting->time,
-                'type'        => $meeting->type ?? 'onsite',
-                'status'      => $status,
-                'link'        => $meeting->link,
-                'location'    => $meeting->location,
-                'location_url'=> $meeting->location_url,
-                'notes'       => $meeting->notes,
-                'duration'    => $meeting->duration_minutes,
-                'invitation'  => $meeting->invitation_direction,
+                'id' => $meeting->id,
+                'title' => $meeting->title,
+                'cat' => $meeting->category,
+                'presenter' => $meeting->presenter ?? '—',
+                'date' => $meeting->date,
+                'time' => $meeting->time,
+                'type' => $meeting->type ?? 'onsite',
+                'status' => $status,
+                'link' => $meeting->link,
+                'location' => $meeting->location,
+                'location_url' => $meeting->location_url,
+                'notes' => $meeting->notes,
+                'duration' => $meeting->duration_minutes,
+                'invitation' => $meeting->invitation_direction,
                 'agendaItems' => $meeting->agendaItems->map(fn($a) => [
-                    'id'       => $a->id,
-                    'title'    => $a->topic_title,
+                    'id' => $a->id,
+                    'title' => $a->topic_title,
                     'duration' => $a->duration_minutes,
-                    'presenter'=> $a->presenter_name,
+                    'presenter' => $a->presenter_name,
                 ]),
-                'cancelReason'=> $meeting->cancel_reason,
-                'report'      => [
-                    'summary'   => $meeting->report_summary,
+                'cancelReason' => $meeting->cancel_reason,
+                'report' => [
+                    'summary' => $meeting->report_summary,
                     'decisions' => $meeting->report_decisions,
                     'attendees' => $meeting->report_attendees,
-                    'actions'   => $meeting->report_actions,
+                    'actions' => $meeting->report_actions,
                 ],
             ];
         });
@@ -80,22 +81,22 @@ class MeetingController extends Controller
                 $status = $meeting->status ?? 'upcoming';
 
                 return [
-                    'id'          => $meeting->id,
-                    'title'       => $meeting->title,
-                    'cat'         => $meeting->category,
-                    'presenter'   => $meeting->presenter ?? '—',
-                    'date'        => $meeting->date,
-                    'time'        => $meeting->time,
-                    'duration'    => $meeting->duration_minutes,
-                    'type'        => $meeting->type ?? 'onsite',
-                    'status'      => $status,
-                    'link'        => $meeting->link,
-                    'location'    => $meeting->location,
-                    'location_url'=> $meeting->location_url,
-                    'notes'       => $meeting->notes,
+                    'id' => $meeting->id,
+                    'title' => $meeting->title,
+                    'cat' => $meeting->category,
+                    'presenter' => $meeting->presenter ?? '—',
+                    'date' => $meeting->date,
+                    'time' => $meeting->time,
+                    'duration' => $meeting->duration_minutes,
+                    'type' => $meeting->type ?? 'onsite',
+                    'status' => $status,
+                    'link' => $meeting->link,
+                    'location' => $meeting->location,
+                    'location_url' => $meeting->location_url,
+                    'notes' => $meeting->notes,
                     'description' => $meeting->description,
-                    'cancelReason'=> $meeting->cancel_reason,
-                    'targets'     => $meeting->targetAssociations->map(fn($t) => $t->name)->toArray(),
+                    'cancelReason' => $meeting->cancel_reason,
+                    'targets' => $meeting->targetAssociations->map(fn($t) => $t->name)->toArray(),
                     'agendaItems' => $meeting->agendaItems->map(fn($a) => [
                         'title' => $a->title,
                         'presenter' => $a->presenter_name,
@@ -133,13 +134,13 @@ class MeetingController extends Controller
         $userIds = User::whereHas('role', fn($q) => $q->where('name', 'user'))->pluck('id');
         foreach ($userIds as $uid) {
             Notification::create([
-                'user_id'      => $uid,
-                'title'        => 'اجتماع جديد',
-                'body'         => "تمت إضافة اجتماع جديد: {$meeting->title}",
-                'type'         => 'meeting_created',
-                'related_id'   => $meeting->id,
+                'user_id' => $uid,
+                'title' => 'اجتماع جديد',
+                'body' => "تمت إضافة اجتماع جديد: {$meeting->title}",
+                'type' => 'meeting_created',
+                'related_id' => $meeting->id,
                 'related_type' => Meeting::class,
-                'is_read'      => false,
+                'is_read' => false,
             ]);
         }
 
@@ -148,12 +149,12 @@ class MeetingController extends Controller
         foreach ($assocIds as $aid) {
             Notification::create([
                 'association_id' => $aid,
-                'title'          => 'اجتماع جديد',
-                'body'           => "تمت إضافة اجتماع جديد: {$meeting->title}",
-                'type'           => 'meeting_created',
-                'related_id'     => $meeting->id,
-                'related_type'   => Meeting::class,
-                'is_read'        => false,
+                'title' => 'اجتماع جديد',
+                'body' => "تمت إضافة اجتماع جديد: {$meeting->title}",
+                'type' => 'meeting_created',
+                'related_id' => $meeting->id,
+                'related_type' => Meeting::class,
+                'is_read' => false,
             ]);
         }
 
@@ -176,19 +177,19 @@ class MeetingController extends Controller
             ?? 'مستخدم';
 
         $meetingType = $meeting->type === 'online' ? 'عبر الإنترنت' : 'حضوري';
-        $action      = $meeting->type === 'online'  ? 'انضم إلى' : 'سيحضر';
+        $action = $meeting->type === 'online' ? 'انضم إلى' : 'سيحضر';
 
         // Notify the admin
         $admin = User::whereHas('role', fn($q) => $q->where('name', 'admin'))->first();
         if ($admin) {
             Notification::create([
-                'user_id'      => $admin->id,
-                'title'        => 'انضمام إلى اجتماع',
-                'body'         => $userName . ' ' . $action . ' الاجتماع: ' . $meeting->title . ' (' . $meetingType . ')',
-                'type'         => 'meeting_joined',
-                'related_id'   => $meeting->id,
+                'user_id' => $admin->id,
+                'title' => 'انضمام إلى اجتماع',
+                'body' => $userName . ' ' . $action . ' الاجتماع: ' . $meeting->title . ' (' . $meetingType . ')',
+                'type' => 'meeting_joined',
+                'related_id' => $meeting->id,
                 'related_type' => Meeting::class,
-                'is_read'      => false,
+                'is_read' => false,
             ]);
         }
 
@@ -246,13 +247,14 @@ class MeetingController extends Controller
     {
         $meeting->agendaItems()->delete();
         foreach ($items as $i => $item) {
-            if (empty($item['title'])) continue;
+            if (empty($item['title']))
+                continue;
             MeetingAgendaItem::create([
-                'meeting_id'       => $meeting->id,
-                'topic_title'      => $item['title'],
+                'meeting_id' => $meeting->id,
+                'topic_title' => $item['title'],
                 'duration_minutes' => $item['duration'] ?? 15,
-                'presenter_name'   => $item['presenter'] ?? null,
-                'order_index'      => $i,
+                'presenter_name' => $item['presenter'] ?? null,
+                'order_index' => $i,
             ]);
         }
     }
@@ -297,8 +299,8 @@ class MeetingController extends Controller
     {
         // Handle both 'upcoming' and NULL status (legacy rows seeded before status column)
         Meeting::where(function ($q) {
-                $q->where('status', 'upcoming')->orWhereNull('status');
-            })
+            $q->where('status', 'upcoming')->orWhereNull('status');
+        })
             ->where(function ($query) {
                 $query->whereDate('date', '<', now()->toDateString())
                     ->orWhere(function ($sub) {
