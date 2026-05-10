@@ -19,7 +19,7 @@ class MeetingController extends Controller
         $this->syncPastMeetings();
 
         return view('meetings');
-        FJJV:
+
     }
 
     public function list()
