@@ -1,8 +1,7 @@
 <?php
-
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\MeetingController;
+use App\Http\Controllers\Admin\MeetingController;
 use App\Http\Middleware\AuthMiddleware;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Support\Facades\Route;
@@ -28,15 +27,20 @@ Route::middleware(AuthMiddleware::class)->group(function () {
         Route::get('/settings',       fn() => view('settings'))->name('settings');
 
         Route::get('/volunteer',      fn() => redirect('/consulting#volunteer'))->name('volunteer');
-        Route::get('/meetings',       [MeetingController::class, 'index'])->name('meetings');
-        Route::get('/api/meetings',   [MeetingController::class, 'list'])->name('meetings.list');
-        Route::post('/meetings',      [MeetingController::class, 'store'])->name('meetings.store');
-        Route::put('/meetings/{meeting}', [MeetingController::class, 'update'])->name('meetings.update');
+
+        // ── Meeting routes (Admin) ────────────────────────────────────────────
+        Route::get('/meetings',                   [MeetingController::class, 'index'])->name('meetings');
+        Route::get('/api/meetings',               [MeetingController::class, 'list'])->name('meetings.list');
+        Route::post('/meetings',                  [MeetingController::class, 'store'])->name('meetings.store');
+        Route::put('/meetings/{meeting}',         [MeetingController::class, 'update'])->name('meetings.update');
         Route::post('/meetings/{meeting}/cancel', [MeetingController::class, 'cancel'])->name('meetings.cancel');
-        Route::delete('/meetings/{meeting}', [MeetingController::class, 'destroy'])->name('meetings.destroy');
+        Route::delete('/meetings/{meeting}',      [MeetingController::class, 'destroy'])->name('meetings.destroy');
+        Route::get('/api/meetings/{meeting}/attendees', [MeetingController::class, 'attendees'])->name('meetings.attendees');
+        // ─────────────────────────────────────────────────────────────────────
+
         Route::get('/orders',         fn() => redirect('/consulting#orders'))->name('orders');
         Route::get('/joint-projects', fn() => redirect('/consulting#projects'))->name('joint-projects');
-        
+
         Route::get('/my-associations', [\App\Http\Controllers\Admin\MyAssociationsController::class, 'index'])->name('my-associations.index');
         Route::delete('/my-associations/{id}', [\App\Http\Controllers\Admin\MyAssociationsController::class, 'destroy'])->name('my-associations.destroy');
     });
@@ -46,20 +50,19 @@ Route::middleware(AuthMiddleware::class)->group(function () {
         Route::get('/user/dashboard', [App\Http\Controllers\DashboardController::class, 'userDashboard'])->name('user.dashboard');
         Route::get('/user/consulting',     fn() => view('user.consulting'))->name('user.consulting');
         Route::get('/user/services',       fn() => view('user.services'))->name('user.services');
-        Route::get('/user/meetings-page',  fn() => view('user.meetings'))->name('user.meetings.page');
-
         Route::get('/user/service-requests', [App\Http\Controllers\User\ServiceRequestController::class, 'index']);
         Route::post('/user/service-requests', [App\Http\Controllers\User\ServiceRequestController::class, 'store']);
         Route::put('/user/service-requests/{id}', [App\Http\Controllers\User\ServiceRequestController::class, 'update']);
         Route::delete('/user/service-requests/{id}', [App\Http\Controllers\User\ServiceRequestController::class, 'destroy']);
 
         // Join meeting (notifies admin)
-        Route::post('/api/meetings/{meeting}/join', [App\Http\Controllers\MeetingController::class, 'joinMeeting'])->name('meetings.join');
+        Route::post('/api/meetings/{meeting}/join', [MeetingController::class, 'joinMeeting'])->name('meetings.join');
 
-        // Meetings list for users (read-only, no admin role needed)
-        Route::get('/api/user/meetings', [App\Http\Controllers\MeetingController::class, 'listForUser'])->name('user.meetings.list');
+        // Meetings list for users (read-only)
+        Route::get('/api/user/meetings', [MeetingController::class, 'listForUser'])->name('user.meetings.list');
 
-        Route::get('/user/meetings',       fn() => redirect()->route('user.meetings.page'))->name('user.meetings');
+        Route::get('/user/meetings',       [MeetingController::class, 'userIndex'])->name('user.meetings');
+        Route::post('/user/meetings/{id}/attendance', [MeetingController::class, 'toggleAttendance'])->name('user.meetings.attendance');
         Route::get('/user/orders',         fn() => redirect('/user/consulting#orders'))->name('user.orders');
         Route::get('/user/joint-projects', fn() => redirect('/user/consulting#projects'))->name('user.joint-projects');
         Route::get('/user/settings',       fn() => view('user.settings'))->name('user.settings');
@@ -67,20 +70,18 @@ Route::middleware(AuthMiddleware::class)->group(function () {
 
 });
 
-// ── JSON API endpoints — must be in web.php to share the session middleware ──
-// (Laravel's api middleware group doesn't start the session, so Auth::check()
-//  would always return false for session-based logins if defined in api.php)
+// ── JSON API endpoints — defined in web.php to share session middleware ───────
 Route::prefix('api')
     ->middleware([AuthMiddleware::class])
     ->group(function () {
 
-        // ── Shared GET Endpoints (Admin & Users) ──────────────────────────────────
+        // ── Shared GET Endpoints (Admin & Users) ──────────────────────────────
         Route::get('/association-categories',
             [App\Http\Controllers\Admin\AssociationCategoryController::class, 'index']);
-        
+
         Route::get('/opportunities',
             [App\Http\Controllers\Admin\OpportunityController::class, 'index']);
-            
+
         Route::get('/joint-projects',
             [App\Http\Controllers\Admin\JointProjectController::class, 'index']);
 
@@ -96,7 +97,7 @@ Route::prefix('api')
         Route::get('/my-project-requests',
             [App\Http\Controllers\Admin\JointProjectController::class, 'myRequests']);
 
-        // ── User / Association Notification Endpoints ─────────────────────────────
+        // ── User / Association Notification Endpoints ─────────────────────────
         Route::middleware(RoleMiddleware::class . ':user,association')->group(function () {
             Route::get('/user/notifications',
                 [\App\Http\Controllers\User\NotificationController::class, 'index']);
@@ -108,84 +109,86 @@ Route::prefix('api')
                 [\App\Http\Controllers\User\NotificationController::class, 'clearAll']);
         });
 
-        // ── Admin-Only Endpoints ──────────────────────────────────────────────────
+        // ── Admin-Only Endpoints ──────────────────────────────────────────────
         Route::middleware(RoleMiddleware::class . ':admin')->group(function () {
 
-        // Association registration requests
-        Route::get('/association-requests',
-            [App\Http\Controllers\Admin\AssociationRequestController::class, 'index']);
-        Route::post('/association-requests/{id}/approve',
-            [App\Http\Controllers\Admin\AssociationRequestController::class, 'approve']);
-        Route::post('/association-requests/{id}/reject',
-            [App\Http\Controllers\Admin\AssociationRequestController::class, 'reject']);
-        Route::post('/association-requests/{id}/review',
-            [App\Http\Controllers\Admin\AssociationRequestController::class, 'requestReview']);
+            // Association registration requests
+            Route::get('/association-requests',
+                [App\Http\Controllers\Admin\AssociationRequestController::class, 'index']);
+            Route::post('/association-requests/{id}/approve',
+                [App\Http\Controllers\Admin\AssociationRequestController::class, 'approve']);
+            Route::post('/association-requests/{id}/reject',
+                [App\Http\Controllers\Admin\AssociationRequestController::class, 'reject']);
+            Route::post('/association-requests/{id}/review',
+                [App\Http\Controllers\Admin\AssociationRequestController::class, 'requestReview']);
 
-        // Mobaderoon Service Requests (Admin Management)
-        Route::get('/orders/services',
-            [\App\Http\Controllers\Admin\ServiceRequestController::class, 'index']);
-        Route::post('/orders/services/{id}/status',
-            [\App\Http\Controllers\Admin\ServiceRequestController::class, 'updateStatus']);
+            // Mobaderoon Service Requests (Admin Management)
+            Route::get('/orders/services',
+                [\App\Http\Controllers\Admin\ServiceRequestController::class, 'index']);
+            Route::post('/orders/services/{id}/status',
+                [\App\Http\Controllers\Admin\ServiceRequestController::class, 'updateStatus']);
 
-        // Notifications
-        Route::get('/notifications',
-            [App\Http\Controllers\Admin\NotificationController::class, 'index']);
-        Route::post('/notifications/{id}/read',
-            [App\Http\Controllers\Admin\NotificationController::class, 'markRead']);
-        Route::post('/notifications/read-all',
-            [App\Http\Controllers\Admin\NotificationController::class, 'markAllRead']);
-        Route::post('/notifications/clear-all',
-            [App\Http\Controllers\Admin\NotificationController::class, 'clearAll']);
+            // Notifications
+            Route::get('/notifications',
+                [App\Http\Controllers\Admin\NotificationController::class, 'index']);
+            Route::post('/notifications/{id}/read',
+                [App\Http\Controllers\Admin\NotificationController::class, 'markRead']);
+            Route::post('/notifications/read-all',
+                [App\Http\Controllers\Admin\NotificationController::class, 'markAllRead']);
+            Route::post('/notifications/clear-all',
+                [App\Http\Controllers\Admin\NotificationController::class, 'clearAll']);
 
-        // Settings / Profile
-        Route::post('/settings/profile', [App\Http\Controllers\Admin\SettingsController::class, 'updateProfile']);
-        Route::post('/settings/password', [App\Http\Controllers\Admin\SettingsController::class, 'updatePassword']);
-        Route::post('/settings/avatar', [App\Http\Controllers\Admin\SettingsController::class, 'uploadAvatar']);
+            // Settings / Profile
+            Route::post('/settings/profile', [App\Http\Controllers\Admin\SettingsController::class, 'updateProfile']);
+            Route::post('/settings/password', [App\Http\Controllers\Admin\SettingsController::class, 'updatePassword']);
+            Route::post('/settings/avatar', [App\Http\Controllers\Admin\SettingsController::class, 'uploadAvatar']);
 
-        // Association Categories (Admin CRUD)
-        Route::post('/association-categories',
-            [App\Http\Controllers\Admin\AssociationCategoryController::class, 'store']);
-        Route::put('/association-categories/{id}',
-            [App\Http\Controllers\Admin\AssociationCategoryController::class, 'update']);
-        Route::delete('/association-categories/{id}',
-            [App\Http\Controllers\Admin\AssociationCategoryController::class, 'destroy']);
+            // Association Categories (Admin CRUD)
+            Route::post('/association-categories',
+                [App\Http\Controllers\Admin\AssociationCategoryController::class, 'store']);
+            Route::put('/association-categories/{id}',
+                [App\Http\Controllers\Admin\AssociationCategoryController::class, 'update']);
+            Route::delete('/association-categories/{id}',
+                [App\Http\Controllers\Admin\AssociationCategoryController::class, 'destroy']);
 
-        // All registered associations (with filters)
-        Route::get('/associations',
-            [App\Http\Controllers\Admin\AssociationCategoryController::class, 'associations']);
+            // All registered associations (with filters)
+            Route::get('/associations',
+                [App\Http\Controllers\Admin\AssociationCategoryController::class, 'associations']);
 
-        // Volunteering Opportunities (Admin)
-        Route::get('/opportunities/admin',
-            [App\Http\Controllers\Admin\OpportunityController::class, 'index']);
-        Route::post('/opportunities',
-            [App\Http\Controllers\Admin\OpportunityController::class, 'store']);
-        Route::put('/opportunities/{id}',
-            [App\Http\Controllers\Admin\OpportunityController::class, 'update']);
-        Route::delete('/opportunities/{id}',
-            [App\Http\Controllers\Admin\OpportunityController::class, 'destroy']);
-        Route::get('/opportunity-requests',
-            [App\Http\Controllers\Admin\OpportunityController::class, 'requests']);
-        Route::post('/opportunity-requests/{id}/approve',
-            [App\Http\Controllers\Admin\OpportunityController::class, 'approveRequest']);
-        Route::post('/opportunity-requests/{id}/reject',
-            [App\Http\Controllers\Admin\OpportunityController::class, 'rejectRequest']);
+            // Volunteering Opportunities (Admin)
+            Route::get('/opportunities/admin',
+                [App\Http\Controllers\Admin\OpportunityController::class, 'index']);
+            Route::post('/opportunities',
+                [App\Http\Controllers\Admin\OpportunityController::class, 'store']);
+            Route::put('/opportunities/{id}',
+                [App\Http\Controllers\Admin\OpportunityController::class, 'update']);
+            Route::delete('/opportunities/{id}',
+                [App\Http\Controllers\Admin\OpportunityController::class, 'destroy']);
+            Route::get('/opportunity-requests',
+                [App\Http\Controllers\Admin\OpportunityController::class, 'requests']);
+            Route::post('/opportunity-requests/{id}/approve',
+                [App\Http\Controllers\Admin\OpportunityController::class, 'approveRequest']);
+            Route::post('/opportunity-requests/{id}/reject',
+                [App\Http\Controllers\Admin\OpportunityController::class, 'rejectRequest']);
 
-        // Joint Projects (Admin CRUD)
-        Route::post('/joint-projects',
-            [App\Http\Controllers\Admin\JointProjectController::class, 'store']);
-        Route::put('/joint-projects/{id}',
-            [App\Http\Controllers\Admin\JointProjectController::class, 'update']);
-        Route::post('/joint-projects/{id}/cancel',
-            [App\Http\Controllers\Admin\JointProjectController::class, 'cancel']);
-        Route::delete('/joint-projects/{id}',
-            [App\Http\Controllers\Admin\JointProjectController::class, 'destroy']);
+            // Joint Projects (Admin CRUD)
+            Route::post('/joint-projects',
+                [App\Http\Controllers\Admin\JointProjectController::class, 'store']);
+            Route::put('/joint-projects/{id}',
+                [App\Http\Controllers\Admin\JointProjectController::class, 'update']);
+            Route::post('/joint-projects/{id}/cancel',
+                [App\Http\Controllers\Admin\JointProjectController::class, 'cancel']);
+            Route::delete('/joint-projects/{id}',
+                [App\Http\Controllers\Admin\JointProjectController::class, 'destroy']);
 
-        // Project Join Requests (Admin)
-        Route::get('/project-join-requests',
-            [App\Http\Controllers\Admin\JointProjectController::class, 'joinRequests']);
-        Route::post('/project-join-requests/{id}/approve',
-            [App\Http\Controllers\Admin\JointProjectController::class, 'approveJoinRequest']);
-        Route::post('/project-join-requests/{id}/reject',
-            [App\Http\Controllers\Admin\JointProjectController::class, 'rejectJoinRequest']);
+            // Project Join Requests (Admin)
+            Route::get('/project-join-requests',
+                [App\Http\Controllers\Admin\JointProjectController::class, 'joinRequests']);
+            Route::post('/project-join-requests/{id}/approve',
+                [App\Http\Controllers\Admin\JointProjectController::class, 'approveJoinRequest']);
+            Route::post('/project-join-requests/{id}/reject',
+                [App\Http\Controllers\Admin\JointProjectController::class, 'rejectJoinRequest']);
         });
     });
+
+

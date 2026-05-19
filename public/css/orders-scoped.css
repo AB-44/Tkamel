@@ -1269,7 +1269,7 @@ select:focus,
 
 /* ── SIDEBAR ── */
 .sidebar {
-  width: 256px;
+  width: 264px;
   flex-shrink: 0;
   background: var(--ink);
   display: flex;

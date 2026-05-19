@@ -15,22 +15,23 @@ class LoginController extends Controller
         if (Auth::check() || session('association')) {
             return $this->redirectByRole();
         }
-        return view('auth.login');
+        $categories = \App\Models\AssociationCategory::where('is_active', true)->get();
+        return view('auth.login', compact('categories'));
     }
 
     public function login(Request $request)
     {
         $request->validate([
-            'email'    => 'required|email',
+            'email' => 'required|email',
             'password' => 'required|string',
         ], [
-            'email.required'    => 'البريد الإلكتروني مطلوب',
-            'email.email'       => 'صيغة البريد الإلكتروني غير صحيحة',
+            'email.required' => 'البريد الإلكتروني مطلوب',
+            'email.email' => 'صيغة البريد الإلكتروني غير صحيحة',
             'password.required' => 'كلمة المرور مطلوبة',
         ]);
 
-        $email  = strtolower(trim($request->email));
-        $pass   = $request->password;
+        $email = strtolower(trim($request->email));
+        $pass = $request->password;
         $isJson = $request->expectsJson() || $request->ajax();
 
         // ── 1. User accounts (admin / user role) ─────────────────────────────
@@ -52,26 +53,27 @@ class LoginController extends Controller
 
             if ($assoc->status === 'pending') {
                 $msg = 'طلبك قيد المراجعة حالياً. سيتم إخطارك خلال 48 ساعة عمل عند الموافقة.';
-                if ($isJson) return response()->json(['success' => false, 'message' => $msg, 'status' => 'pending'], 403);
+                if ($isJson)
+                    return response()->json(['success' => false, 'message' => $msg, 'status' => 'pending'], 403);
                 return back()->withErrors(['email' => $msg]);
             }
 
             if ($assoc->status === 'review') {
                 $notes = $assoc->admin_notes ?: 'يرجى مراجعة بيانات التسجيل وتعديلها.';
-                $msg   = 'طلبك يحتاج إلى تعديلات من الإدارة. يرجى مراجعة ملاحظات الإدارة وتحديث بياناتك.';
+                $msg = 'طلبك يحتاج إلى تعديلات من الإدارة. يرجى مراجعة ملاحظات الإدارة وتحديث بياناتك.';
                 if ($isJson) {
                     return response()->json([
-                        'success'   => false,
-                        'message'   => $msg,
-                        'status'    => 'review',
-                        'notes'     => $notes,
+                        'success' => false,
+                        'message' => $msg,
+                        'status' => 'review',
+                        'notes' => $notes,
                         'form_data' => [
                             'association_name' => $assoc->association_name,
-                            'email'            => $assoc->email,
-                            'license_number'   => $assoc->license_number,
-                            'category'         => $assoc->category,
-                            'manager_name'     => $assoc->manager_name,
-                            'phone'            => $assoc->phone,
+                            'email' => $assoc->email,
+                            'license_number' => $assoc->license_number,
+                            'category' => $assoc->category,
+                            'manager_name' => $assoc->manager_name,
+                            'phone' => $assoc->phone,
                         ],
                     ], 403);
                 }
@@ -80,21 +82,26 @@ class LoginController extends Controller
 
             if ($assoc->status === 'rejected') {
                 $notes = $assoc->admin_notes ? " — السبب: {$assoc->admin_notes}" : '';
-                $msg   = "تم رفض طلب تسجيل جمعيتك{$notes}. يرجى التواصل مع الإدارة.";
-                if ($isJson) return response()->json(['success' => false, 'message' => $msg, 'status' => 'rejected'], 403);
+                $msg = "تم رفض طلب تسجيل جمعيتك{$notes}. يرجى التواصل مع الإدارة.";
+                if ($isJson)
+                    return response()->json(['success' => false, 'message' => $msg, 'status' => 'rejected'], 403);
                 return back()->withErrors(['email' => $msg]);
             }
 
             // Approved — start association session
             $request->session()->regenerate();
-            session(['association' => [
-                'id'    => $assoc->id,
-                'name'  => $assoc->association_name,
-                'email' => $assoc->email,
-            ]]);
+            session([
+                'association' => [
+                    'id'       => $assoc->id,
+                    'name'     => $assoc->association_name,
+                    'email'    => $assoc->email,
+                    'category' => $assoc->category, // store category name for filtering
+                    'avatar'   => $assoc->avatar,
+                ]
+            ]);
             $request->session()->save();
 
-            // Associations always go to /user/dashboard (not dashboard)
+            // Associations go to the user dashboard
             if ($isJson) {
                 return response()->json(['success' => true, 'type' => 'association', 'name' => $assoc->association_name, 'redirect' => route('user.dashboard')]);
             }
@@ -102,7 +109,8 @@ class LoginController extends Controller
         }
 
         $msg = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
-        if ($isJson) return response()->json(['success' => false, 'message' => $msg], 401);
+        if ($isJson)
+            return response()->json(['success' => false, 'message' => $msg], 401);
         return back()->withErrors(['email' => $msg]);
     }
 
@@ -117,9 +125,9 @@ class LoginController extends Controller
 
     private function redirectByRole(): \Illuminate\Http\RedirectResponse
     {
-        // Session-based associations → user dashboard
+        // Session-based associations → admin dashboard
         if (session('association') && !Auth::check()) {
-            return redirect()->route('user.dashboard');
+            return redirect()->route('dashboard');
         }
         // Auth users → by role
         $roleName = Auth::user()?->role?->name ?? 'user';

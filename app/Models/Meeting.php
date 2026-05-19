@@ -7,31 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 class Meeting extends Model
 {
     protected $fillable = [
-        'created_by',
-        'title',
-        'main_speaker',
-        'description',
-        'date_time',
-        'meeting_type',
-        'direction',
-        'category',
-        'presenter',
-        'date',
-        'time',
-        'type',
-        'status',
-        'link',
-        'location',
-        'location_url',
-        'notes',
-        'duration_minutes',
-        'invitation_direction',
-        'report_summary',
-        'report_decisions',
-        'report_attendees',
-        'report_actions',
-        'cancel_reason',
+        'created_by', 'category_id', 'title', 'main_speaker', 'description',
+        'date_time', 'end_date_time', 'meeting_type', 'direction', 'link', 'location',
+        'status', 'cancel_reason', 'report_summary', 'report_decisions',
+        'report_attendees', 'report_actions', 'category', 'presenter', 'date',
+        'time', 'type', 'location_url', 'notes', 'duration_minutes', 'invitation_direction'
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(AssociationCategory::class, 'category_id');
+    }
 
     public function creator()
     {
@@ -51,5 +37,15 @@ class Meeting extends Model
     public function agendaItems()
     {
         return $this->hasMany(MeetingAgendaItem::class)->orderBy('order_index');
+    }
+
+    public function attendees()
+    {
+        return $this->belongsToMany(User::class, 'meeting_user');
+    }
+
+    public function attendeeAssociations()
+    {
+        return $this->belongsToMany(Association::class, 'meeting_association')->withTimestamps();
     }
 }

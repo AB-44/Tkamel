@@ -18,3 +18,4 @@ class MeetingTarget extends Model
         return $this->belongsTo(Association::class);
     }
 }
+

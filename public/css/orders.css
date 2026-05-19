@@ -126,7 +126,7 @@ body {
 /* === MAIN CONTAINER (LAYOUT) === */
 .main {
   flex: 1;
-  margin-right: 256px;
+  margin-right: 264px;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -815,7 +815,7 @@ tbody tr:hover {
 
 /* ── SIDEBAR ── */
 .sidebar {
-  width: 256px;
+  width: 264px;
   flex-shrink: 0;
   background: var(--ink);
   display: flex;

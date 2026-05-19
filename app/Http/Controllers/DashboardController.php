@@ -14,32 +14,35 @@ use App\Models\OpportunityRequest;
 class DashboardController extends Controller
 {
     /**
-     * Admin & Association Dashboard
+     * Admin Dashboard
      */
     public function adminDashboard()
     {
-        // Stats
         $stats = [
-            'associations_count' => Association::where('status', 'approved')->count(),
+            'associations_count'  => Association::where('status', 'approved')->count(),
             'opportunities_count' => Opportunity::count(),
-            'projects_count' => JointProject::count(),
-            'completed_requests' => OpportunityRequest::where('status', 'approved')->count() + Association::where('status', 'approved')->count(),
+            'projects_count'      => JointProject::count(),
+            'completed_requests'  => OpportunityRequest::where('status', 'approved')->count()
+                                   + Association::where('status', 'approved')->count(),
         ];
 
-        // Upcoming meetings (Next 2)
-        $upcomingMeetings = $this->getUpcomingMeetings();
+        $upcomingMeetings    = $this->getUpcomingMeetings();
+        $activeProjects      = JointProject::orderBy('created_at', 'desc')->take(2)->get();
+        $latestOpportunities = Opportunity::orderBy('created_at', 'desc')->take(2)->get();
 
-        // Active Joint Projects (Latest 2)
-        $activeProjects = JointProject::orderBy('created_at', 'desc')
+        $latestOppRequests = OpportunityRequest::with(['opportunity', 'user', 'association'])
+            ->whereNotNull('opportunity_id')
+            ->orderBy('created_at', 'desc')
+            ->take(2)
+            ->get();
+            
+        $latestProjApps = OpportunityRequest::with(['project', 'user', 'association'])
+            ->whereNotNull('project_id')
+            ->orderBy('created_at', 'desc')
             ->take(2)
             ->get();
 
-        // Latest Opportunities (Latest 2)
-        $latestOpportunities = Opportunity::orderBy('created_at', 'desc')
-            ->take(2)
-            ->get();
-
-        return view('dashboard', compact('stats', 'upcomingMeetings', 'activeProjects', 'latestOpportunities'));
+        return view('dashboard', compact('stats', 'upcomingMeetings', 'activeProjects', 'latestOpportunities', 'latestOppRequests', 'latestProjApps'));
     }
 
     /**
@@ -47,45 +50,48 @@ class DashboardController extends Controller
      */
     public function userDashboard()
     {
-        $authUser = Auth::user();
+        $authUser     = Auth::user();
         $assocSession = session('association');
 
-        // Regular users use Auth; approved associations use session only (no Auth::user()).
         if (!$authUser && !$assocSession) {
             abort(401);
         }
 
         $stats = [
-            'associations_count' => Association::where('status', 'approved')->count(),
-            'opportunities_count' => Opportunity::count(),
-            'projects_count' => JointProject::count(),
+            'associations_count'   => Association::where('status', 'approved')->count(),
+            'opportunities_count'  => Opportunity::count(),
+            'projects_count'       => JointProject::count(),
             'my_approved_requests' => OpportunityRequest::query()
                 ->where('status', 'approved')
-                ->when($authUser, fn ($q) => $q->where('user_id', $authUser->id))
+                ->when($authUser,  fn ($q) => $q->where('user_id', $authUser->id))
                 ->when(!$authUser, fn ($q) => $q->where('association_id', $assocSession['id']))
                 ->count(),
         ];
 
-        // Upcoming meetings
-        $upcomingMeetings = $this->getUpcomingMeetings();
+        $upcomingMeetings    = $this->getUpcomingMeetings();
+        $activeProjects      = JointProject::orderBy('created_at', 'desc')->take(2)->get();
+        $latestOpportunities = Opportunity::orderBy('created_at', 'desc')->take(2)->get();
 
-        // Active Projects
-        $activeProjects = JointProject::orderBy('created_at', 'desc')
-            ->take(2)
-            ->get();
-
-        // Latest Opportunities
-        $latestOpportunities = Opportunity::orderBy('created_at', 'desc')
-            ->take(2)
-            ->get();
-
-        // Latest requests (volunteer accounts: user_id; associations: association_id)
-        $latestRequests = OpportunityRequest::with('opportunity')
-            ->when($authUser, fn ($q) => $q->where('user_id', $authUser->id))
+        $latestRequests = OpportunityRequest::with(['opportunity', 'project'])
+            ->when($authUser,  fn ($q) => $q->where('user_id', $authUser->id))
             ->when(!$authUser, fn ($q) => $q->where('association_id', $assocSession['id']))
             ->orderBy('created_at', 'desc')
             ->take(2)
-            ->get();
+            ->get()
+            ->map(function ($req) {
+                if ($req->project_id) {
+                    $req->title = $req->project->name ?? 'طلب مشروع محذوف';
+                    $req->sub = 'طلب انضمام لمشروع';
+                    $req->color = '#10b981'; // emerald
+                    $req->typeIcon = 'fa-diagram-project';
+                } else {
+                    $req->title = $req->opportunity->title ?? 'طلب فرصة محذوفة';
+                    $req->sub = 'طلب فرصة تطوع';
+                    $req->color = '#f59e0b'; // amber
+                    $req->typeIcon = 'fa-hand-holding-heart';
+                }
+                return $req;
+            });
 
         $viewerName = $authUser?->full_name ?? ($assocSession['name'] ?? '');
 

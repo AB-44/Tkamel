@@ -101,7 +101,7 @@ function showToast(icon, msg) {
 
 /* ══ CONTACT ══ */
 function sendContactMsg() {
-  showToast('', 'تم إرسال رسالتك! سنردّ خلال 24 ساعة');
+  showToast('📨', 'تم إرسال رسالتك! سنردّ خلال 24 ساعة');
 }
 
 /* ══ KEYBOARD ══ */

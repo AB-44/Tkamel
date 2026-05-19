@@ -38,7 +38,7 @@
 
   <!-- Footer links -->
   <div class="notif-footer">
-    <a href="/user/meetings-page" class="notif-footer-link">
+    <a href="{{ route('user.meetings') }}" class="notif-footer-link">
        الاجتماعات <i class="fa-solid fa-chevron-left"></i>
     </a>
     <a href="/user/consulting" class="notif-footer-link">
@@ -331,7 +331,7 @@
     }
     // Navigate to the relevant page
     if (type === 'meeting_created') {
-      window.location.href = '{{ route("user.meetings.page") }}';
+      window.location.href = '{{ route("user.meetings") }}';
     } else if (type === 'opportunity_approved' || type === 'opportunity_rejected') {
       window.location.href = '{{ route("user.consulting") }}';
     } else if (type === 'project_join_approved' || type === 'project_join_rejected') {

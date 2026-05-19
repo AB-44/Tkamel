@@ -8,19 +8,17 @@
     <title>تكامل | لوحة التحكم</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?php echo e(asset('css/consulting.css')); ?>">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
     <?php echo $__env->make('layouts.sidebar-admin', ['activeNav' => 'dashboard'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
-
     <!-- ══ MAIN ══ -->
     <div class="main">
 
         <!-- TOPBAR -->
-        <?php echo $__env->make('layouts.topbar', ['title' => 'لوحة التحكم'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
-
+        <?php echo $__env->make('layouts.topbar', ['title' => 'لوحة التحكم', 'userName' => 'مبادرون (أدمن)', 'userAv' => 'م'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <div class="content">
 
@@ -31,7 +29,7 @@
                     <div class="ph-sub">مرحباً بعودتك — إليك ملخص أهم النشاطات والإحصائيات</div>
                 </div>
                 <div class="ph-actions">
-                    <a href="<?php echo e(route('consulting')); ?>" class="btn-primary">
+                    <a href="<?php echo e(route('volunteer')); ?>" class="btn-primary">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                         فرص التطوع
                     </a>
@@ -41,26 +39,26 @@
             <!-- Stats row — matching consulting.css .stat-card style -->
             <div class="stats-row" style="margin-bottom:2rem">
                 <div class="stat-card" style="--sc:var(--teal-glow)">
-                    <div class="s-icon" style="background:rgba(42,184,208,0.1)"><i class="fa-solid fa-building"></i></div>
+                    <div class="s-icon" style="background:rgba(42,184,208,0.1)">🏢</div>
                     <div><span class="s-num" id="dash-assoc-count"><?php echo e(number_format($stats['associations_count'])); ?></span><span class="s-lbl">إجمالي الجمعيات</span></div>
                 </div>
                 <div class="stat-card" style="--sc:var(--green)">
-                    <div class="s-icon" style="background:rgba(46,170,120,0.1)"><i class="fa-solid fa-lightbulb"></i></div>
+                    <div class="s-icon" style="background:rgba(46,170,120,0.1)">💡</div>
                     <div><span class="s-num"><?php echo e(number_format($stats['opportunities_count'])); ?></span><span class="s-lbl">الفرص المتاحة</span></div>
                 </div>
                 <div class="stat-card" style="--sc:var(--blue)">
-                    <div class="s-icon" style="background:rgba(29,111,164,0.1)"><i class="fa-solid fa-handshake"></i></div>
+                    <div class="s-icon" style="background:rgba(29,111,164,0.1)">🤝</div>
                     <div><span class="s-num"><?php echo e(number_format($stats['projects_count'])); ?></span><span class="s-lbl">المشاريع المشتركة</span></div>
                 </div>
                 <div class="stat-card" style="--sc:var(--purple)">
-                    <div class="s-icon" style="background:rgba(109,40,217,0.1)"><i class="fa-solid fa-circle-check"></i></div>
+                    <div class="s-icon" style="background:rgba(109,40,217,0.1)">✅</div>
                     <div><span class="s-num"><?php echo e(number_format($stats['completed_requests'])); ?></span><span class="s-lbl">إجمالي الطلبات المنجزة</span></div>
                 </div>
             </div>
 
             <!-- Registration requests alert — shown when pending DB registrations exist -->
             <div id="dash-pending-alert" style="display:none;align-items:center;gap:12px;background:rgba(245,158,11,0.08);border:1.5px solid rgba(245,158,11,0.22);border-radius:12px;padding:14px 18px;margin-bottom:1.5rem">
-                <span style="font-size:1.1rem;color:#b45309"><i class="fa-solid fa-inbox"></i></span>
+                <span style="font-size:1.3rem">📬</span>
                 <div style="flex:1">
                     <div style="font-size:.9rem;font-weight:800;color:#92400e">طلبات تسجيل جمعيات جديدة بانتظار المراجعة</div>
                     <div id="dash-pending-text" style="font-size:.8rem;color:#b45309;margin-top:2px"></div>
@@ -80,8 +78,21 @@
                     <ul class="dw-list">
                         <?php $__empty_1 = true; $__currentLoopData = $upcomingMeetings; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $meeting): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <li class="dw-item">
-                                <div class="dw-icon" style="background:rgba(29,111,164,0.12);color:var(--blue)"><i class="fa-solid fa-video"></i></div>
-                                <div class="dw-info"><div class="dw-name"><?php echo e($meeting->title); ?></div><div class="dw-meta"><?php echo e(\Carbon\Carbon::parse($meeting->date_time)->translatedFormat('d M Y')); ?> • <?php echo e(\Carbon\Carbon::parse($meeting->date_time)->format('h:i A')); ?></div></div>
+                                <div class="dw-icon" style="background:rgba(29,111,164,0.12);color:var(--blue)">
+                                    <i class="fa-solid <?php echo e($meeting->direction === 'online' ? 'fa-video' : 'fa-users'); ?>"></i>
+                                </div>
+                                <div class="dw-info">
+                                    <div class="dw-name"><?php echo e($meeting->title); ?></div>
+                                    <div class="dw-meta">
+                                        <?php if($meeting->category): ?>
+                                            🏢 <?php echo e(is_string($meeting->category) ? $meeting->category : ($meeting->category->name ?? 'عام')); ?> •
+                                        <?php endif; ?>
+                                        <?php echo e(\Carbon\Carbon::parse($meeting->date_time)->translatedFormat('d M')); ?>
+
+                                        • <?php echo e(\Carbon\Carbon::parse($meeting->date_time)->format('h:i A')); ?>
+
+                                    </div>
+                                </div>
                                 <a href="<?php echo e(route('meetings')); ?>" class="dw-action">انضمام</a>
                             </li>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
@@ -99,9 +110,26 @@
                     <ul class="dw-list">
                         <?php $__empty_1 = true; $__currentLoopData = $activeProjects; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $project): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <li class="dw-item">
-                                <div class="dw-icon" style="background:rgba(46,170,120,0.12);color:var(--green)"><i class="fa-solid fa-leaf"></i></div>
-                                <div class="dw-info"><div class="dw-name"><?php echo e($project->name); ?></div><div class="dw-meta">تاريخ البداية: <?php echo e($project->start_date ? \Carbon\Carbon::parse($project->start_date)->format('Y-m-d') : 'غير محدد'); ?></div></div>
-                                <div class="dw-bar"><div class="dw-bar-fill" style="width:<?php echo e(rand(40, 100)); ?>%;background:var(--green)"></div></div>
+                                <div class="dw-icon" style="background:rgba(46,170,120,0.12);color:var(--green)"><i class="fa-solid fa-diagram-project"></i></div>
+                                <div class="dw-info">
+                                    <div class="dw-name"><?php echo e($project->name); ?></div>
+                                    <div class="dw-meta">
+                                        <?php if($project->category): ?>
+                                            <?php echo e($project->category->icon ?? '🏢'); ?> <?php echo e($project->category->name); ?>  •
+                                        <?php endif; ?>
+                                        <?php if($project->start_date): ?>
+                                            بدأ <?php echo e($project->start_date->format('Y-m-d')); ?>
+
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <?php
+                                    $statusLabels = ['active'=>'نشط','planning'=>'تخطيط','idea'=>'فكرة','completed'=>'مكتمل','canceled'=>'ملغى'];
+                                    $statusColors = ['active'=>'approved','planning'=>'pending','idea'=>'new','completed'=>'approved','canceled'=>'rejected'];
+                                    $sl = $statusLabels[$project->status] ?? $project->status;
+                                    $sc = $statusColors[$project->status] ?? 'new';
+                                ?>
+                                <span class="dw-badge <?php echo e($sc); ?>"><?php echo e($sl); ?></span>
                             </li>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <p style="text-align:center; padding: 1rem; color: #888;">لا توجد مشاريع مشتركة نشطة</p>
@@ -113,14 +141,30 @@
                 <div class="dash-widget">
                     <div class="dw-header">
                         <div class="dw-title"><i class="fa-solid fa-lightbulb"></i> فرص التطوع والدعم</div>
-                        <a href="<?php echo e(route('consulting')); ?>" class="dw-link">عرض الكل</a>
+                        <a href="<?php echo e(route('volunteer')); ?>" class="dw-link">عرض الكل</a>
                     </div>
                     <ul class="dw-list">
                         <?php $__empty_1 = true; $__currentLoopData = $latestOpportunities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $opp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <?php
+                                $isClosed = $opp->deadline && \Carbon\Carbon::parse($opp->deadline)->isPast();
+                            ?>
                             <li class="dw-item">
-                                <div class="dw-icon" style="background:rgba(245,158,11,0.12);color:#d97706"><i class="fa-solid fa-box-open"></i></div>
-                                <div class="dw-info"><div class="dw-name"><?php echo e($opp->title); ?></div><div class="dw-meta"><?php echo e($opp->type ?? 'تطوع'); ?> • حتى <?php echo e($opp->deadline ? \Carbon\Carbon::parse($opp->deadline)->format('Y-m-d') : 'مفتوح'); ?></div></div>
-                                <a href="<?php echo e(route('consulting')); ?>" class="dw-action">تصفح</a>
+                                <div class="dw-icon" style="background:rgba(245,158,11,0.12);color:#d97706"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                                <div class="dw-info">
+                                    <div class="dw-name"><?php echo e($opp->title); ?></div>
+                                    <div class="dw-meta">
+                                        <?php if($opp->category): ?>
+                                            <?php echo e($opp->category->icon ?? '💡'); ?> <?php echo e($opp->category->name); ?> •
+                                        <?php endif; ?>
+                                        <?php echo e($opp->direction === 'remote' ? '💻 عن بعد' : ($opp->direction === 'both' ? '🔄 مزدوج' : '📍 حضوري')); ?>
+
+                                        <?php if($opp->deadline): ?>
+                                            • حتى <?php echo e(\Carbon\Carbon::parse($opp->deadline)->translatedFormat('d M')); ?>
+
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <span class="dw-badge <?php echo e($isClosed ? 'rejected' : 'approved'); ?>"><?php echo e($isClosed ? 'منتهية' : 'مفتوحة'); ?></span>
                             </li>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                             <p style="text-align:center; padding: 1rem; color: #888;">لا توجد فرص تطوع ومبادرات</p>
@@ -148,7 +192,69 @@
                     </ul>
                 </div>
 
-            </div>
+            </div><!-- /.dash-grid row 1 -->
+
+            <!-- ══ ROW 2: Requests ══ -->
+            <div class="dash-grid" style="margin-top:1.25rem">
+
+                <!-- طلبات الفرص -->
+                <div class="dash-widget">
+                    <div class="dw-header">
+                        <div class="dw-title"><i class="fa-solid fa-hand-holding-heart"></i> طلبات فرص التطوع</div>
+                        <a href="<?php echo e(route('volunteer')); ?>" class="dw-link">عرض الكل</a>
+                    </div>
+                    <ul class="dw-list">
+                        <?php $__empty_1 = true; $__currentLoopData = $latestOppRequests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $req): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <?php
+                                $applicant = $req->association?->association_name ?? $req->user?->full_name ?? $req->user?->name ?? '—';
+                                $oppTitle  = $req->opportunity?->title ?? 'فرصة محذوفة';
+                            ?>
+                            <li class="dw-item">
+                                <div class="dw-icon" style="background:rgba(245,158,11,0.12);color:#d97706">
+                                    <i class="fa-solid fa-user-check"></i>
+                                </div>
+                                <div class="dw-info">
+                                    <div class="dw-name"><?php echo e($oppTitle); ?></div>
+                                    <div class="dw-meta">مقدم من: <?php echo e($applicant); ?> • <?php echo e(\Carbon\Carbon::parse($req->created_at)->diffForHumans()); ?></div>
+                                </div>
+                                <span class="dw-badge pending">⏳ معلق</span>
+                            </li>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                            <p style="text-align:center; padding: 1rem; color: #888;">لا توجد طلبات فرص معلقة ✅</p>
+                        <?php endif; ?>
+                    </ul>
+                </div>
+
+                <!-- طلبات المشاريع -->
+                <div class="dash-widget">
+                    <div class="dw-header">
+                        <div class="dw-title"><i class="fa-solid fa-diagram-project"></i> طلبات المشاريع المشتركة</div>
+                        <a href="<?php echo e(route('joint-projects')); ?>" class="dw-link">عرض الكل</a>
+                    </div>
+                    <ul class="dw-list">
+                        <?php $__empty_1 = true; $__currentLoopData = $latestProjApps; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $app): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <?php
+                                $applicant  = $app->association?->association_name ?? $app->user?->full_name ?? $app->user?->name ?? '—';
+                                $projTitle  = $app->project?->name ?? 'مشروع محذوف';
+                            ?>
+                            <li class="dw-item">
+                                <div class="dw-icon" style="background:rgba(46,170,120,0.12);color:var(--green)">
+                                    <i class="fa-solid fa-people-group"></i>
+                                </div>
+                                <div class="dw-info">
+                                    <div class="dw-name"><?php echo e($projTitle); ?></div>
+                                    <div class="dw-meta">مقدم من: <?php echo e($applicant); ?> • <?php echo e(\Carbon\Carbon::parse($app->created_at)->diffForHumans()); ?></div>
+                                </div>
+                                <span class="dw-badge pending">⏳ معلق</span>
+                            </li>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                            <p style="text-align:center; padding: 1rem; color: #888;">لا توجد طلبات مشاريع معلقة ✅</p>
+                        <?php endif; ?>
+                    </ul>
+                </div>
+
+            </div><!-- /.dash-grid row 2 -->
+
         </div>
     </div>
 

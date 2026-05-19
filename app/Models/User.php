@@ -7,7 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class User extends Authenticatable
 {
     protected $fillable = [
-        'role_id', 'full_name', 'email', 'phone', 'bio', 'avatar_path', 'password_hash',
+        'role_id', 'full_name', 'email', 'phone', 'bio', 'avatar', 'password_hash',
     ];
 
     protected $hidden = ['password_hash'];
@@ -59,6 +59,11 @@ class User extends Authenticatable
     public function meetings()
     {
         return $this->hasMany(Meeting::class, 'created_by');
+    }
+
+    public function attendingMeetings()
+    {
+        return $this->belongsToMany(Meeting::class, 'meeting_user');
     }
 
     public function handledServiceRequests()

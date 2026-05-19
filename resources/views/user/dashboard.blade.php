@@ -1,164 +1,414 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>تكامل | لوحة التحكم</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تكامل — الرئيسية</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ asset('css/user-dashboard.css') }}?v={{ time() }}">
 </head>
 
-<body class="dashboard-body">
-    @include('layouts.sidebar-user', ['activeNav' => 'dashboard'])
+<body>
 
+  <!-- ══ SIDEBAR ══ -->
+  @include('layouts.sidebar-user', ['activeNav' => 'dashboard'])
 
-    <div class="main">
-        @include('layouts.topbar', ['title' => 'لوحة التحكم', 'userName' => $viewerName, 'userAv' => mb_substr($viewerName, 0, 1), 'showNotif' => true, 'userRole' => '<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(245,158,11,.12);color:#b45309;border:1px solid rgba(245,158,11,.3);border-radius:20px;padding:2px 9px;font-size:.7rem;font-weight:700"><i class="fa-solid fa-eye" style="font-size:.6rem"></i> عرض فقط</span>'])
-        @include('layouts.notif-panel-user')
+  <!-- ══ MAIN ══ -->
+  <div class="main-wrapper">
 
-        <div class="content">
-            <div class="page-hd">
-                <div>
-                    <div class="ph-title">مرحباً، {{ $viewerName }}</div>
-                    <div class="ph-sub">إليك ملخص أهم النشاطات والإحصائيات — <span style="color:#b45309;font-weight:700">وضع العرض فقط</span></div>
-                </div>
-            </div>
+    <!-- TOPBAR -->
+    @include('layouts.topbar', ['title' => 'لوحة التحكم', 'crumb' => 'الرئيسية'])
 
-            <div class="stats-row" style="margin-bottom:2rem">
-                <div class="stat-card" style="--sc:var(--teal-glow)"><div class="s-icon" style="background:rgba(42,184,208,0.1)"><i class="fa-solid fa-building"></i></div><div><span class="s-num">{{ number_format($stats['associations_count']) }}</span><span class="s-lbl">إجمالي الجمعيات</span></div></div>
-                <div class="stat-card" style="--sc:var(--green)"><div class="s-icon" style="background:rgba(46,170,120,0.1)"><i class="fa-solid fa-lightbulb"></i></div><div><span class="s-num">{{ number_format($stats['opportunities_count']) }}</span><span class="s-lbl">الفرص المتاحة</span></div></div>
-                <div class="stat-card" style="--sc:var(--blue)"><div class="s-icon" style="background:rgba(29,111,164,0.1)"><i class="fa-solid fa-handshake"></i></div><div><span class="s-num">{{ number_format($stats['projects_count']) }}</span><span class="s-lbl">المشاريع المشتركة</span></div></div>
-                <div class="stat-card" style="--sc:var(--purple)"><div class="s-icon" style="background:rgba(109,40,217,0.1)"><i class="fa-solid fa-circle-check"></i></div><div><span class="s-num">{{ number_format($stats['my_approved_requests']) }}</span><span class="s-lbl">طلباتي المنجزة</span></div></div>
-            </div>
+    <!-- CONTENT -->
+    <div class="content">
 
-            <div class="dash-grid">
-                <div class="dash-widget">
-                    <div class="dw-header">
-                        <div class="dw-title"><i class="fa-regular fa-calendar-check"></i> الاجتماعات القادمة</div>
-                        <a href="{{ route('user.meetings') }}" class="dw-link">عرض الكل</a>
-                    </div>
-                    <ul class="dw-list">
-                        @forelse($upcomingMeetings as $meeting)
-                            <li class="dw-item">
-                                <div class="dw-icon" style="background:rgba(29,111,164,0.12);color:var(--blue)"><i class="fa-solid fa-video"></i></div>
-                                <div class="dw-info"><div class="dw-name">{{ $meeting->title }}</div><div class="dw-meta">{{ \Carbon\Carbon::parse($meeting->date_time)->translatedFormat('d M Y') }} • {{ \Carbon\Carbon::parse($meeting->date_time)->format('h:i A') }}</div></div>
-                                <span class="dw-badge new">قادم</span>
-                            </li>
-                        @empty
-                            <p style="text-align:center; padding: 1rem; color: #888;">لا توجد اجتماعات قادمة</p>
-                        @endforelse
-                    </ul>
-                </div>
-
-                <div class="dash-widget">
-                    <div class="dw-header">
-                        <div class="dw-title"><i class="fa-solid fa-chart-pie"></i> المشاريع المشتركة</div>
-                        <a href="{{ route('user.joint-projects') }}" class="dw-link">عرض الكل</a>
-                    </div>
-                    <ul class="dw-list">
-                        @forelse($activeProjects as $project)
-                            <li class="dw-item">
-                                <div class="dw-icon" style="background:rgba(46,170,120,0.12);color:var(--green)"><i class="fa-solid fa-leaf"></i></div>
-                                <div class="dw-info"><div class="dw-name">{{ $project->name }}</div><div class="dw-meta">تاريخ البداية: {{ $project->start_date ? \Carbon\Carbon::parse($project->start_date)->format('Y-m-d') : 'غير محدد' }}</div></div>
-                                <div class="dw-bar"><div class="dw-bar-fill" style="width:{{ rand(40, 100) }}%;background:var(--green)"></div></div>
-                            </li>
-                        @empty
-                            <p style="text-align:center; padding: 1rem; color: #888;">لا توجد مشاريع مشتركة نشطة</p>
-                        @endforelse
-                    </ul>
-                </div>
-
-                <div class="dash-widget">
-                    <div class="dw-header">
-                        <div class="dw-title"><i class="fa-solid fa-lightbulb"></i> فرص التطوع والدعم</div>
-                        <a href="{{ route('user.consulting') }}" class="dw-link">عرض الكل</a>
-                    </div>
-                    <ul class="dw-list">
-                        @forelse($latestOpportunities as $opp)
-                            <li class="dw-item">
-                                <div class="dw-icon" style="background:rgba(245,158,11,0.12);color:#d97706"><i class="fa-solid fa-box-open"></i></div>
-                                <div class="dw-info"><div class="dw-name">{{ $opp->title }}</div><div class="dw-meta">{{ $opp->type ?? 'تطوع' }} • حتى {{ $opp->deadline ? \Carbon\Carbon::parse($opp->deadline)->format('Y-m-d') : 'مفتوح' }}</div></div>
-                                <span class="dw-badge pending">متاحة</span>
-                            </li>
-                        @empty
-                            <p style="text-align:center; padding: 1rem; color: #888;">لا توجد فرص تطوع ومبادرات</p>
-                        @endforelse
-                    </ul>
-                </div>
-
-                <div class="dash-widget">
-                    <div class="dw-header">
-                        <div class="dw-title"><i class="fa-solid fa-clipboard-list"></i> أحدث الطلبات</div>
-                        <a href="{{ route('user.orders') }}" class="dw-link">عرض الكل</a>
-                    </div>
-                    <ul class="dw-list">
-                        @forelse($latestRequests as $req)
-                            <li class="dw-item">
-                                <div class="dw-icon" style="background:rgba(109,40,217,0.12);color:var(--purple)"><i class="fa-solid fa-file-signature"></i></div>
-                                <div class="dw-info"><div class="dw-name">{{ $req->opportunity ? $req->opportunity->title : 'طلب تطوع' }}</div><div class="dw-meta">مقدم منذ: {{ \Carbon\Carbon::parse($req->created_at)->diffForHumans() }}</div></div>
-                                @if($req->status === 'approved')
-                                    <span class="dw-badge approved">مقبول</span>
-                                @elseif($req->status === 'rejected')
-                                    <span class="dw-badge rejected">مرفوض</span>
-                                @else
-                                    <span class="dw-badge pending">قيد المراجعة</span>
-                                @endif
-                            </li>
-                        @empty
-                            <p style="text-align:center; padding: 1rem; color: #888;">لم تقم بتقديم أي طلبات بعد</p>
-                        @endforelse
-                    </ul>
-                </div>
-            </div>
+      <!-- WELCOME BANNER -->
+      <div class="welcome-banner" id="welcome-banner">
+        <div class="wb-pattern"></div>
+        <div class="wb-glow"></div>
+        <div class="wb-text">
+          <div class="wb-greeting" id="wb-greeting">
+            {{ (date('H') < 12) ? 'صباح الخير 👋' : ((date('H') < 17) ? 'مساء الخير 👋' : 'أهلاً وسهلاً 👋') }}
+          </div>
+          <div class="wb-name">{{ Auth::user()?->full_name ?? session('association.name') ?? 'مستخدم' }}</div>
+          <div class="wb-sub">إليك ملخص نشاطك على منصة <strong>تكامل</strong> لهذا اليوم</div>
         </div>
-    </div>
+        <div class="wb-date">{{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}</div>
+      </div>
 
-    <script src="{{ asset('js/dashboard.js') }}"></script>
-    <style>
-        .content{padding:2rem 2.5rem;overflow-y:auto;flex:1}
-        .page-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;gap:1rem;flex-wrap:wrap}
-        .ph-title{font-size:1.45rem;font-weight:800;color:var(--ink)}
-        .ph-sub{font-size:.83rem;color:var(--muted);margin-top:3px}
-        .stats-row{display:flex;gap:14px;flex-wrap:wrap}
-        .stat-card{flex:1;min-width:160px;background:var(--white);border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px;border:1.5px solid var(--border);box-shadow:var(--sh-sm);transition:transform .2s,box-shadow .2s}
-        .stat-card:hover{transform:translateY(-3px);box-shadow:var(--sh-md)}
-        .s-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;flex-shrink:0}
-        .s-num{display:block;font-size:1.5rem;font-weight:900;color:var(--sc,var(--teal-glow));line-height:1.1}
-        .s-lbl{display:block;font-size:.75rem;color:var(--muted);font-weight:500;margin-top:2px}
-        .dash-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.25rem}
-        @media(max-width:900px){.dash-grid{grid-template-columns:1fr}}
-        .dash-widget{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:1.25rem 1.4rem;box-shadow:var(--sh-sm);display:flex;flex-direction:column;gap:.75rem;transition:box-shadow .2s}
-        .dash-widget:hover{box-shadow:var(--sh-md)}
-        .dw-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
-        .dw-title{font-size:.95rem;font-weight:800;color:var(--teal-deep);display:flex;align-items:center;gap:8px}
-        .dw-title i{color:var(--teal)}
-        .dw-link{font-size:.78rem;font-weight:700;color:var(--teal);text-decoration:none;opacity:.8;transition:opacity .15s}
-        .dw-link:hover{opacity:1}
-        .dw-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:.6rem}
-        .dw-item{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--fog);border-radius:10px;transition:background .15s}
-        .dw-item:hover{background:rgba(14,165,201,.06)}
-        .dw-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
-        .dw-info{flex:1;min-width:0}
-        .dw-name{font-size:.87rem;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-        .dw-meta{font-size:.75rem;color:var(--muted);margin-top:2px}
-        .dw-bar{width:60px;height:5px;background:rgba(0,0,0,.08);border-radius:4px;flex-shrink:0;overflow:hidden}
-        .dw-bar-fill{height:100%;border-radius:4px}
-        .dw-badge{font-size:.74rem;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap;flex-shrink:0}
-        .dw-badge.pending{background:rgba(245,158,11,.12);color:#d97706}
-        .dw-badge.approved{background:rgba(46,170,120,.12);color:var(--green)}
-        .dw-badge.new{background:rgba(14,165,201,.1);color:var(--teal)}
-        .notif-btn{width:36px;height:36px;border-radius:10px;background:var(--fog);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
-        .notif-btn:hover{border-color:rgba(42,184,208,.3);background:white}
-    </style>
-    <script>
-        function toggleServices() {
-            const sub = document.getElementById('submenu-services');
-            const np  = document.getElementById('np-services');
-            if (sub) sub.classList.toggle('open');
-            if (np)  np.classList.toggle('open');
+      <!-- STAT CARDS -->
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card" style="--sa:var(--teal-glow)">
+          <div class="stat-ico-wrap" style="background:rgba(14,165,201,.1)">📋</div>
+          <div class="stat-info">
+            <div class="stat-num counter" data-target="{{ $stats['total_requests'] ?? 0 }}">0</div>
+            <div class="stat-lbl">إجمالي طلباتي</div>
+          </div>
+          <div class="stat-trend up"><i class="fa-solid fa-paper-plane fa-xs"></i></div>
+        </div>
+        <div class="stat-card" style="--sa:#f59e0b">
+          <div class="stat-ico-wrap" style="background:rgba(245,158,11,.1)">⏳</div>
+          <div class="stat-info">
+            <div class="stat-num counter" data-target="{{ $stats['pending_requests'] ?? 0 }}">0</div>
+            <div class="stat-lbl">قيد المراجعة</div>
+          </div>
+          <div class="stat-trend" style="color:#f59e0b"><i class="fa-solid fa-clock fa-xs"></i></div>
+        </div>
+        <div class="stat-card" style="--sa:var(--green)">
+          <div class="stat-ico-wrap" style="background:rgba(13,148,136,.1)">✅</div>
+          <div class="stat-info">
+            <div class="stat-num counter" data-target="{{ $stats['approved_requests'] ?? 0 }}">0</div>
+            <div class="stat-lbl">مقبولة</div>
+          </div>
+          <div class="stat-trend up" style="color:var(--green)"><i class="fa-solid fa-check fa-xs"></i></div>
+        </div>
+        <div class="stat-card" style="--sa:#6366f1">
+          <div class="stat-ico-wrap" style="background:rgba(99,102,241,.1)">🗂️</div>
+          <div class="stat-info">
+            <div class="stat-num counter" data-target="{{ $stats['projects_count'] ?? 0 }}">0</div>
+            <div class="stat-lbl">مشاريع نشطة</div>
+          </div>
+          <div class="stat-trend up" style="color:#6366f1"><i class="fa-solid fa-diagram-project fa-xs"></i></div>
+        </div>
+        <div class="stat-card" style="--sa:var(--teal)">
+          <div class="stat-ico-wrap" style="background:rgba(12,96,128,.1)">📅</div>
+          <div class="stat-info">
+            <div class="stat-num counter" data-target="{{ $stats['upcoming_meetings_count'] ?? 0 }}">0</div>
+            <div class="stat-lbl">اجتماعات قادمة</div>
+          </div>
+          <div class="stat-trend up"><i class="fa-solid fa-calendar fa-xs"></i></div>
+        </div>
+        <div class="stat-card" style="--sa:var(--green)">
+          <div class="stat-ico-wrap" style="background:rgba(46,170,120,.1)">🤝</div>
+          <div class="stat-info">
+            <div class="stat-num counter" data-target="{{ $stats['opportunities_count'] ?? 0 }}">0</div>
+            <div class="stat-lbl">فرص التطوع المتاحة</div>
+          </div>
+          <div class="stat-trend up" style="color:var(--green)"><i class="fa-solid fa-hand-holding-heart fa-xs"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- ROW 1: طلباتي + الاجتماعات القادمة -->
+      <div class="dash-row">
+
+        <!-- طلبات الأخيرة -->
+        <div class="dash-card large">
+          <div class="dc-hd">
+            <div class="dc-hd-left">
+              <div class="dc-icon" style="background:rgba(99,102,241,.1)">
+                <i class="fa-solid fa-paper-plane" style="color:#6366f1"></i>
+              </div>
+              <div>
+                <div class="dc-title">آخر طلباتي</div>
+                <div class="dc-sub">أحدث طلبات التقديم المُرسَلة</div>
+              </div>
+            </div>
+            <a href="{{ route('user.orders') }}" class="dc-link">عرض الكل <i class="fa-solid fa-arrow-left"></i></a>
+          </div>
+          <div class="dc-body" id="recent-reqs">
+            @forelse($latestRequests as $req)
+              <div class="req-row">
+                <div class="rr-type" style="background: {{ $req->color }}1a; color: {{ $req->color }};">
+                  <i class="fa-solid {{ $req->typeIcon }}"></i>
+                </div>
+                <div class="rr-body">
+                  <div class="rr-title">{{ $req->title }}</div>
+                  <div class="rr-sub">{{ $req->sub }}</div>
+                </div>
+                <div class="rr-right">
+                  @if($req->status === 'pending')
+                    <span class="sbdg sb-pending">⏳ قيد المراجعة</span>
+                  @elseif($req->status === 'approved')
+                    <span class="sbdg sb-approved">✅ مقبول</span>
+                  @elseif($req->status === 'rejected')
+                    <span class="sbdg sb-rejected">❌ مرفوض</span>
+                  @endif
+                  <div class="rr-date">{{ \Carbon\Carbon::parse($req->created_at)->translatedFormat('d M Y') }}</div>
+                </div>
+              </div>
+            @empty
+              <div class="dc-empty"><i class="fa-solid fa-paper-plane"></i>
+                <p>لا توجد طلبات بعد</p>
+              </div>
+            @endforelse
+          </div>
+        </div>
+
+        <!-- الاجتماعات القادمة -->
+        <div class="dash-card small">
+          <div class="dc-hd">
+            <div class="dc-hd-left">
+              <div class="dc-icon" style="background:rgba(14,165,201,.1)">
+                <i class="fa-solid fa-calendar-days" style="color:var(--teal)"></i>
+              </div>
+              <div>
+                <div class="dc-title">الاجتماعات القادمة</div>
+                <div class="dc-sub">أقرب الاجتماعات الموجودة</div>
+              </div>
+            </div>
+            <a href="{{ route('user.meetings') }}" class="dc-link">عرض الكل <i class="fa-solid fa-arrow-left"></i></a>
+          </div>
+          <div class="dc-body" id="upcoming-meets">
+            @forelse($upcomingMeetings as $meet)
+              <a href="{{ route('user.meetings') }}" class="meet-row">
+                <div class="mr-date-box">
+                  <span class="mr-day">{{ \Carbon\Carbon::parse($meet->date_time)->format('d') }}</span>
+                  <span class="mr-month">{{ \Carbon\Carbon::parse($meet->date_time)->translatedFormat('M') }}</span>
+                </div>
+                <div class="mr-body">
+                  <div class="mr-title">{{ $meet->title }}</div>
+                  <div class="mr-meta">
+                    {{ ($meet->meeting_type == 'online') ? '💻 عن بعد' : '📍 حضوري' }}
+                    · {{ \Carbon\Carbon::parse($meet->date_time)->format('h:i A') }}{{ $meet->end_date_time ? ' - ' . \Carbon\Carbon::parse($meet->end_date_time)->format('h:i A') : '' }}
+                  </div>
+                </div>
+                @if($meet->link)
+                  <span class="mr-join">انضم</span>
+                @endif
+              </a>
+            @empty
+              <div class="dc-empty"><i class="fa-solid fa-calendar"></i>
+                <p>لا توجد اجتماعات قادمة</p>
+              </div>
+            @endforelse
+          </div>
+        </div>
+
+      </div><!-- /row1 -->
+
+      <!-- ROW 2: فرص التطوع + المشاريع النشطة -->
+      <div class="dash-row">
+
+        <!-- فرص التطوع -->
+        <div class="dash-card small">
+          <div class="dc-hd">
+            <div class="dc-hd-left">
+              <div class="dc-icon" style="background:rgba(46,170,120,.1)">
+                <i class="fa-solid fa-hand-holding-heart" style="color:var(--green)"></i>
+              </div>
+              <div>
+                <div class="dc-title">فرص التطوع المتاحة</div>
+                <div class="dc-sub">فرص مفتوحة تطابق تصنيفك</div>
+              </div>
+            </div>
+            <a href="{{ route('user.consulting') }}" class="dc-link">تصفح الكل <i
+                class="fa-solid fa-arrow-left"></i></a>
+          </div>
+          <div class="dc-body" id="vol-opps">
+            @forelse($latestOpportunities as $opp)
+              <a href="{{ route('user.consulting') }}" class="opp-row">
+                <div class="or-dot" style="background:#2ab8d0"></div>
+                <div class="or-body">
+                  <div class="or-title">{{ $opp->title }}</div>
+                  <div class="or-sub">{{ $opp->organization ?? 'تكامل' }}</div>
+                </div>
+                <span class="opp-tag ot-onsite">متاحة</span>
+              </a>
+            @empty
+              <div class="dc-empty"><i class="fa-solid fa-hand-holding-heart"></i>
+                <p>لا توجد فرص متاحة</p>
+              </div>
+            @endforelse
+          </div>
+        </div>
+
+        <!-- المشاريع النشطة -->
+        <div class="dash-card large">
+          <div class="dc-hd">
+            <div class="dc-hd-left">
+              <div class="dc-icon" style="background:rgba(245,158,11,.1)">
+                <i class="fa-solid fa-diagram-project" style="color:var(--amber)"></i>
+              </div>
+              <div>
+                <div class="dc-title">المشاريع المشتركة النشطة</div>
+                <div class="dc-sub">المشاريع المفتوحة للمشاركة</div>
+              </div>
+            </div>
+            <a href="{{ route('user.joint-projects') }}" class="dc-link">عرض الكل <i
+                class="fa-solid fa-arrow-left"></i></a>
+          </div>
+          <div class="dc-body" id="active-projs">
+            @forelse($activeProjects as $proj)
+              @php $prog = $proj->progress ?? 0; @endphp
+              <a href="{{ route('user.joint-projects') }}" class="proj-row">
+                <div class="pr-emoji">🪴</div>
+                <div class="pr-body">
+                  <div class="pr-title">{{ $proj->name }}</div>
+                  @if($proj->category)
+                    <div style="font-size:0.74rem;color:var(--muted);margin-bottom:5px">
+                      {{ $proj->category->icon ?? '' }} {{ $proj->category->name }}
+                    </div>
+                  @endif
+                  <div class="pr-prog">
+                    <div class="pr-prog-tr">
+                      <div class="pr-prog-fi" style="width:{{ $prog }}%;background:#22d3a5"></div>
+                    </div>
+                    <span class="pr-pct">{{ $prog }}%</span>
+                  </div>
+                </div>
+                <span class="pr-status s-active">مستمر</span>
+              </a>
+            @empty
+              <div class="dc-empty"><i class="fa-solid fa-diagram-project"></i>
+                <p>لا توجد مشاريع نشطة</p>
+              </div>
+            @endforelse
+          </div>
+        </div>
+
+      </div><!-- /row2 -->
+
+      <!-- ROW 3: تقدم طلباتي + نشاطي -->
+      <div class="dash-row">
+
+        <!-- حالة طلباتي (دونت) -->
+        <div class="dash-card small">
+          <div class="dc-hd">
+            <div class="dc-hd-left">
+              <div class="dc-icon" style="background:rgba(14,165,201,.08)">
+                <i class="fa-solid fa-chart-pie" style="color:var(--teal-glow)"></i>
+              </div>
+              <div>
+                <div class="dc-title">حالة طلباتي</div>
+                <div class="dc-sub">توزيع حالات جميع الطلبات</div>
+              </div>
+            </div>
+          </div>
+          <div class="dc-body" id="reqs-status">
+            <!-- سيتم توليده بالجافاسكربت -->
+          </div>
+        </div>
+
+        <!-- نشاط سريع / اختصارات -->
+        <div class="dash-card large">
+          <div class="dc-hd">
+            <div class="dc-hd-left">
+              <div class="dc-icon" style="background:rgba(251,191,36,.1)">
+                <i class="fa-solid fa-bolt" style="color:#fbbf24"></i>
+              </div>
+              <div>
+                <div class="dc-title">وصول سريع</div>
+                <div class="dc-sub">الأدوات والصفحات الأكثر استخداماً</div>
+              </div>
+            </div>
+          </div>
+          <div class="dc-body shortcuts-grid">
+            <a href="{{ route('user.consulting') }}" class="shortcut-card">
+              <div class="sc-emoji">🤝</div>
+              <div class="sc-lbl">فرص التطوع</div>
+            </a>
+            <a href="{{ route('user.joint-projects') }}" class="shortcut-card">
+              <div class="sc-emoji">🗂️</div>
+              <div class="sc-lbl">المشاريع المشتركة</div>
+            </a>
+            <a href="{{ route('user.meetings') }}" class="shortcut-card">
+              <div class="sc-emoji">📅</div>
+              <div class="sc-lbl">الاجتماعات</div>
+            </a>
+            <a href="{{ route('user.orders') }}" class="shortcut-card">
+              <div class="sc-emoji">📋</div>
+              <div class="sc-lbl">طلباتي</div>
+            </a>
+            <a href="{{ route('user.services') }}" class="shortcut-card">
+              <div class="sc-emoji">⭐</div>
+              <div class="sc-lbl">خدمات مبادرون</div>
+            </a>
+            <a href="{{ route('user.settings') }}" class="shortcut-card">
+              <div class="sc-emoji">👤</div>
+              <div class="sc-lbl">ملفي الشخصي</div>
+            </a>
+          </div>
+        </div>
+
+      </div><!-- /row3 -->
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+
+  <div class="toast" id="toast"><span id="t-icon"></span><span id="t-msg"></span></div>
+  
+  @include('layouts.notif-panel-user')
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      // أنيميشن العداد
+      document.querySelectorAll('.counter').forEach(el => {
+        const target = +el.dataset.target;
+        if (target === 0) return;
+        let cur = 0;
+        const step = Math.max(1, Math.ceil(target / 30));
+        const timer = setInterval(() => {
+          cur = Math.min(cur + step, target);
+          el.textContent = cur;
+          if (cur >= target) clearInterval(timer);
+        }, 40);
+      });
+
+      // حالة الطلبات (Donut Chart)
+      const total = {{ $stats['total_requests'] ?? 0 }};
+      const pending = {{ $stats['pending_requests'] ?? 0 }};
+      const approved = {{ $stats['approved_requests'] ?? 0 }};
+      const rejected = {{ $stats['rejected_requests'] ?? 0 }};
+      const el = document.getElementById('reqs-status');
+
+      if (total === 0) {
+        el.innerHTML = '<div class="dc-empty"><i class="fa-solid fa-chart-pie"></i><p>لا توجد طلبات بعد</p></div>';
+      } else {
+        const p = Math.round;
+        const pPend = p(pending / total * 100), pApp = p(approved / total * 100), pRej = p(rejected / total * 100);
+
+        const r = 60;
+        const circ = 2 * Math.PI * r;
+        const gap = 4;
+
+        function arc(pct, offset, color) {
+          if (pct <= 0) return '';
+          const len = Math.max(0, circ * pct / 100 - gap);
+          return `<circle cx="70" cy="70" r="${r}" fill="none" stroke="${color}" stroke-width="14"
+                stroke-dasharray="${len} ${circ}" stroke-dashoffset="${-circ * offset / 100}"
+                stroke-linecap="round"/>`;
         }
-    </script>
+
+        const svg = `
+            <svg viewBox="0 0 140 140" class="donut-svg">
+                <circle cx="70" cy="70" r="${r}" fill="none" stroke="var(--border)" stroke-width="14"/>
+                ${arc(pApp, 0, '#0d9488')}
+                ${arc(pPend, pApp, '#f59e0b')}
+                ${arc(pRej, pApp + pPend, '#ef5350')}
+                <text x="70" y="66" text-anchor="middle" font-family="Tajawal" font-size="20" font-weight="900" fill="var(--ink)">${total}</text>
+                <text x="70" y="83" text-anchor="middle" font-family="Tajawal" font-size="9" fill="var(--muted)">طلب</text>
+            </svg>`;
+
+        el.innerHTML = `
+            <div class="donut-wrap">
+                ${svg}
+                <div class="donut-legend">
+                <div class="dl-item"><span class="dl-dot" style="background:#0d9488"></span><span>مقبولة</span><strong>${approved}</strong></div>
+                <div class="dl-item"><span class="dl-dot" style="background:#f59e0b"></span><span>قيد المراجعة</span><strong>${pending}</strong></div>
+                <div class="dl-item"><span class="dl-dot" style="background:#ef5350"></span><span>مرفوضة</span><strong>${rejected}</strong></div>
+                </div>
+            </div>
+            <div class="donut-bars">
+                <div class="db-item">
+                <div class="db-labels"><span>مقبولة</span><span style="color:#0d9488">${pApp}%</span></div>
+                <div class="db-track"><div class="db-fill" style="width:${pApp}%;background:#0d9488"></div></div>
+                </div>
+                <div class="db-item">
+                <div class="db-labels"><span>قيد المراجعة</span><span style="color:#f59e0b">${pPend}%</span></div>
+                <div class="db-track"><div class="db-fill" style="width:${pPend}%;background:#f59e0b"></div></div>
+                </div>
+                <div class="db-item">
+                <div class="db-labels"><span>مرفوضة</span><span style="color:#ef5350">${pRej}%</span></div>
+                <div class="db-track"><div class="db-fill" style="width:${pRej}%;background:#ef5350"></div></div>
+                </div>
+            </div>`;
+      }
+    });
+  </script>
 </body>
+
 </html>

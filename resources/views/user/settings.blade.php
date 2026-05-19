@@ -28,7 +28,8 @@
       --shadow: 0 4px 24px rgba(13, 127, 159, 0.10);
       --shadow-lg: 0 8px 40px rgba(13, 127, 159, 0.14);
     }
-    body { background: var(--pg-bg) !important; }
+    body { background: var(--pg-bg) !important; display:flex; min-height:100vh; }
+    .layout { display:flex; width:100%; min-height:100vh; }
     .settings-wrap { padding: 2rem 2.2rem; }
     .settings-header { margin-bottom: 1.8rem; }
     .settings-header h1 { font-size: 1.55rem; font-weight: 900; color: var(--ink); letter-spacing: -0.4px; }
@@ -109,6 +110,7 @@
 </head>
 
 <body>
+<div class="layout">
 @include('layouts.sidebar-user', ['activeNav' => 'settings'])
 
 <div class="main">
@@ -371,6 +373,7 @@
     </div>{{-- /grid --}}
   </div>{{-- /content --}}
 </div>{{-- /main --}}
+</div>{{-- /layout --}}
 
 <div class="toast" id="toast"><span id="t-icon"></span><span id="t-msg"></span></div>
 

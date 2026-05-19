@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="<?php echo e(asset('css/meeting.css')); ?>">
+  <link rel="stylesheet" href="<?php echo e(asset('css/meetings.css')); ?>">
 <style>#nb-reqs:empty{display:none!important}</style>
 </head>
 
@@ -434,13 +434,42 @@
       </div>
     </div>
 
+
+    <!-- ══ ATTENDEES MODAL ══ -->
+    <div class="overlay" id="ov-attendees" onclick="bgClose(event,'ov-attendees')">
+      <div class="modal" style="max-width:500px; border-radius:16px; overflow:hidden; border:1px solid rgba(255,255,255,0.1); box-shadow:0 25px 50px -12px rgba(0,0,0,0.3); padding:0;" onclick="event.stopPropagation()">
+
+        <div style="background:linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); padding:24px 20px; text-align:center; position:relative;">
+          <div style="width:56px;height:56px;background:#22c55e;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 4px 14px rgba(34,197,94,0.35)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" width="28" height="28"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <h3 id="att-meeting-title" style="margin:0 0 6px;font-size:1.1rem;font-weight:800;color:#14532d;">الجمعيات المسجّلة للحضور</h3>
+          <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.6);border-radius:20px;padding:4px 14px;">
+            <span style="font-size:.8rem;color:#166534;font-weight:700;">إجمالي الحاضرين:</span>
+            <span id="att-total-count" style="font-size:1rem;font-weight:900;color:#16a34a;">0</span>
+          </div>
+          <button onclick="closeAttendees()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.6);border:none;width:32px;height:32px;border-radius:50%;cursor:pointer;color:#22c55e;display:flex;align-items:center;justify-content:center;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+
+        <div id="att-list" style="max-height:380px;overflow-y:auto;background:var(--bg-card, #fff);">
+          <div style="text-align:center;padding:2rem;color:var(--text-muted)">⏳ جاري التحميل...</div>
+        </div>
+
+        <div style="padding:16px 24px;background:rgba(249,250,251,0.6);border-top:1px solid rgba(0,0,0,0.05);display:flex;justify-content:flex-end;">
+          <button onclick="closeAttendees()" style="background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;border:none;border-radius:10px;padding:10px 24px;font-weight:800;font-family:Tajawal,sans-serif;font-size:.95rem;cursor:pointer;">إغلاق</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ══ TOAST ══ -->
     <div class="toast" id="toast"><span id="t-icon"></span><span id="t-msg"></span></div>
 
     <?php echo $__env->make('layouts.notif-panel', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
     <script src="<?php echo e(asset('js/menu.js')); ?>"></script>
-    <script src="<?php echo e(asset('js/meeting.js')); ?>"></script>
+    <script src="<?php echo e(asset('js/meetings.js')); ?>"></script>
 </body>
 
 </html><?php /**PATH C:\xampp\htdocs\tkamel-abdullah1\tkamel\resources\views/meetings.blade.php ENDPATH**/ ?>

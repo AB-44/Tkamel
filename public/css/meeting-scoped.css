@@ -945,8 +945,8 @@
   transform: none;
 }
 
-#view-meetings .fld input,
-#view-meetings .fld select,
+.fld input,
+.fld select,
 #view-meetings .fld textarea {
   width: 100%;
   padding: 10px 40px 10px 13px;
@@ -969,15 +969,15 @@
   min-height: 76px;
 }
 
-#view-meetings .fld input:focus,
-#view-meetings .fld select:focus,
+.fld input:focus,
+.fld select:focus,
 #view-meetings .fld textarea:focus {
   border-color: var(--teal-glow);
   background: white;
   box-shadow: 0 0 0 3px rgba(42, 184, 208, 0.1);
 }
 
-#view-meetings .fld input::placeholder,
+.fld input::placeholder,
 #view-meetings .fld textarea::placeholder {
   color: #b8c8d0;
 }
@@ -1558,117 +1558,4 @@
   .det-grid {
     grid-template-columns: 1fr;
   }
-}
-/* ══ NEW MODAL STYLES ══ */
-
-#view-meetings .form-section-hd {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.82rem;
-  font-weight: 900;
-  color: var(--teal-deep);
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  margin: 18px 0 12px;
-  padding-bottom: 8px;
-  border-bottom: 1.5px solid rgba(42,184,208,0.15);
-}
-
-#view-meetings .form-section-hd i {
-  font-size: 0.82rem;
-  color: var(--teal);
-}
-
-#view-meetings .row3 {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-/* Add-agenda button inside section header */
-#view-meetings .btn-add-agenda {
-  margin-right: auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 12px;
-  border: 1.5px solid var(--teal-glow);
-  border-radius: 20px;
-  background: rgba(42,184,208,0.06);
-  color: var(--teal);
-  font-family: 'Tajawal', sans-serif;
-  font-size: 0.75rem;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-#view-meetings .btn-add-agenda:hover {
-  background: rgba(42,184,208,0.14);
-  box-shadow: 0 2px 8px rgba(42,184,208,0.2);
-}
-
-/* Agenda item card */
-#view-meetings .agenda-item {
-  background: var(--fog);
-  border: 1.5px solid var(--border);
-  border-radius: 13px;
-  padding: 12px 14px 10px;
-  margin-bottom: 10px;
-  position: relative;
-}
-#view-meetings .agenda-item-hd {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-#view-meetings .agenda-item-num {
-  font-size: 0.72rem;
-  font-weight: 800;
-  color: var(--muted);
-  background: rgba(42,184,208,0.1);
-  border-radius: 20px;
-  padding: 2px 9px;
-}
-#view-meetings .btn-del-agenda {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 3px 9px;
-  border: 1px solid rgba(198,40,40,0.25);
-  border-radius: 7px;
-  background: rgba(198,40,40,0.06);
-  color: #c62828;
-  font-family: 'Tajawal', sans-serif;
-  font-size: 0.7rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.18s;
-}
-#view-meetings .btn-del-agenda:hover {
-  background: rgba(198,40,40,0.12);
-  border-color: rgba(198,40,40,0.4);
-}
-#view-meetings .agenda-row {
-  display: grid;
-  grid-template-columns: 1fr 80px;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-#view-meetings .agenda-presenter .fld {
-  background: white;
-}
-
-/* Empty agenda state */
-#view-meetings .agenda-empty {
-  text-align: center;
-  padding: 18px 12px;
-  background: var(--fog);
-  border: 1.5px dashed var(--border);
-  border-radius: 12px;
-  color: var(--muted);
-  font-size: 0.8rem;
-  margin-bottom: 4px;
 }

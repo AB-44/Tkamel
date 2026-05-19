@@ -45,19 +45,17 @@ body {
   min-height: 100vh;
 }
 
-/* ── SIDEBAR ── */
+/* —— SIDEBAR — visual styles defined in sidebar-user.blade.php —— */
 .sidebar {
-  width: 256px;
+  width: 264px;
   flex-shrink: 0;
-  background: var(--ink);
-  display: flex;
-  flex-direction: column;
   position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
   z-index: 50;
-  border-left: 1px solid rgba(255, 255, 255, 0.04);
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar::before {
@@ -194,13 +192,14 @@ body {
   opacity: 0.65;
 }
 
-/* ── MAIN ── */
+/* —— MAIN —— */
 .main {
   flex: 1;
-  margin-right: 256px;
+  margin-right: 264px;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 /* ── TOPBAR ── */

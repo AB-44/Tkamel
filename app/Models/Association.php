@@ -9,7 +9,7 @@ class Association extends Model
     protected $fillable = [
         'association_name', 'email', 'license_number',
         'category', 'manager_name', 'phone', 'password_hash',
-        'status', 'admin_notes', 'reviewed_at',
+        'status', 'admin_notes', 'reviewed_at', 'avatar',
     ];
 
     protected $hidden = ['password_hash'];
@@ -28,6 +28,7 @@ class Association extends Model
     public function opportunityRequests() { return $this->hasMany(OpportunityRequest::class); }
     public function meetingTargets()      { return $this->hasMany(MeetingTarget::class); }
     public function meetings()            { return $this->belongsToMany(Meeting::class, 'meeting_targets'); }
+    public function attendingMeetings()   { return $this->belongsToMany(Meeting::class, 'meeting_association')->withTimestamps(); }
     public function receivedMessages()    { return $this->morphMany(Message::class, 'receiver'); }
     public function notifications()       { return $this->hasMany(Notification::class); }
 }
