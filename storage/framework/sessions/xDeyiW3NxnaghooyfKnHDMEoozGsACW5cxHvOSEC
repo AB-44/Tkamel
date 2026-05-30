@@ -1,0 +1,1 @@
+a:4:{s:6:"_token";s:40:"6kQKOPM36uRPxS65E1oWvQ0sv6NTwGMz7DnO8RUg";s:6:"_flash";a:2:{s:3:"old";a:0:{}s:3:"new";a:0:{}}s:9:"_previous";a:2:{s:3:"url";s:44:"http://127.0.0.1:8000/api/user/notifications";s:5:"route";N;}s:11:"association";a:5:{s:2:"id";i:2;s:4:"name";s:3:"ham";s:5:"email";s:13:"ham@gmail.com";s:8:"category";s:4:"hamo";s:6:"avatar";N;}}

@@ -112,18 +112,17 @@ function backToVolunteer() {
 
 /* ══ تهيئة: تشغيل القسم الصحيح عند التحميل ══ */
 document.addEventListener('DOMContentLoaded', () => {
-  /* علّم volunteer كمهيأ مسبقاً (consulting.js يهيّأه بنفسه) */
-  _initializedSections.add('volunteer');
-
   /* اقرأ الـ hash من URL لتحديد القسم الابتدائي */
   const hash = window.location.hash.replace('#', '');
   const validSections = Object.keys(SECTION_META);
 
   if (hash && validSections.includes(hash)) {
+    /* للمشاريع أو الطلبات: لا تُهيئ volunteer أولاً */
+    _initializedSections.add('volunteer');
     showSection(hash);
   } else {
-    /* الافتراضي: فرص التطوع نشطة */
-    document.getElementById('nav-volunteer')?.classList.add('active');
+    /* الافتراضي: فرص التطوع */
+    showSection('volunteer');
   }
 
   /* مستمع للـ hash changes لتتيح التنقل بزر الرجوع في المتصفح */

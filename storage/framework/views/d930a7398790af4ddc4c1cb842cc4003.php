@@ -131,7 +131,7 @@
       <div class="content">
 
         
-        <div class="view active" id="view-admin">
+        <div class="view" id="view-admin">
           <div class="page-hd">
             <div>
               <div class="ph-title">فرص التطوع</div>

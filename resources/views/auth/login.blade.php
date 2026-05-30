@@ -315,7 +315,7 @@
       <div class="orb orb3"></div>
       <div class="brand-content">
         <div class="brand-logo-wrap">
-          <img class="brand-logo-img" src="{{ asset('images/Gemini_Generated_Image_tlotq1tlotq1tlot (1) (1).png') }}" alt="تكامل">
+          <img class="brand-logo-img" src="{{ asset('images/logo1.png') }}" alt="تكامل">
         </div>
         <div class="brand-tagline">منصة الجمعيات والمنظمات المجتمعية</div>
         <div class="brand-features">

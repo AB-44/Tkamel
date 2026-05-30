@@ -82,8 +82,8 @@
     .rich-opp-stat i { font-size:1rem; margin-bottom:2px; }
 
     /* ── Redesigned Add/Edit Modal ── */
-    .opp-modal-redesign { border-radius:20px; overflow:hidden; max-width:560px; width:100%; }
-    .opp-modal-hd { background:linear-gradient(135deg,#0d3d49 0%,#1a6b7c 60%,#2ab8d0 100%); padding:20px 24px; display:flex; align-items:center; justify-content:space-between; }
+    .opp-modal-redesign { border-radius:20px; overflow:hidden; max-width:560px; width:100%; max-height: 90vh; display: flex; flex-direction: column; }
+    .opp-modal-hd { background:linear-gradient(135deg,#0d3d49 0%,#1a6b7c 60%,#2ab8d0 100%); padding:20px 24px; display:flex; align-items:center; justify-content:space-between; flex-shrink: 0; }
     .opp-modal-hd-inner { display:flex; align-items:center; gap:14px; }
     .opp-modal-hd-icon { width:44px; height:44px; border-radius:12px; background:rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; font-size:1.3rem; color:#fff; flex-shrink:0; }
     .opp-modal-hd-title { font-size:1.05rem; font-weight:800; color:#fff; }
@@ -98,6 +98,25 @@
     .opp-chip-lbl { font-size:0.7rem; color:#94a3b8; font-weight:700; }
     .opp-chip-inp { border:none; background:transparent; outline:none; font-family:inherit; font-size:0.88rem; font-weight:700; color:#1e293b; width:100%; padding:0; }
     .opp-chip-inp option { font-family:inherit; }
+
+    /* Modal Form Styles */
+    .fg { display:flex; flex-direction:column; gap:6px; margin-bottom: 12px; flex-shrink: 0; }
+    .fg label { font-size:0.83rem; font-weight:700; color:#374151; }
+    .req-span { color:#dc2626; margin-right:2px; }
+    .fld { position:relative; display:flex; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; overflow:hidden; flex-shrink: 0; }
+    .fi { position:absolute; right:12px; color:#94a3b8; display:flex; align-items:center; pointer-events:none; }
+    .fi.top { top:12px; align-items:flex-start; }
+    .fld input, .fld textarea, .fld select { width:100%; border:none; outline:none; background:transparent; padding:10px 36px 10px 12px; font-family:inherit; font-size:0.88rem; color:#0f172a; resize:vertical; }
+    .fld textarea { min-height:90px; padding-top:10px; }
+    .row2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom: 12px; flex-shrink: 0; }
+
+    /* Modal Body & Footer for Add Opp */
+    .m-body { padding:22px 24px; display:flex; flex-direction:column; gap:16px; overflow-y:auto; flex:1; }
+    .m-ft { padding:0 24px 20px; display:flex; gap:10px; flex-shrink:0; margin-top: auto; }
+    .btn-cancel { flex:1; padding:11px; border:1px solid #e2e8f0; border-radius:12px; background:#fff; font-family:inherit; font-size:0.88rem; font-weight:700; cursor:pointer; color:#64748b; }
+    .btn-cancel:hover { background:#f8fafc; }
+    .btn-save { flex:2; padding:11px; border:none; border-radius:12px; background:linear-gradient(135deg,#0d3d49,#2ab8d0); font-family:inherit; font-size:0.88rem; font-weight:800; cursor:pointer; color:#fff; }
+    .btn-save:hover { opacity:0.92; }
   </style>
 </head>
 
@@ -670,12 +689,6 @@
               <div class="tb-div"></div>
               <select class="filter-select" id="catFilter" onchange="renderAll()">
                 <option value="">كل التصنيفات</option>
-                <option value="خيرية">خيرية واجتماعية</option>
-                <option value="ثقافية">ثقافية وتعليمية</option>
-                <option value="صحية">صحية وبيئية</option>
-                <option value="رياضية">رياضية وشبابية</option>
-                <option value="تنموية">تنموية واقتصادية</option>
-                <option value="دينية">دينية ودعوية</option>
               </select>
               <div class="tb-div"></div>
               <div class="chips">
@@ -705,7 +718,7 @@
           <div class="modal-body">
             <div class="fg"><label>عنوان الاجتماع <span class="req">*</span></label><div class="fld"><span class="fld-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span><input type="text" id="f-title" placeholder="مثال: اجتماع التخطيط الاستراتيجي"></div></div>
             <div class="row2">
-              <div class="fg"><label>التصنيف <span class="req">*</span></label><div class="fld"><span class="fld-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span><select id="f-cat"><option value="">اختر التصنيف</option><option value="خيرية">خيرية واجتماعية</option><option value="ثقافية">ثقافية وتعليمية</option><option value="صحية">صحية وبيئية</option><option value="رياضية">رياضية وشبابية</option><option value="تنموية">تنموية واقتصادية</option><option value="دينية">دينية ودعوية</option></select></div></div>
+              <div class="fg"><label>التصنيف <span class="req">*</span></label><div class="fld"><span class="fld-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span><select id="f-cat"><option value="">اختر التصنيف</option></select></div></div>
               <div class="fg"><label>اسم المقدم <span class="req">*</span></label><div class="fld"><span class="fld-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span><input type="text" id="f-presenter" placeholder="اسم المقدم"></div></div>
             </div>
             <div class="row2">
@@ -1318,7 +1331,7 @@
 
       <div class="m-ft">
         <button class="btn-cancel" onclick="closeOv('ov-opp')">إلغاء</button>
-        <button class="btn-save" onclick="saveOpp()"><span id="opp-save-lbl"><i class="fa-solid fa-floppy-disk" style="margin-left:8px"></i> إضافة الفرصة</span></button>
+        <button class="btn-save" onclick="saveOpp()"><span id="opp-save-lbl"><i class="fa-solid fa-floppy-disk" style="margin-left:8px"></i> حفظ الفرصة</span></button>
       </div>
     </div>
   </div>

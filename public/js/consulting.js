@@ -667,7 +667,7 @@ function openAddOpp(mode) {
   document.getElementById('opp-m-icon').innerHTML = '<i class="fa-solid fa-star"></i>';
   document.getElementById('opp-m-title').textContent = 'إضافة فرصة تطوع';
   document.getElementById('opp-m-sub').textContent = isGlobal ? 'أضف تفاصيل الفرصة أدناه' : 'فرصة جديدة في تصنيف: ' + cat.name;
-  document.getElementById('opp-save-lbl').innerHTML = '<i class="fa-solid fa-floppy-disk" style="margin-left:8px"></i> إضافة الفرصة';
+  document.getElementById('opp-save-lbl').innerHTML = '<i class="fa-solid fa-floppy-disk" style="margin-left:8px"></i> حفظ الفرصة';
   
   const badgeWrap = document.getElementById('opp-cat-badge-wrap');
   const catSelectWrap = document.getElementById('fg-opp-cat');

@@ -39,20 +39,23 @@ class JointProjectController extends Controller
 
         $projects = $query->get()->map(fn($p) => $this->format($p));
 
-        $all = JointProject::all();
-        $active    = $all->whereNotIn('status', ['completed', 'canceled']);
-        $avgProgress = $active->count()
-            ? round($active->avg('progress'))
+        // Optimized Stats queries (prevents loading all records into memory)
+        $total        = JointProject::count();
+        $completed    = JointProject::where('status', 'completed')->count();
+        $canceled     = JointProject::where('status', 'canceled')->count();
+        $activeCount  = JointProject::whereNotIn('status', ['completed', 'canceled'])->count();
+        $avgProgress  = $activeCount > 0 
+            ? round(JointProject::whereNotIn('status', ['completed', 'canceled'])->avg('progress')) 
             : 0;
 
         return response()->json([
             'projects' => $projects,
             'stats' => [
-                'total'        => $all->count(),
-                'active'       => $active->count(),
-                'completed'    => $all->where('status', 'completed')->count(),
-                'canceled'     => $all->where('status', 'canceled')->count(),
-                'avg_progress' => $avgProgress,
+                'total'        => $total,
+                'active'       => $activeCount,
+                'completed'    => $completed,
+                'canceled'     => $canceled,
+                'avg_progress' => (int) $avgProgress,
             ],
         ]);
     }
@@ -345,12 +348,20 @@ class JointProjectController extends Controller
     public function apply(Request $request, $id)
     {
         $project = JointProject::findOrFail($id);
-        $user = Auth::user();
+        
+        $userId = Auth::check() ? Auth::id() : null;
+        $assocId = (!Auth::check() && session()->has('association')) ? session('association.id') : null;
+
+        if (!$userId && !$assocId) {
+            return response()->json(['success' => false, 'message' => 'يجب تسجيل الدخول لتقديم طلب']);
+        }
 
         // Prevent duplicate requests
-        $existing = \App\Models\OpportunityRequest::where('project_id', $id)
-            ->where('user_id', $user->id)
-            ->first();
+        $query = \App\Models\OpportunityRequest::where('project_id', $id);
+        if ($userId) $query->where('user_id', $userId);
+        if ($assocId) $query->where('association_id', $assocId);
+        
+        $existing = $query->first();
 
         if ($existing) {
             return response()->json([
@@ -362,19 +373,21 @@ class JointProjectController extends Controller
         $projectRequest = \App\Models\OpportunityRequest::create([
             'project_id'     => $id,
             'opportunity_id' => null,
-            'user_id'        => $user->id,
-            'association_id' => null,
+            'user_id'        => $userId,
+            'association_id' => $assocId,
             'status'         => 'pending',
             'notes'          => $request->input('notes'),
         ]);
 
         // Notify admin(s)
         $admins = User::whereHas('role', fn($q) => $q->where('name', 'admin'))->get();
+        $applicantName = Auth::check() ? Auth::user()->full_name : session('association.name', 'جمعية');
+
         foreach ($admins as $admin) {
             Notification::create([
                 'user_id'      => $admin->id,
                 'title'        => 'طلب انضمام لمشروع مشترك',
-                'body'         => 'قدّم ' . $user->full_name . ' طلبًا للانضمام إلى المشروع: «' . $project->name . '»',
+                'body'         => 'قدّم ' . $applicantName . ' طلبًا للانضمام إلى المشروع: «' . $project->name . '»',
                 'type'         => 'project_join',
                 'is_read'      => false,
                 'related_id'   => $project->id,
@@ -392,12 +405,20 @@ class JointProjectController extends Controller
     /** Return the authenticated user's own project join requests */
     public function myRequests()
     {
-        $user = Auth::user();
+        $userId = Auth::check() ? Auth::id() : null;
+        $assocId = (!Auth::check() && session()->has('association')) ? session('association.id') : null;
 
-        $myReqs = \App\Models\OpportunityRequest::where('user_id', $user->id)
-            ->whereNotNull('project_id')
-            ->latest()
-            ->get()
+        $query = \App\Models\OpportunityRequest::whereNotNull('project_id')->latest();
+        
+        if ($userId) {
+            $query->where('user_id', $userId);
+        } elseif ($assocId) {
+            $query->where('association_id', $assocId);
+        } else {
+            return response()->json(['requests' => []]);
+        }
+
+        $myReqs = $query->get()
             ->map(fn($r) => [
                 'id'        => $r->id,
                 'projId'    => $r->project_id,

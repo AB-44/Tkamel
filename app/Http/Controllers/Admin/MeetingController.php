@@ -46,6 +46,16 @@ class MeetingController extends Controller
                         ->count();
                 }
 
+                $report = null;
+                if ($meeting->report_summary || $meeting->report_decisions) {
+                    $report = [
+                        'summary'   => $meeting->report_summary,
+                        'decisions' => $meeting->report_decisions,
+                        'attendees' => $meeting->report_attendees,
+                        'actions'   => $meeting->report_actions,
+                    ];
+                }
+
                 return [
                     'id'           => $meeting->id,
                     'title'        => $meeting->title,
@@ -71,12 +81,7 @@ class MeetingController extends Controller
                     ]),
                     'cancelReason' => $meeting->cancel_reason,
                     'attendee_count' => $attendeeCount,
-                    'report'       => [
-                        'summary'   => $meeting->report_summary,
-                        'decisions' => $meeting->report_decisions,
-                        'attendees' => $meeting->report_attendees,
-                        'actions'   => $meeting->report_actions,
-                    ],
+                    'report'       => $report,
                 ];
             });
 
@@ -90,12 +95,29 @@ class MeetingController extends Controller
     {
         $this->syncPastMeetings();
 
-        $meetings = Meeting::with(['agendaItems'])
-            ->whereIn('status', ['upcoming', 'past', 'cancelled'])
-            ->orWhereNull('status')
+        // ── Filter by association category if logged in as association ─────────
+        $assocCategory = null;
+        if (session()->has('association')) {
+            $assocCategory = session('association')['category'] ?? session('association.category') ?? null;
+        }
+
+        $query = Meeting::with(['agendaItems'])
+            ->where(function ($statusQ) {
+                $statusQ->whereIn('status', ['upcoming', 'past', 'cancelled'])
+                        ->orWhereNull('status');
+            })
             ->orderByDesc('date')
-            ->orderByDesc('time')
-            ->get();
+            ->orderByDesc('time');
+
+        // Show meetings where invitation_direction is 'عام' or matches the association's category
+        if ($assocCategory) {
+            $query->where(function ($q) use ($assocCategory) {
+                $q->where('invitation_direction', 'عام')
+                  ->orWhere('invitation_direction', $assocCategory);
+            });
+        }
+
+        $meetings = $query->get();
 
         $formattedMeetings = $meetings->map(function (Meeting $meeting) {
             $status = $meeting->status ?? 'upcoming';
@@ -158,6 +180,7 @@ class MeetingController extends Controller
             'activeNav'         => 'meetings',
         ]);
     }
+
 
     /**
      * GET /api/user/meetings  — User: read-only list
@@ -388,7 +411,7 @@ class MeetingController extends Controller
             ->where('ma.meeting_id', $meeting->id)
             ->select(
                 'a.id',
-                'a.name as association_name',
+                'a.association_name',
                 'a.manager_name',
                 'a.email',
                 'ma.created_at as registered_at'

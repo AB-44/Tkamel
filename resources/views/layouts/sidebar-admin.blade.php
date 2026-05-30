@@ -1,6 +1,6 @@
 {{--
   layouts/sidebar-admin.blade.php
-  Admin sidebar — premium glassmorphic design, fully self-contained CSS.
+  Admin sidebar — redesigned to match target UI with Takamol branding.
   Variables:
     $activeNav — 'dashboard','meetings','volunteer','orders','projects','settings'
 --}}
@@ -10,15 +10,13 @@
 
 <style>
 /* ═══════════════════════════════════════════════════════════
-   SIDEBAR-ADMIN — Premium Glassmorphic Design System
-   Using "aside.sidebar" prefix for high specificity to prevent
-   any external CSS (meetings.css, dashboard.css, etc.) bleeding in.
+   SIDEBAR-ADMIN — New Design matching target UI
    ═══════════════════════════════════════════════════════════ */
 
 aside.sidebar {
-  width: 264px !important;
+  width: 260px !important;
   flex-shrink: 0;
-  background: linear-gradient(175deg, #071c2d 0%, #0a2a40 40%, #0c3350 100%) !important;
+  background: #0f1923 !important;
   display: flex !important;
   flex-direction: column !important;
   position: fixed !important;
@@ -26,174 +24,83 @@ aside.sidebar {
   right: 0 !important;
   bottom: 0 !important;
   z-index: 50 !important;
-  border-left: 1px solid rgba(14,165,201,0.12);
-  box-shadow: -6px 0 40px rgba(0,0,0,0.3);
+  border-left: 1px solid rgba(255,255,255,0.06);
   overflow: hidden;
+  font-family: 'Tajawal', sans-serif;
 }
 
-/* Ambient glow layers */
-aside.sidebar::before {
-  content: '';
-  position: absolute;
-  top: -80px;
-  right: -60px;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(14,165,201,0.14) 0%, transparent 65%) !important;
-  pointer-events: none;
-  z-index: 0;
-}
-aside.sidebar::after {
-  content: '';
-  position: absolute;
-  bottom: -60px;
-  left: -40px;
-  width: 240px;
-  height: 240px;
-  background: radial-gradient(circle, rgba(13,148,136,0.12) 0%, transparent 65%) !important;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* ── LOGO ── */
+/* ── LOGO AREA ── */
 aside.sidebar .sb-logo {
-  padding: 22px 20px 18px;
+  padding: 24px 20px 20px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
   border-bottom: 1px solid rgba(255,255,255,0.06);
   position: relative;
   z-index: 1;
   flex-shrink: 0;
 }
 
-aside.sidebar .sb-logo-mark {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #0ea5c9 0%, #0d9488 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.15rem;
+aside.sidebar .sb-logo-wordmark {
+  font-size: 1.75rem;
   font-weight: 900;
   color: white;
-  box-shadow: 0 4px 16px rgba(14,165,201,0.45);
-  flex-shrink: 0;
-  font-family: 'Tajawal', sans-serif;
-}
-
-aside.sidebar .sb-logo-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-aside.sidebar .sb-logo-name {
-  font-size: 1.18rem;
-  font-weight: 900;
-  color: white;
-  letter-spacing: -0.5px;
+  letter-spacing: -1px;
   line-height: 1;
   font-family: 'Tajawal', sans-serif;
 }
 
-aside.sidebar .sb-logo-sub {
-  font-size: 0.62rem;
-  font-weight: 600;
-  color: rgba(255,255,255,0.3);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  font-family: 'Tajawal', sans-serif;
+aside.sidebar .sb-logo-wordmark span {
+  color: #0ea5c9;
 }
 
-/* Admin badge in logo area */
-aside.sidebar .sb-admin-badge {
-  margin: 0 20px 0;
-  padding: 5px 12px;
-  background: linear-gradient(135deg, rgba(109,40,217,0.3), rgba(109,40,217,0.15));
-  border: 1px solid rgba(109,40,217,0.35);
-  border-radius: 20px;
-  font-size: 0.64rem;
-  font-weight: 800;
-  color: rgba(196,170,255,0.9);
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  display: inline-block;
-  font-family: 'Tajawal', sans-serif;
-}
-
-/* ── ADMIN PROFILE CARD ── */
-aside.sidebar .sb-profile {
-  margin: 14px 12px 6px;
-  padding: 11px 13px;
-  background: rgba(255,255,255,0.055);
-  border: 1px solid rgba(14,165,201,0.18);
-  border-radius: 14px;
+/* ── ADMIN PROFILE BAR ── */
+aside.sidebar .sb-profile-bar {
   display: flex;
   align-items: center;
   gap: 10px;
-  position: relative;
-  z-index: 1;
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   flex-shrink: 0;
-  backdrop-filter: blur(10px);
-  transition: border-color 0.2s;
-}
-
-aside.sidebar .sb-profile:hover {
-  border-color: rgba(14,165,201,0.35);
 }
 
 aside.sidebar .sb-profile-av {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   background: linear-gradient(135deg, #6d28d9, #4f46e5);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   font-weight: 900;
   color: white;
   flex-shrink: 0;
-  box-shadow: 0 2px 10px rgba(109,40,217,0.4);
-  font-family: 'Tajawal', sans-serif;
 }
 
 aside.sidebar .sb-profile-info { flex: 1; min-width: 0; }
 
 aside.sidebar .sb-profile-name {
-  font-size: 0.83rem;
-  font-weight: 800;
+  font-size: 0.8rem;
+  font-weight: 700;
   color: white;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.2;
-  font-family: 'Tajawal', sans-serif;
 }
 
 aside.sidebar .sb-profile-role {
-  font-size: 0.67rem;
-  color: rgba(196,170,255,0.7);
-  margin-top: 2px;
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.35);
+  margin-top: 1px;
   font-weight: 500;
-  font-family: 'Tajawal', sans-serif;
-}
-
-aside.sidebar .sb-status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 8px rgba(34,197,94,0.65);
-  flex-shrink: 0;
 }
 
 /* ── NAV ── */
 aside.sidebar .sb-nav {
   flex: 1;
-  padding: 8px 10px;
+  padding: 6px 8px;
   overflow-y: auto;
   position: relative;
   z-index: 1;
@@ -203,12 +110,13 @@ aside.sidebar .sb-nav {
 
 aside.sidebar .sb-nav::-webkit-scrollbar { display: none; }
 
+/* ── SECTION LABEL ── */
 aside.sidebar .sb-section {
-  font-size: 0.59rem;
-  font-weight: 800;
-  color: rgba(255,255,255,0.2);
-  padding: 14px 10px 5px;
-  letter-spacing: 2px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.22);
+  padding: 14px 12px 4px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   user-select: none;
   font-family: 'Tajawal', sans-serif;
@@ -219,88 +127,68 @@ aside.sidebar .nav-item {
   display: flex !important;
   align-items: center !important;
   gap: 10px !important;
-  padding: 9px 11px !important;
-  border-radius: 12px !important;
-  margin-bottom: 2px;
+  padding: 9px 12px !important;
+  border-radius: 8px !important;
+  margin-bottom: 1px;
   font-size: 0.875rem !important;
-  font-weight: 600 !important;
-  color: rgba(255,255,255,0.48) !important;
+  font-weight: 500 !important;
+  color: rgba(255,255,255,0.45) !important;
   cursor: pointer;
-  transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, border-color 0.2s ease !important;
+  transition: all 0.18s ease !important;
   text-decoration: none !important;
   background: transparent !important;
-  border: 1px solid transparent !important;
+  border: none !important;
   width: 100%;
   font-family: 'Tajawal', sans-serif !important;
   text-align: right;
   position: relative;
-  overflow: hidden;
   box-shadow: none !important;
   -webkit-appearance: none;
   appearance: none;
 }
 
 aside.sidebar .nav-item:hover {
-  background: rgba(255,255,255,0.075) !important;
-  color: rgba(255,255,255,0.88) !important;
-  transform: translateX(-3px) !important;
-  border-color: rgba(255,255,255,0.06) !important;
-  box-shadow: none !important;
-}
-
-aside.sidebar .nav-item.active {
-  background: linear-gradient(135deg, rgba(14,165,201,0.22) 0%, rgba(13,148,136,0.14) 100%) !important;
-  color: #7de8f5 !important;
-  border-color: rgba(14,165,201,0.25) !important;
-  font-weight: 700 !important;
-  box-shadow: 0 2px 14px rgba(14,165,201,0.12), inset 0 1px 0 rgba(255,255,255,0.06) !important;
+  background: rgba(255,255,255,0.06) !important;
+  color: rgba(255,255,255,0.8) !important;
   transform: none !important;
 }
 
-/* Active indicator bar */
-aside.sidebar .nav-item.active::after {
+aside.sidebar .nav-item.active {
+  background: linear-gradient(90deg, rgba(14,165,201,0.25) 0%, rgba(14,165,201,0.12) 100%) !important;
+  color: #38d9f0 !important;
+  font-weight: 700 !important;
+}
+
+/* Active indicator bar on right */
+aside.sidebar .nav-item.active::before {
   content: '';
   position: absolute;
   right: 0;
   top: 50%;
-  transform: translateY(-50%) !important;
+  transform: translateY(-50%);
   width: 3px;
-  height: 55%;
+  height: 60%;
   border-radius: 3px 0 0 3px;
-  background: linear-gradient(180deg, #0ea5c9, #0d9488);
+  background: #0ea5c9;
 }
 
-/* ── NAV ICON WRAPPER ── */
+/* ── NAV ICON ── */
 aside.sidebar .nav-icon {
-  width: 30px;
-  height: 30px;
-  border-radius: 8px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: rgba(255,255,255,0.055);
-  transition: background 0.2s ease, transform 0.2s ease;
 }
 
-aside.sidebar .nav-item.active .nav-icon {
-  background: rgba(14,165,201,0.22);
-}
-
-aside.sidebar .nav-item:hover .nav-icon {
-  background: rgba(255,255,255,0.11);
-  transform: scale(1.05);
-}
-
-/* ── NAV SVG — Critical: force size to prevent huge icons ── */
 aside.sidebar .nav-icon svg {
-  width: 15px !important;
-  height: 15px !important;
-  opacity: 0.58;
-  transition: opacity 0.2s ease;
+  width: 16px !important;
+  height: 16px !important;
+  opacity: 0.55;
+  transition: opacity 0.18s ease;
   flex-shrink: 0;
   filter: none !important;
-  display: block;
 }
 
 aside.sidebar .nav-item.active .nav-icon svg {
@@ -308,31 +196,42 @@ aside.sidebar .nav-item.active .nav-icon svg {
 }
 
 aside.sidebar .nav-item:hover .nav-icon svg {
-  opacity: 0.92;
+  opacity: 0.85;
 }
 
 /* ── NAV BADGE ── */
 aside.sidebar .nav-badge {
   margin-right: auto;
-  background: rgba(239,68,68,0.25);
-  border: 1px solid rgba(239,68,68,0.3);
+  background: rgba(14,165,201,0.2);
+  border: 1px solid rgba(14,165,201,0.3);
   border-radius: 20px;
   padding: 1px 7px;
   font-size: 0.63rem;
   font-weight: 800;
-  color: #f87171;
+  color: #38d9f0;
   min-width: 18px;
   text-align: center;
   font-family: 'Tajawal', sans-serif;
 }
 
 aside.sidebar .nav-badge:empty { display: none !important; }
-aside.sidebar .nav-badge.red { background: rgba(239,68,68,0.25); border-color: rgba(239,68,68,0.3); color: #f87171; }
+aside.sidebar .nav-badge.red {
+  background: rgba(239,68,68,0.2);
+  border-color: rgba(239,68,68,0.3);
+  color: #f87171;
+}
+
+/* ── DIVIDER ── */
+aside.sidebar .sb-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.05);
+  margin: 4px 10px;
+}
 
 /* ── FOOTER ── */
 aside.sidebar .sb-foot {
-  padding: 10px 10px 14px !important;
-  border-top: 1px solid rgba(255,255,255,0.05) !important;
+  padding: 8px 8px 14px !important;
+  border-top: 1px solid rgba(255,255,255,0.06) !important;
   position: relative;
   z-index: 1;
   flex-shrink: 0;
@@ -340,48 +239,29 @@ aside.sidebar .sb-foot {
 
 /* ── LOGOUT BUTTON ── */
 aside.sidebar .sb-foot .logout-btn {
-  color: rgba(255,255,255,0.42) !important;
+  color: rgba(255,255,255,0.38) !important;
   background: transparent !important;
-  border: 1px solid transparent !important;
+  border: none !important;
   -webkit-appearance: none !important;
   appearance: none !important;
   font-size: 0.875rem !important;
   font-family: 'Tajawal', sans-serif !important;
   box-shadow: none !important;
-  transform: none !important;
 }
 
 aside.sidebar .sb-foot .logout-btn:hover {
   background: rgba(239,68,68,0.1) !important;
   color: #f87171 !important;
-  border-color: rgba(239,68,68,0.18) !important;
-  transform: translateX(-3px) !important;
+  transform: none !important;
   box-shadow: none !important;
 }
 
-aside.sidebar .sb-foot .logout-btn .nav-icon {
-  background: rgba(255,255,255,0.04);
-}
-
-aside.sidebar .sb-foot .logout-btn:hover .nav-icon {
-  background: rgba(239,68,68,0.15) !important;
-  transform: none !important;
-}
-
-aside.sidebar .sb-foot .logout-btn .nav-icon svg {
-  opacity: 0.5 !important;
-}
-
-aside.sidebar .sb-foot .logout-btn:hover .nav-icon svg {
-  opacity: 0.88 !important;
-}
-
-/* ── MAIN OFFSET — ensures all pages have correct margin ── */
+/* ── MAIN OFFSET ── */
 .main {
   flex: 1;
   min-width: 0;
-  margin-right: 264px;
-  width: calc(100vw - 264px);
+  margin-right: 260px !important;
+  width: calc(100vw - 260px) !important;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
@@ -390,8 +270,8 @@ aside.sidebar .sb-foot .logout-btn:hover .nav-icon svg {
 
 /* ── RESPONSIVE ── */
 @media (max-width: 900px) {
-  aside.sidebar { width: 220px !important; }
-  .main { margin-right: 220px; width: calc(100vw - 220px); }
+  aside.sidebar { width: 200px !important; }
+  .main { margin-right: 200px; width: calc(100vw - 200px); }
 }
 </style>
 
@@ -399,22 +279,9 @@ aside.sidebar .sb-foot .logout-btn:hover .nav-icon svg {
 
   {{-- ── LOGO ── --}}
   <div class="sb-logo">
-    <div class="sb-logo-mark">ت</div>
-    <div class="sb-logo-text">
-      <div class="sb-logo-name">تكامل</div>
-      <div class="sb-logo-sub">لوحة الإدارة</div>
-    </div>
+    <img src="{{ asset('images/logo1.png') }}" alt="Takamol Logo" style="max-width: 210px; width: 100%; height: auto; object-fit: contain;">
   </div>
 
-  {{-- ── ADMIN PROFILE CARD ── --}}
-  <div class="sb-profile">
-    <div class="sb-profile-av">م</div>
-    <div class="sb-profile-info">
-      <div class="sb-profile-name">مدير النظام</div>
-      <div class="sb-profile-role">مسؤول المنصة</div>
-    </div>
-    <div class="sb-status-dot" title="متصل"></div>
-  </div>
 
   {{-- ── NAVIGATION ── --}}
   <nav class="sb-nav">
@@ -437,20 +304,6 @@ aside.sidebar .sb-foot .logout-btn:hover .nav-icon svg {
     </a>
 
     <div class="sb-section">إدارة الأنشطة</div>
-
-    <a class="nav-item {{ $nav==='orders' ? 'active' : '' }}" id="nav-orders"
-       href="{{ route('orders') }}"
-       onclick="if(typeof showSection==='function'){showSection('orders');return false;}">
-      <div class="nav-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-             stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 11l3 3L22 4"/>
-          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
-        </svg>
-      </div>
-      الجمعيات والطلبات
-      <span class="nav-badge red" id="nb-reqs"></span>
-    </a>
 
     <a class="nav-item {{ $nav==='meetings' ? 'active' : '' }}" id="nav-meetings"
        href="{{ route('meetings') }}">
@@ -476,6 +329,20 @@ aside.sidebar .sb-foot .logout-btn:hover .nav-icon svg {
         </svg>
       </div>
       فرص التطوع
+      <span class="nav-badge red" id="nb-reqs"></span>
+    </a>
+
+    <a class="nav-item {{ $nav==='orders' ? 'active' : '' }}" id="nav-orders"
+       href="{{ route('orders') }}"
+       onclick="if(typeof showSection==='function'){showSection('orders');return false;}">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 11l3 3L22 4"/>
+          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+        </svg>
+      </div>
+      الطلبات
     </a>
 
     <a class="nav-item {{ $nav==='projects' ? 'active' : '' }}" id="nav-projects"
@@ -489,7 +356,22 @@ aside.sidebar .sb-foot .logout-btn:hover .nav-icon svg {
           <line x1="12" y1="22.08" x2="12" y2="12"/>
         </svg>
       </div>
-      المشاريع المشتركة
+      المشاريع
+    </a>
+
+    <div class="sb-section">خدمات مبادرون</div>
+
+    <a class="nav-item {{ $nav==='services' ? 'active' : '' }}" id="nav-services"
+       href="#">
+      <div class="nav-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      طلبات الخدمات
     </a>
 
     <div class="sb-section">النظام</div>
@@ -499,11 +381,11 @@ aside.sidebar .sb-foot .logout-btn:hover .nav-icon svg {
       <div class="nav-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3"/>
-          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
         </svg>
       </div>
-      الإعدادات
+      الملف الشخصي
     </a>
 
   </nav>

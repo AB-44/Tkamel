@@ -22,37 +22,39 @@ body { font-family:'Tajawal',sans-serif; background:var(--fog); color:var(--ink)
 
 /* ══ SIDEBAR ══ */
 .sidebar {
-  width:256px; flex-shrink:0; background:var(--ink);
+  width:240px; flex-shrink:0; background:#0f1923;
   display:flex; flex-direction:column;
   position:fixed; top:0; right:0; bottom:0; z-index:50;
-  border-left:1px solid rgba(255,255,255,.04);
+  border-left:1px solid rgba(255,255,255,.06);
 }
 .sidebar::before {
   content:''; position:absolute; inset:0; pointer-events:none;
   background:
-    radial-gradient(ellipse 80% 40% at 50% 0%,rgba(42,184,208,.08) 0%,transparent 60%),
-    radial-gradient(ellipse 60% 40% at 50% 100%,rgba(46,170,120,.06) 0%,transparent 60%);
+    radial-gradient(ellipse 80% 40% at 50% 0%,rgba(42,184,208,.06) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 40% at 50% 100%,rgba(46,170,120,.04) 0%,transparent 60%);
 }
-.sb-logo { padding:22px 20px 18px; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,.06); position:relative; z-index:1; }
+.sb-logo { padding:24px 20px 20px; display:flex; align-items:center; justify-content:center; border-bottom:1px solid rgba(255,255,255,.06); position:relative; z-index:1; }
 .sb-logo img { width:32px; height:32px; filter:brightness(0) invert(1) drop-shadow(0 0 8px rgba(42,184,208,.8)); }
 .sb-logo span { font-size:1.35rem; font-weight:900; color:white; letter-spacing:-.5px; }
-.sb-nav { flex:1; padding:14px 10px; overflow-y:auto; position:relative; z-index:1; }
-.sb-section { font-size:.63rem; font-weight:800; color:rgba(255,255,255,.22); padding:14px 10px 5px; letter-spacing:2px; text-transform:uppercase; }
+.sb-nav { flex:1; padding:6px 8px; overflow-y:auto; position:relative; z-index:1; }
+.sb-section { font-size:.6rem; font-weight:700; color:rgba(255,255,255,.22); padding:14px 12px 4px; letter-spacing:1.5px; text-transform:uppercase; }
 .nav-item {
-  display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:10px; margin-bottom:1px;
-  font-size:.86rem; font-weight:600; color:rgba(255,255,255,.45);
-  cursor:pointer; transition:all .2s; text-decoration:none;
-  background:none; border:none; width:100%; font-family:inherit; text-align:right;
+  display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:8px; margin-bottom:1px;
+  font-size:.875rem; font-weight:500; color:rgba(255,255,255,.45);
+  cursor:pointer; transition:all .18s; text-decoration:none;
+  background:none; border:none; width:100%; font-family:inherit; text-align:right; position:relative;
 }
-.nav-item:hover { background:rgba(255,255,255,.05); color:rgba(255,255,255,.8); }
-.nav-item.active { background:linear-gradient(135deg,rgba(42,184,208,.16),rgba(46,170,120,.1)); color:#7de8f5; border:1px solid rgba(42,184,208,.18); }
-.nav-item svg { flex-shrink:0; width:16px; height:16px; opacity:.65; }
+.nav-item:hover { background:rgba(255,255,255,.06); color:rgba(255,255,255,.8); }
+.nav-item.active { background:linear-gradient(90deg,rgba(14,165,201,.25),rgba(14,165,201,.12)); color:#38d9f0; font-weight:700; }
+.nav-item.active::before { content:''; position:absolute; right:0; top:50%; transform:translateY(-50%); width:3px; height:60%; border-radius:3px 0 0 3px; background:#0ea5c9; }
+.nav-item svg { flex-shrink:0; width:16px; height:16px; opacity:.55; }
 .nav-item.active svg { opacity:1; }
-.nav-badge { margin-right:auto; background:rgba(42,184,208,.2); border-radius:20px; padding:1px 7px; font-size:.68rem; font-weight:700; color:var(--teal-glow); }
-.sb-foot { padding:12px 10px 16px; border-top:1px solid rgba(255,255,255,.05); position:relative; z-index:1; }
+.nav-item:hover svg { opacity:.85; }
+.nav-badge { margin-right:auto; background:rgba(14,165,201,.2); border:1px solid rgba(14,165,201,.3); border-radius:20px; padding:1px 7px; font-size:.63rem; font-weight:800; color:#38d9f0; }
+.sb-foot { padding:8px 8px 14px; border-top:1px solid rgba(255,255,255,.06); position:relative; z-index:1; }
 
 /* ══ MAIN ══ */
-.main, .main-wrapper { flex:1; min-width:0; margin-right:256px; width:calc(100vw - 256px); display:flex; flex-direction:column; min-height:100vh; overflow-x:hidden; }
+.main, .main-wrapper { flex:1; min-width:0; margin-right:240px; width:calc(100vw - 240px); display:flex; flex-direction:column; min-height:100vh; overflow-x:hidden; }
 
 /* TOPBAR */
 .topbar {

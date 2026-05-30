@@ -69,7 +69,7 @@ class ServiceRequestController extends Controller
                 'typeLabel' => $typeLabels[$req->service_type] ?? 'طلب خدمة',
                 'title'     => $req->title,
                 'details'   => $req->details,
-                'date'      => $req->preferred_date,
+                'date'      => $req->created_at ? $req->created_at->translatedFormat('d M Y') : null,
                 'budget'    => $req->budget,
                 'status'    => $this->normalizeStatus($req->status),
             ];

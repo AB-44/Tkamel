@@ -63,7 +63,7 @@ Route::middleware(AuthMiddleware::class)->group(function () {
 
         Route::get('/user/meetings',       [MeetingController::class, 'userIndex'])->name('user.meetings');
         Route::post('/user/meetings/{id}/attendance', [MeetingController::class, 'toggleAttendance'])->name('user.meetings.attendance');
-        Route::get('/user/orders',         fn() => redirect('/user/consulting#orders'))->name('user.orders');
+        Route::get('/user/my-requests', [App\Http\Controllers\User\MyRequestController::class, 'index'])->name('user.orders');
         Route::get('/user/joint-projects', fn() => redirect('/user/consulting#projects'))->name('user.joint-projects');
         Route::get('/user/settings',       fn() => view('user.settings'))->name('user.settings');
     });

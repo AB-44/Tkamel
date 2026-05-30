@@ -3,26 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title>تكامل | خدمات مبادرون</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/services.css') }}">
+    <link rel="stylesheet" href="<?php echo e(asset('css/dashboard.css')); ?>">
+    <link rel="stylesheet" href="<?php echo e(asset('css/services.css')); ?>">
 </head>
 
 <body class="dashboard-body">
-    @include('layouts.sidebar-user', ['activeNav' => 'services'])
+    <?php echo $__env->make('layouts.sidebar-user', ['activeNav' => 'services'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
     <div class="main">
-        @include('layouts.topbar', [
+        <?php echo $__env->make('layouts.topbar', [
             'title'    => 'خدمات مبادرون',
             'userName' => (Auth::user()?->full_name ?? session('association.name') ?? 'مستخدم'),
             'userAv'   => mb_substr((Auth::user()?->full_name ?? session('association.name') ?? 'مستخدم'), 0, 1),
             'showNotif' => true,
             'userRole' => Auth::check() ? (Auth::user()->role?->name === 'admin' ? 'مدير' : 'مستفيد') : 'جمعية معتمدة'
-        ])
-        @include('layouts.notif-panel-user')
+        ], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+        <?php echo $__env->make('layouts.notif-panel-user', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
         <div class="content services-content">
 
@@ -141,6 +141,7 @@
     <!-- TOAST -->
     <div class="toast" id="toast"><span id="t-icon"></span><span id="t-msg"></span></div>
 
-    <script src="{{ asset('js/services.js') }}"></script>
+    <script src="<?php echo e(asset('js/services.js')); ?>"></script>
 </body>
 </html>
+<?php /**PATH C:\xampp\htdocs\tkamel-abdullah1\tkamel\resources\views/user/services.blade.php ENDPATH**/ ?>

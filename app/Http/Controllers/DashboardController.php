@@ -57,41 +57,59 @@ class DashboardController extends Controller
             abort(401);
         }
 
+        $serviceReqs = \App\Models\ServiceRequest::query()
+            ->when($authUser,  fn ($q) => $q->where('user_id', $authUser->id))
+            ->when(!$authUser, fn ($q) => $q->where('association_id', $assocSession['id']))
+            ->get();
+
+        $oppReqs = OpportunityRequest::with(['opportunity', 'project'])
+            ->when($authUser,  fn ($q) => $q->where('user_id', $authUser->id))
+            ->when(!$authUser, fn ($q) => $q->where('association_id', $assocSession['id']))
+            ->get();
+
+        $totalReqs = $serviceReqs->count() + $oppReqs->count();
+        $pendingReqs = $serviceReqs->whereIn('status', ['pending', 'review'])->count() + $oppReqs->where('status', 'pending')->count();
+        $approvedReqs = $serviceReqs->whereIn('status', ['approved', 'completed'])->count() + $oppReqs->where('status', 'approved')->count();
+        $rejectedReqs = $serviceReqs->where('status', 'rejected')->count() + $oppReqs->where('status', 'rejected')->count();
+
         $stats = [
             'associations_count'   => Association::where('status', 'approved')->count(),
             'opportunities_count'  => Opportunity::count(),
             'projects_count'       => JointProject::count(),
-            'my_approved_requests' => OpportunityRequest::query()
-                ->where('status', 'approved')
-                ->when($authUser,  fn ($q) => $q->where('user_id', $authUser->id))
-                ->when(!$authUser, fn ($q) => $q->where('association_id', $assocSession['id']))
-                ->count(),
+            'upcoming_meetings_count' => $this->getUpcomingMeetings()->count(),
+            'total_requests'       => $totalReqs,
+            'pending_requests'     => $pendingReqs,
+            'approved_requests'    => $approvedReqs,
+            'rejected_requests'    => $rejectedReqs,
         ];
 
         $upcomingMeetings    = $this->getUpcomingMeetings();
         $activeProjects      = JointProject::orderBy('created_at', 'desc')->take(2)->get();
         $latestOpportunities = Opportunity::orderBy('created_at', 'desc')->take(2)->get();
 
-        $latestRequests = OpportunityRequest::with(['opportunity', 'project'])
-            ->when($authUser,  fn ($q) => $q->where('user_id', $authUser->id))
-            ->when(!$authUser, fn ($q) => $q->where('association_id', $assocSession['id']))
-            ->orderBy('created_at', 'desc')
-            ->take(2)
-            ->get()
-            ->map(function ($req) {
-                if ($req->project_id) {
-                    $req->title = $req->project->name ?? 'طلب مشروع محذوف';
-                    $req->sub = 'طلب انضمام لمشروع';
-                    $req->color = '#10b981'; // emerald
-                    $req->typeIcon = 'fa-diagram-project';
-                } else {
-                    $req->title = $req->opportunity->title ?? 'طلب فرصة محذوفة';
-                    $req->sub = 'طلب فرصة تطوع';
-                    $req->color = '#f59e0b'; // amber
-                    $req->typeIcon = 'fa-hand-holding-heart';
-                }
-                return $req;
-            });
+        $latestOppReqs = $oppReqs->map(function ($req) {
+            if ($req->project_id) {
+                $req->title = $req->project->name ?? 'طلب مشروع محذوف';
+                $req->sub = 'طلب انضمام لمشروع';
+                $req->color = '#10b981'; // emerald
+                $req->typeIcon = 'fa-diagram-project';
+            } else {
+                $req->title = $req->opportunity->title ?? 'طلب فرصة محذوفة';
+                $req->sub = 'طلب فرصة تطوع';
+                $req->color = '#f59e0b'; // amber
+                $req->typeIcon = 'fa-hand-holding-heart';
+            }
+            return $req;
+        });
+
+        $latestServiceReqs = $serviceReqs->map(function ($req) {
+            $req->sub = 'طلب خدمة مبادرون';
+            $req->color = '#3b82f6'; // blue
+            $req->typeIcon = 'fa-screwdriver-wrench';
+            return $req;
+        });
+
+        $latestRequests = $latestOppReqs->concat($latestServiceReqs)->sortByDesc('created_at')->take(4)->values();
 
         $viewerName = $authUser?->full_name ?? ($assocSession['name'] ?? '');
 

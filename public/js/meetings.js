@@ -16,9 +16,9 @@ let mType       = 'online';
 let typeFilter  = 'all';
 
 /* ─── helpers ─────────────────────────────────────────── */
-const CAT_BADGE = { خيرية:'b-xairy', ثقافية:'b-thaqafi', صحية:'b-seha', رياضية:'b-riyadhi', تنموية:'b-tanmawi', دينية:'b-dini' };
-const CAT_EMOJI = { خيرية:'🤝', ثقافية:'📚', صحية:'🌿', رياضية:'⚽', تنموية:'📈', دينية:'🕌' };
-const ACCENT    = { خيرية:'#2ab8d0', ثقافية:'#7b4ea6', صحية:'#2eaa78', رياضية:'#3a72b8', تنموية:'#e65100', دينية:'#7b4ea6' };
+function getCatObj(m) { return categories.find(c => c.name === m.cat) || {}; }
+function catIcon(m) { return getCatObj(m).icon || '📁'; }
+function catAccent(m) { return getCatObj(m).color || '#2ab8d0'; }
 
 function isCurrent(m) { 
   if (isCancelled(m)) return false;
@@ -45,21 +45,46 @@ function ini(n) { const p = (n||'').trim().split(' '); return p.length >= 2 ? (p
 function domainShort(u) { try { return new URL(u).hostname.replace('www.',''); } catch { return u; } }
 
 /* ─── API ─────────────────────────────────────────────── */
+async function loadCategories() {
+  try {
+    const res = await fetch('/api/association-categories', { headers: { 'Accept': 'application/json' } });
+    const data = await res.json();
+    categories = (data.categories || []).map(c => ({
+      id: String(c.id), name: c.name, icon: c.icon || '📁', color: c.color || '#2ab8d0'
+    }));
+    populateCategoryFilters();
+  } catch (e) { console.error('Failed to load categories', e); }
+}
+
+function populateCategoryFilters() {
+  const catFilter = document.getElementById('catFilter');
+  if (catFilter) {
+    catFilter.innerHTML = '<option value="">كل التصنيفات</option>' + categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+  }
+  const fCat = document.getElementById('f-cat');
+  if (fCat) {
+    fCat.innerHTML = '<option value="">اختر التصنيف</option>' + categories.map(c => `<option value="${c.name}">${c.icon} ${c.name}</option>`).join('');
+  }
+  const fInv = document.getElementById('f-invitation');
+  if (fInv) {
+    fInv.innerHTML = '<option value="عام">عام (جميع الجمعيات)</option>' + 
+                     '<option value="تقني">تقني (الجمعيات التقنية)</option>' + 
+                     '<option value="ميداني">ميداني (الجمعيات الميدانية)</option>' + 
+                     categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+  }
+}
+
 async function loadMeetings() {
   try {
     const res  = await fetch('/api/meetings', { credentials:'same-origin', headers:{ Accept:'application/json' } });
     if (!res.ok) throw new Error();
     const data = await res.json();
-    // API returns array directly
     meetings = Array.isArray(data) ? data : (data.meetings || []);
     renderAll();
   } catch {
     showToast('⚠️','فشل تحميل الاجتماعات');
   }
 }
-
-/* populateCategoryFilter: categories are static in blade HTML — no dynamic population needed */
-/* populateCategorySelectModal: f-cat is a static <select> with string values in blade HTML */
 
 /* ─── filter ──────────────────────────────────────────── */
 function getFiltered() {
@@ -101,7 +126,7 @@ function renderAll() {
 
 /* ─── full card ────────────────────────────────────────── */
 function fullCard(m) {
-  const acc    = ACCENT[m.cat] || '#2ab8d0';
+  const acc    = catAccent(m);
   const tLabel = m.type === 'online' ? '💻 عن بعد' : '📍 حضوري';
   const tBadge = m.type === 'online' ? 'b-online' : 'b-onsite';
   const linkRow = (m.type === 'online' && m.link)
@@ -113,7 +138,7 @@ function fullCard(m) {
       <div class="card-row1">
         <div class="card-badges">
           <span class="badge ${tBadge}">${tLabel}</span>
-          <span class="badge ${CAT_BADGE[m.cat]||'b-online'}">${m.catItem ? (m.catItem.icon || '📁') : (CAT_EMOJI[m.cat]||'📁')} ${m.cat}</span>
+          <span class="badge" style="background:${acc}15; color:${acc}; border:1px solid ${acc}40">${catIcon(m)} ${m.cat}</span>
         </div>
         <div class="card-actions">
           <button class="icn-btn attendees-btn" onclick="event.stopPropagation(); openAttendees(${m.id})" title="الحاضرون" style="position:relative">
@@ -144,7 +169,7 @@ function fullCard(m) {
 
 /* ─── compact row ──────────────────────────────────────── */
 function compactRow(m, isCnc) {
-  const acc = isCnc ? '#c62828' : (ACCENT[m.cat] || '#2ab8d0');
+  const acc = isCnc ? '#c62828' : catAccent(m);
   const ds  = fmtDateShort(m.date);
   const tLabel = m.type === 'online' ? '💻 عن بعد' : '📍 حضوري';
   const hasReport = !isCnc && m.report;
@@ -175,7 +200,7 @@ function compactRow(m, isCnc) {
       </div>
     </div>
     <div class="ci-badges">
-      <span class="badge ${CAT_BADGE[m.cat]||'b-online'}" style="font-size:0.65rem">${m.catItem ? (m.catItem.icon || '📁') : (CAT_EMOJI[m.cat]||'📁')} ${m.cat}</span>
+      <span class="badge" style="background:${acc}15; color:${acc}; border:1px solid ${acc}40; font-size:0.65rem">${catIcon(m)} ${m.cat}</span>
       ${isCnc ? '<span class="ci-cancelled-badge">🚫 ملغي</span>' : ''}
       ${hasReport ? '<span class="badge b-has-report" style="font-size:0.65rem">📋 تقرير</span>' : ''}
     </div>
@@ -300,11 +325,11 @@ async function saveMeeting() {
   const title     = (document.getElementById('f-title')?.value || '').trim();
   const presenter = (document.getElementById('f-presenter')?.value || '').trim();
   const date      = document.getElementById('f-date')?.value || '';
-  const category  = 'عام'; // Default category since it's not in the modal
-  const mType     = document.getElementById('tb-online')?.classList.contains('active') ? 'online' : 'onsite';
+  const category  = document.getElementById('f-cat')?.value;
+  const mType     = document.getElementById('tb-online')?.classList.contains('on-online') ? 'online' : 'onsite';
 
-  if (!title || !presenter || !date) { 
-    showToast('⚠️', 'يرجى ملء الحقول المطلوبة (العنوان، المتحدث، والتاريخ)'); 
+  if (!title || !presenter || !date || !category) { 
+    showToast('⚠️', 'يرجى ملء الحقول المطلوبة (العنوان، المتحدث، التاريخ، والتصنيف)'); 
     return; 
   }
 
@@ -424,7 +449,7 @@ function openDetails(id) {
   const isC = isCancelled(m);
 
   document.getElementById('d-title').textContent = m.title;
-  document.getElementById('d-cat').textContent   = (m.catItem ? (m.catItem.icon || '📁') : (CAT_EMOJI[m.cat]||'📁')) + ' ' + m.cat;
+  document.getElementById('d-cat').textContent   = catIcon(m) + ' ' + m.cat;
   document.getElementById('d-date').textContent  = fmtDate(m.date);
   document.getElementById('d-time').textContent  = m.time || '—';
   document.getElementById('d-banner-bg').className = 'det-banner-bg' + (isC ? ' red-bg' : isPast(m) ? ' grey-bg' : '');
@@ -598,5 +623,5 @@ function closeAttendees() { closeOv('ov-attendees'); attendeesId = null; }
 
 /* ─── INIT ─────────────────────────────────────────────── */
 setMType('online');
-loadMeetings();
+loadCategories().then(() => loadMeetings());
 setInterval(loadMeetings, 60000); // auto-refresh every 60s

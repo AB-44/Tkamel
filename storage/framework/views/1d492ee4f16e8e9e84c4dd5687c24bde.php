@@ -85,12 +85,6 @@
           <div class="tb-div"></div>
           <select class="filter-select" id="catFilter" onchange="renderAll()">
             <option value="">كل التصنيفات</option>
-            <option value="خيرية">خيرية واجتماعية</option>
-            <option value="ثقافية">ثقافية وتعليمية</option>
-            <option value="صحية">صحية وبيئية</option>
-            <option value="رياضية">رياضية وشبابية</option>
-            <option value="تنموية">تنموية واقتصادية</option>
-            <option value="دينية">دينية ودعوية</option>
           </select>
           <div class="tb-div"></div>
           <div class="chips">
@@ -180,6 +174,14 @@
           </div>
 
           <div class="fg">
+            <label>التصنيف <span class="req">*</span></label>
+            <div class="fld">
+              <span class="fld-icon"><i class="fa-solid fa-folder" style="font-size:.75rem"></i></span>
+              <select id="f-cat"><option value="">اختر التصنيف</option></select>
+            </div>
+          </div>
+
+          <div class="fg">
             <label>المتحدث الرئيسي <span class="req">*</span></label>
             <div class="fld">
               <span class="fld-icon"><i class="fa-solid fa-microphone" style="font-size:.75rem"></i></span>
@@ -241,14 +243,6 @@
                 <span class="fld-icon"><i class="fa-solid fa-paper-plane" style="font-size:.72rem"></i></span>
                 <select id="f-invitation">
                   <option value="عام">عام (جميع الجمعيات)</option>
-                  <option value="تقني">تقني (الجمعيات التقنية)</option>
-                  <option value="ميداني">ميداني (الجمعيات الميدانية)</option>
-                  <option value="خيرية">خيرية واجتماعية</option>
-                  <option value="ثقافية">ثقافية وتعليمية</option>
-                  <option value="صحية">صحية وبيئية</option>
-                  <option value="رياضية">رياضية وشبابية</option>
-                  <option value="تنموية">تنموية واقتصادية</option>
-                  <option value="دينية">دينية ودعوية</option>
                 </select>
               </div>
             </div>

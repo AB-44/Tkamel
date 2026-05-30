@@ -18,23 +18,26 @@ class MeetingController extends Controller
     public function index()
     {
         // ── Auto-filter by association category ───────────────────────────────
-        $categoryFilter = null;
-        if (!Auth::check() && session()->has('association')) {
-            $assocCategory = session('association')['category'] ?? null;
-            if ($assocCategory) {
-                // Since meetings use string categories now, we just match the name
-                $categoryFilter = $assocCategory;
-            }
+        $assocCategory = null;
+        if (session()->has('association')) {
+            $assocCategory = session('association')['category'] ?? session('association.category') ?? null;
         }
 
         $query = Meeting::orderBy('date_time', 'asc');
 
-        // Filter by the association's category (includes all statuses: active, cancelled, completed)
-        if ($categoryFilter) {
-            $query->where('category', $categoryFilter);
+        // Show meetings where invitation_direction is 'عام' or matches the association's category
+        // If no category (admin or regular user), show all
+        if ($assocCategory) {
+            $query->where(function ($q) use ($assocCategory) {
+                $q->where('invitation_direction', 'عام')
+                  ->orWhere('invitation_direction', $assocCategory)
+                  ->orWhereNull('invitation_direction');
+            });
         }
 
         $meetings = $query->get();
+
+
 
         // Detect who is logged in: regular user or association via session
         $attendingIds = [];

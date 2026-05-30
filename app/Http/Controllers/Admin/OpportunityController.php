@@ -188,12 +188,20 @@ class OpportunityController extends Controller
     public function apply(Request $request, $id)
     {
         $opportunity = Opportunity::findOrFail($id);
-        $user = Auth::user();
+        
+        $userId = Auth::check() ? Auth::id() : null;
+        $assocId = (!Auth::check() && session()->has('association')) ? session('association.id') : null;
+
+        if (!$userId && !$assocId) {
+            return response()->json(['success' => false, 'message' => 'يجب تسجيل الدخول لتقديم طلب']);
+        }
 
         // Prevent duplicate requests
-        $existing = OpportunityRequest::where('opportunity_id', $id)
-            ->where('user_id', $user->id)
-            ->first();
+        $query = OpportunityRequest::where('opportunity_id', $id);
+        if ($userId) $query->where('user_id', $userId);
+        if ($assocId) $query->where('association_id', $assocId);
+        
+        $existing = $query->first();
 
         if ($existing) {
             return response()->json([
@@ -204,19 +212,21 @@ class OpportunityController extends Controller
 
         $opportunityRequest = OpportunityRequest::create([
             'opportunity_id' => $id,
-            'user_id'        => $user->id,
-            'association_id' => null,
+            'user_id'        => $userId,
+            'association_id' => $assocId,
             'status'         => 'pending',
             'notes'          => $request->input('notes'),
         ]);
 
         // Notify admin(s)
         $admins = User::whereHas('role', fn($q) => $q->where('name', 'admin'))->get();
+        $applicantName = Auth::check() ? Auth::user()->full_name : session('association.name', 'جمعية');
+        
         foreach ($admins as $admin) {
             Notification::create([
                 'user_id'      => $admin->id,
                 'title'        => 'طلب تطوع جديد',
-                'body'         => 'قدّم ' . $user->full_name . ' طلبًا للانضمام إلى فرصة التطوع: «' . $opportunity->title . '»',
+                'body'         => 'قدّم ' . $applicantName . ' طلبًا للانضمام إلى فرصة التطوع: «' . $opportunity->title . '»',
                 'type'         => 'volunteer_request',
                 'is_read'      => false,
                 'related_id'   => $opportunity->id,
@@ -234,12 +244,20 @@ class OpportunityController extends Controller
     /** Return the authenticated user's own opportunity requests */
     public function myRequests()
     {
-        $user = Auth::user();
+        $userId = Auth::check() ? Auth::id() : null;
+        $assocId = (!Auth::check() && session()->has('association')) ? session('association.id') : null;
 
-        $myReqs = OpportunityRequest::where('user_id', $user->id)
-            ->with('opportunity')
-            ->latest()
-            ->get()
+        $query = OpportunityRequest::with('opportunity')->latest();
+        
+        if ($userId) {
+            $query->where('user_id', $userId);
+        } elseif ($assocId) {
+            $query->where('association_id', $assocId);
+        } else {
+            return response()->json(['requests' => []]);
+        }
+
+        $myReqs = $query->get()
             ->map(fn($r) => [
                 'id'     => $r->id,
                 'oppId'  => $r->opportunity_id,

@@ -62,23 +62,26 @@ const STATUS_MAP = {
 async function loadAll() {
   try {
     const isUser = document.querySelector('.readonly-notice') || window.location.pathname.includes('/user/');
-    if (isUser) {
-      try {
-        const reqs = await apiFetch('/api/my-project-requests');
-        myProjRequests = reqs.requests || [];
-      } catch(e) {
-        myProjRequests = [];
-      }
-    }
-
     const params = new URLSearchParams();
     if (_activeCat !== 'all') params.append('category_id', _activeCat);
     if (_searchQ)             params.append('search', _searchQ);
 
-    const [projData, catData] = await Promise.all([
+    const promises = [
       apiFetch('/api/joint-projects?' + params.toString()),
-      apiFetch('/api/association-categories'),
-    ]);
+      apiFetch('/api/association-categories')
+    ];
+
+    if (isUser) {
+      promises.push(apiFetch('/api/my-project-requests').catch(() => ({ requests: [] })));
+    }
+
+    const results = await Promise.all(promises);
+    const projData = results[0];
+    const catData  = results[1];
+    
+    if (isUser) {
+      myProjRequests = results[2]?.requests || [];
+    }
 
     _projects   = projData.projects || [];
     _categories = catData.categories || [];
