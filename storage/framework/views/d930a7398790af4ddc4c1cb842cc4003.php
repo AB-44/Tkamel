@@ -123,7 +123,7 @@
     <div class="main">
 
       <!-- TOPBAR -->
-      <?php echo $__env->make('layouts.topbar', ['title' => 'فرص التطوع', 'userName' => (Auth::user()?->full_name ?? session('association.name') ?? 'مستخدم'), 'userAv' => mb_substr((Auth::user()?->full_name ?? session('association.name') ?? 'مستخدم'), 0, 1), 'showNotif' => true, 'userRole' => '<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(245,158,11,.12);color:#b45309;border:1px solid rgba(245,158,11,.3);border-radius:20px;padding:2px 9px;font-size:.7rem;font-weight:700"><i class="fa-solid fa-eye" style="font-size:.6rem"></i> عرض فقط</span>'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+      <?php echo $__env->make('layouts.topbar', ['title' => 'فرص التطوع', 'userName' => (Auth::user()?->full_name ?? session('association.name') ?? 'مستخدم'), 'userAv' => mb_substr((Auth::user()?->full_name ?? session('association.name') ?? 'مستخدم'), 0, 1), 'showNotif' => true], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
       <?php echo $__env->make('layouts.notif-panel-user', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
 
@@ -135,7 +135,7 @@
           <div class="page-hd">
             <div>
               <div class="ph-title">فرص التطوع</div>
-              <div class="ph-sub">تصفح الفرص المتاحة — <span style="color:#b45309;font-weight:700">وضع العرض فقط</span></div>
+              <div class="ph-sub">تصفح الفرص المتاحة</div>
             </div>
           </div>
 
@@ -146,10 +146,6 @@
             <div class="stat-card" style="--sc:var(--purple)"><div class="s-icon" style="background:rgba(123,78,166,0.1)"><i class="fa-solid fa-tag"></i></div><div><span class="s-num" id="st-cats">0</span><span class="s-lbl">التصنيفات</span></div></div>
           </div>
 
-          <div class="readonly-notice">
-            <i class="fa-solid fa-circle-info"></i>
-            أنت في وضع العرض فقط. يمكنك تقديم طلب على الفرص المتاحة.
-          </div>
 
           <div class="tabs" style="margin-bottom:16px;">
             <button class="tab on" data-opp-t="available" onclick="setOppTab('available')"><i class="fa-solid fa-star"></i>الفرص المتاحة<span class="n" id="n-opp-avail">0</span></button>
@@ -351,7 +347,7 @@
             <div class="ph">
               <div>
                 <h1>المشاريع المشتركة</h1>
-                <p>عرض المشاريع — <span style="color:#b45309;font-weight:700">وضع العرض فقط</span></p>
+                <p>عرض المشاريع المشتركة</p>
               </div>
               
             </div>

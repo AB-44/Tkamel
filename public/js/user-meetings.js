@@ -301,10 +301,38 @@ function openDetails(id) {
         jb.style.display = (m.type === 'online' && m.link && isCur) ? '' : 'none';
     }
 
-    // Attend button
+    // Attend button + navigate button
     const aw = document.getElementById('d-attend-wrap');
     if (aw) aw.style.display = (isCur && !isC) ? '' : 'none';
     updateAttendBtn();
+
+    // Navigate button — opens location URL (onsite) or meeting link (online)
+    const navBtn   = document.getElementById('btn-navigate');
+    const navIcon  = document.getElementById('btn-navigate-icon');
+    const navLabel = document.getElementById('btn-navigate-label');
+    if (navBtn && isCur && !isC) {
+        if (m.type === 'onsite') {
+            // Show location button only if location_url or location text exists
+            const dest = m.location_url || (m.location ? 'https://www.google.com/maps/search/' + encodeURIComponent(m.location) : null);
+            if (dest) {
+                navBtn.style.display = '';
+                navBtn.dataset.url   = dest;
+                if (navIcon)  navIcon.textContent  = '📍';
+                if (navLabel) navLabel.textContent = 'الموقع';
+            } else {
+                navBtn.style.display = 'none';
+            }
+        } else if (m.type === 'online' && m.link) {
+            navBtn.style.display = '';
+            navBtn.dataset.url   = m.link;
+            if (navIcon)  navIcon.textContent  = '💻';
+            if (navLabel) navLabel.textContent = 'انضم للاجتماع';
+        } else {
+            navBtn.style.display = 'none';
+        }
+    } else if (navBtn) {
+        navBtn.style.display = 'none';
+    }
 
     openOv('ov-details');
 }
@@ -355,6 +383,11 @@ async function doToggle(id) {
 function joinMeeting() {
     const m = meetings.find(x => x.id === viewingId);
     if (m && m.link) window.open(m.link, '_blank');
+}
+
+function navigateMeeting() {
+    const btn = document.getElementById('btn-navigate');
+    if (btn && btn.dataset.url) window.open(btn.dataset.url, '_blank');
 }
 
 /* ── MODAL UTILS ── */

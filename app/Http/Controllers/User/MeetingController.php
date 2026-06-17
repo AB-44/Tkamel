@@ -73,6 +73,7 @@ class MeetingController extends Controller
                 'time'         => \Carbon\Carbon::parse($m->date_time)->format('H:i'),
                 'end_time'     => $m->end_date_time ? \Carbon\Carbon::parse($m->end_date_time)->format('H:i') : '',
                 'location'     => $m->location ?? '',
+                'location_url' => $m->location_url ?? '',
                 'link'         => $m->link ?? '',
                 'presenter'    => $m->main_speaker ?? 'مقدم الاجتماع',
                 'notes'        => $m->description ?? '',

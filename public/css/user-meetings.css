@@ -493,15 +493,40 @@ body {
 /* ATTEND SECTION IN MODAL */
 .det-attend-wrap { margin-bottom:14px; }
 
+.det-action-row {
+  display:flex; gap:10px; align-items:stretch;
+}
+
 .btn-attend {
-  width:100%; padding:12px 20px;
+  flex:1; padding:11px 16px;
   background:linear-gradient(135deg,var(--teal-deep) 0%,var(--teal) 50%,var(--teal-glow) 100%);
   color:white; border:none; border-radius:12px;
-  font-family:'Tajawal',sans-serif; font-size:0.9rem; font-weight:800;
+  font-family:'Tajawal',sans-serif; font-size:0.85rem; font-weight:800;
   cursor:pointer; transition:all 0.22s;
   box-shadow:0 4px 18px rgba(7,28,45,0.3);
+  white-space:nowrap;
 }
 .btn-attend:hover { transform:translateY(-2px); box-shadow:0 8px 26px rgba(42,184,208,0.5); filter:brightness(1.05); }
+
+.btn-attend.att {
+  background:rgba(13,148,136,0.08);
+  color:var(--green);
+  border:1.5px solid rgba(13,148,136,0.3);
+  box-shadow:none;
+}
+.btn-attend.att:hover { background:rgba(13,148,136,0.15); transform:none; box-shadow:none; }
+
+.btn-navigate {
+  flex:1; padding:11px 16px;
+  display:inline-flex; align-items:center; justify-content:center; gap:7px;
+  background:linear-gradient(135deg,#1a3a5c 0%,#1d6fa4 60%,#2ab8d0 100%);
+  color:white; border:none; border-radius:12px;
+  font-family:'Tajawal',sans-serif; font-size:0.85rem; font-weight:800;
+  cursor:pointer; transition:all 0.22s;
+  box-shadow:0 4px 18px rgba(7,28,45,0.25);
+  white-space:nowrap;
+}
+.btn-navigate:hover { transform:translateY(-2px); box-shadow:0 8px 26px rgba(29,111,164,0.5); filter:brightness(1.08); }
 
 .btn-attending-modal {
   background:rgba(13,148,136,0.08) !important;
@@ -551,14 +576,7 @@ body {
 }
 .toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
 
-/* Attended state for attend button in modal */
-.btn-attend.att {
-  background:rgba(13,148,136,0.08);
-  color:var(--green);
-  border:1.5px solid rgba(13,148,136,0.3);
-  box-shadow:none;
-}
-.btn-attend.att:hover { background:rgba(13,148,136,0.15); transform:none; box-shadow:none; }
+/* (btn-attend.att already defined above) */
 
 /* Join button inside modal link cell */
 .join-btn {

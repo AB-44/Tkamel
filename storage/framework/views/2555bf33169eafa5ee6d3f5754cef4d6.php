@@ -117,8 +117,6 @@
   <?php echo $__env->make('layouts.topbar', [
     'title'    => 'الإعدادات',
     'crumb'    => 'الإعدادات',
-    'userName' => Auth::user()->full_name ?? 'مستخدم',
-    'userAv'   => mb_substr(Auth::user()->full_name ?? 'م', 0, 1),
     'showNotif' => true,
   ], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
   <?php echo $__env->make('layouts.notif-panel-user', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>

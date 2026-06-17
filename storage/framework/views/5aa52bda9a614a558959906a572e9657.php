@@ -178,9 +178,15 @@
           <div class="det-cancel" id="d-cancel-reason"></div>
         </div>
 
-        <!-- زر الحضور (للاجتماعات القادمة فقط) -->
+        <!-- أزرار الحضور والانتقال (للاجتماعات القادمة فقط) -->
         <div id="d-attend-wrap" class="det-attend-wrap">
-          <button class="btn-attend" id="btn-attend" onclick="toggleAttend()"></button>
+          <div class="det-action-row">
+            <button class="btn-attend" id="btn-attend" onclick="toggleAttend()"></button>
+            <button class="btn-navigate" id="btn-navigate" style="display:none" onclick="navigateMeeting()">
+              <span id="btn-navigate-icon"></span>
+              <span id="btn-navigate-label"></span>
+            </button>
+          </div>
         </div>
       </div>
       <div class="det-ft">

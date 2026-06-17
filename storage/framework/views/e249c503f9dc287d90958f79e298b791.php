@@ -1,8 +1,8 @@
 
 <?php
   $authUser = \Illuminate\Support\Facades\Auth::user();
-  $resolvedName = $authUser?->full_name ?? ($userName ?? 'مبادرون');
-  $resolvedRole = $userRole ?? 'مسؤول المنصة';
+  $resolvedName = $authUser?->full_name ?? ($userName ?? session('association.name') ?? 'مبادرون');
+  $resolvedRole = $userRole ?? (session()->has('association') && !$authUser ? 'جمعية معتمدة' : 'مسؤول المنصة');
   $resolvedAvatarHtml = null;
   if ($authUser && !empty($authUser->avatar_path)) {
     $resolvedAvatarHtml = '<img src="' . e(asset('storage/' . $authUser->avatar_path)) . '" alt="avatar">';

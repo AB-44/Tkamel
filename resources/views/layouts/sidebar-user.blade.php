@@ -44,6 +44,9 @@ aside.sidebar .sb-logo {
   z-index: 1;
   flex-shrink: 0;
 }
+aside.sidebar .sb-logo img {
+  filter: brightness(0) invert(1) drop-shadow(0 0 8px rgba(42,184,208,0.8));
+}
 
 aside.sidebar .sb-logo-wordmark {
   font-size: 1.75rem;

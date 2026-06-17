@@ -351,6 +351,35 @@
     color: #64748b;
 }
 
+.mr-req-actions {
+    margin-right: 1.5rem;
+    padding-right: 1.5rem;
+    border-right: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+}
+
+.mr-btn-details {
+    background: linear-gradient(135deg, #0c6080, #0ea5c9);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.55rem 1.2rem;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.mr-btn-details:hover {
+    box-shadow: 0 4px 12px rgba(14, 165, 201, 0.3);
+    transform: translateY(-1px);
+}
+
 @media (max-width: 1024px) {
     .mr-stats-grid {
         grid-template-columns: repeat(2, 1fr);

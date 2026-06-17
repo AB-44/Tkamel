@@ -117,8 +117,6 @@
   @include('layouts.topbar', [
     'title'    => 'الإعدادات',
     'crumb'    => 'الإعدادات',
-    'userName' => Auth::user()->full_name ?? 'مستخدم',
-    'userAv'   => mb_substr(Auth::user()->full_name ?? 'م', 0, 1),
     'showNotif' => true,
   ])
   @include('layouts.notif-panel-user')
