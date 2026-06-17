@@ -125,21 +125,36 @@ class DashboardController extends Controller
 
     private function getUpcomingMeetings()
     {
-        if (Schema::hasColumn('meetings', 'date_time')) {
-            return Meeting::where('date_time', '>=', now())
-                ->orderBy('date_time', 'asc')
-                ->take(2)
-                ->get();
-        }
-
-        return Meeting::whereDate('date', '>=', now()->toDateString())
+        // First sync past meetings to ensure status is up to date
+        // Since we duplicate the sync logic, it's better to just query 'upcoming' and 'null' 
+        // and also ensure they haven't ended yet based on the date/time.
+        
+        $meetings = Meeting::where(function ($q) {
+                $q->where('status', 'upcoming')->orWhereNull('status');
+            })
             ->orderBy('date', 'asc')
             ->orderBy('time', 'asc')
-            ->take(2)
-            ->get()
-            ->map(function ($meeting) {
-                $meeting->date_time = trim(($meeting->date ?? '') . ' ' . ($meeting->time ?? '00:00'));
-                return $meeting;
-            });
+            ->get();
+
+        // Filter out past meetings using the exact logic the frontend uses (to avoid timezone mismatch if simple)
+        $now = now();
+        
+        return $meetings->filter(function ($m) use ($now) {
+            $endDate = $m->end_date ?: $m->date;
+            $endTime = $m->end_time ?: '23:59';
+            
+            // If the meeting has a specific time but no end time, we should consider it past if the start time has passed.
+            // But since duration was previously used, let's just use the start time + 1 hour as a fallback if end_time is missing,
+            // or just rely on the strict end_time.
+            if (!$m->end_time && $m->time) {
+                $endTime = \Carbon\Carbon::parse($m->time)->addHours(1)->format('H:i');
+            }
+            
+            $endDateTime = \Carbon\Carbon::parse($endDate . ' ' . $endTime);
+            return $endDateTime->greaterThanOrEqualTo($now);
+        })->take(2)->values()->map(function ($meeting) {
+            $meeting->date_time = trim(($meeting->date ?? '') . ' ' . ($meeting->time ?? '00:00'));
+            return $meeting;
+        });
     }
 }

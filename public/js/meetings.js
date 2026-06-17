@@ -22,12 +22,16 @@ function catAccent(m) { return getCatObj(m).color || '#2ab8d0'; }
 
 function isCurrent(m) { 
   if (isCancelled(m)) return false;
-  let endDt = new Date(m.date + 'T' + (m.end_time || '23:59') + ':00');
+  let ed = m.end_date || m.date;
+  let et = m.end_time || '23:59';
+  let endDt = new Date(ed + 'T' + et + ':00');
   return endDt >= new Date();
 }
 function isPast(m) { 
   if (isCancelled(m)) return false;
-  let endDt = new Date(m.date + 'T' + (m.end_time || '23:59') + ':00');
+  let ed = m.end_date || m.date;
+  let et = m.end_time || '23:59';
+  let endDt = new Date(ed + 'T' + et + ':00');
   return endDt < new Date();
 }
 function isCancelled(m){ return m.status === 'cancelled' || m.status === 'canceled'; }
@@ -272,8 +276,9 @@ function openEdit(id) {
   document.getElementById('f-title').value         = m.title;
   document.getElementById('f-presenter').value     = m.presenter || '';
   document.getElementById('f-date').value          = m.date || '';
+  if(document.getElementById('f-end-date')) document.getElementById('f-end-date').value = m.end_date || '';
   document.getElementById('f-time').value          = m.time || '';
-  document.getElementById('f-duration').value      = m.duration || '';
+  if(document.getElementById('f-end-time')) document.getElementById('f-end-time').value = m.end_time || '';
   document.getElementById('f-location').value      = m.location || '';
   document.getElementById('f-location-url').value  = m.location_url || '';
   document.getElementById('f-link').value          = m.link || '';
@@ -311,7 +316,7 @@ function openEdit(id) {
 }
 
 function clearForm() {
-  ['f-title','f-cat','f-presenter','f-date','f-time','f-duration','f-location','f-location-url',
+  ['f-title','f-cat','f-presenter','f-date','f-end-date','f-time','f-end-time','f-location','f-location-url',
    'f-link','f-notes','f-report-summary','f-report-decisions','f-report-attendees','f-report-actions'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
@@ -350,7 +355,8 @@ async function saveMeeting() {
     category,
     invitation_direction : document.getElementById('f-invitation')?.value || null,
     time                 : document.getElementById('f-time')?.value || null,
-    duration_minutes     : parseInt(document.getElementById('f-duration')?.value) || null,
+    end_date             : document.getElementById('f-end-date')?.value || null,
+    end_time             : document.getElementById('f-end-time')?.value || null,
     location             : (document.getElementById('f-location')?.value || '').trim() || null,
     location_url         : (document.getElementById('f-location-url')?.value || '').trim() || null,
     link                 : (document.getElementById('f-link')?.value || '').trim() || null,

@@ -28,12 +28,16 @@ const CAT_BADGE = {
 /* ── HELPERS ── */
 function isCurrent(m) {
     if (isCancelled(m)) return false;
-    let endDt = new Date(m.date + 'T' + (m.end_time || '23:59') + ':00');
+    let ed = m.end_date || m.date;
+    let et = m.end_time || '23:59';
+    let endDt = new Date(ed + 'T' + et + ':00');
     return endDt >= new Date();
 }
 function isPast(m) {
     if (isCancelled(m)) return false;
-    let endDt = new Date(m.date + 'T' + (m.end_time || '23:59') + ':00');
+    let ed = m.end_date || m.date;
+    let et = m.end_time || '23:59';
+    let endDt = new Date(ed + 'T' + et + ':00');
     return endDt < new Date();
 }
 function isCancelled(m) { return m.status === 'cancelled' || m.status === 'canceled'; }

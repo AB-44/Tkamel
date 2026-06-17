@@ -62,7 +62,9 @@ class MeetingController extends Controller
                     'cat'          => $meeting->category,
                     'presenter'    => $meeting->presenter ?? '—',
                     'date'         => $meeting->date,
+                    'end_date'     => $meeting->end_date,
                     'time'         => $meeting->time,
+                    'end_time'     => $meeting->end_time,
                     'duration'     => $meeting->duration_minutes,
                     'type'         => $meeting->type ?? 'onsite',
                     'direction'    => $meeting->direction,
@@ -109,11 +111,12 @@ class MeetingController extends Controller
             ->orderByDesc('date')
             ->orderByDesc('time');
 
-        // Show meetings where invitation_direction is 'عام' or matches the association's category
+        // Show meetings where invitation_direction is 'عام', matches category, or is null (defaults to all)
         if ($assocCategory) {
             $query->where(function ($q) use ($assocCategory) {
                 $q->where('invitation_direction', 'عام')
-                  ->orWhere('invitation_direction', $assocCategory);
+                  ->orWhere('invitation_direction', $assocCategory)
+                  ->orWhereNull('invitation_direction');
             });
         }
 
@@ -138,7 +141,9 @@ class MeetingController extends Controller
                 'cat'          => $meeting->category,
                 'presenter'    => $meeting->presenter ?? '—',
                 'date'         => $meeting->date,
+                'end_date'     => $meeting->end_date,
                 'time'         => $meeting->time,
+                'end_time'     => $meeting->end_time,
                 'duration'     => $meeting->duration_minutes,
                 'type'         => $meeting->type ?? 'onsite',
                 'direction'    => $meeting->direction,
@@ -204,7 +209,9 @@ class MeetingController extends Controller
                     'cat'          => $meeting->category,
                     'presenter'    => $meeting->presenter ?? '—',
                     'date'         => $meeting->date,
+                    'end_date'     => $meeting->end_date,
                     'time'         => $meeting->time,
+                    'end_time'     => $meeting->end_time,
                     'duration'     => $meeting->duration_minutes,
                     'type'         => $meeting->type ?? 'onsite',
                     'status'       => $status,
@@ -434,8 +441,9 @@ class MeetingController extends Controller
             'category'            => ['required', 'string', 'max:100'],
             'presenter'           => ['required', 'string', 'max:255'],
             'date'                => ['required', 'date'],
+            'end_date'            => ['nullable', 'date', 'after_or_equal:date'],
             'time'                => ['nullable', 'date_format:H:i'],
-            'duration_minutes'    => ['nullable', 'integer', 'min:1'],
+            'end_time'            => ['nullable', 'date_format:H:i'],
             'type'                => ['required', Rule::in(['online', 'onsite'])],
             'invitation_direction'=> ['nullable', 'string', 'max:100'],
             'link'                => ['nullable', 'url', 'max:1000'],
@@ -484,8 +492,9 @@ class MeetingController extends Controller
             'category'             => $validated['category'],
             'presenter'            => $validated['presenter'],
             'date'                 => $validated['date'],
+            'end_date'             => $validated['end_date'] ?? null,
             'time'                 => $validated['time'] ?? null,
-            'duration_minutes'     => $validated['duration_minutes'] ?? null,
+            'end_time'             => $validated['end_time'] ?? null,
             'invitation_direction' => $validated['invitation_direction'] ?? null,
             'type'                 => $validated['type'],
             'status'               => $validated['status'] ?? 'upcoming',
@@ -510,12 +519,43 @@ class MeetingController extends Controller
                 $q->where('status', 'upcoming')->orWhereNull('status');
             })
             ->where(function ($query) {
-                $query->whereDate('date', '<', now()->toDateString())
-                    ->orWhere(function ($sub) {
-                        $sub->whereDate('date', now()->toDateString())
-                            ->whereNotNull('time')
-                            ->where('time', '<', now()->format('H:i'));
-                    });
+                // If end_date is present, check against end_date and end_time
+                $query->where(function ($q1) {
+                    $q1->whereNotNull('end_date')
+                       ->where(function ($sub1) {
+                           $sub1->whereDate('end_date', '<', now()->toDateString())
+                                ->orWhere(function ($sub2) {
+                                    $sub2->whereDate('end_date', now()->toDateString())
+                                         ->whereNotNull('end_time')
+                                         ->where('end_time', '<', now()->format('H:i'));
+                                });
+                       });
+                })
+                // If end_date is NOT present but end_time IS present, use date and end_time
+                ->orWhere(function ($q2) {
+                    $q2->whereNull('end_date')
+                       ->whereNotNull('end_time')
+                       ->where(function ($sub1) {
+                           $sub1->whereDate('date', '<', now()->toDateString())
+                                ->orWhere(function ($sub2) {
+                                    $sub2->whereDate('date', now()->toDateString())
+                                         ->where('end_time', '<', now()->format('H:i'));
+                                });
+                       });
+                })
+                // If neither end_date nor end_time is present, fallback to date and time
+                ->orWhere(function ($q3) {
+                    $q3->whereNull('end_date')
+                       ->whereNull('end_time')
+                       ->where(function ($sub1) {
+                           $sub1->whereDate('date', '<', now()->toDateString())
+                                ->orWhere(function ($sub2) {
+                                    $sub2->whereDate('date', now()->toDateString())
+                                         ->whereNotNull('time')
+                                         ->where('time', '<', now()->format('H:i'));
+                                });
+                       });
+                });
             })
             ->update(['status' => 'past']);
 

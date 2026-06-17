@@ -1422,6 +1422,12 @@ body {
   gap: 14px;
 }
 
+.row4 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
 .form-divider {
   display: flex;
   align-items: center;
@@ -2002,7 +2008,62 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .row4 {
+    grid-template-columns: 1fr 1fr;
+  }
+
   .det-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ══ FORM SECTION HEADER ══ */
+.form-section-hd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: .82rem;
+  font-weight: 800;
+  color: var(--teal-deep, #071c2d);
+  margin: 20px 0 12px;
+  padding-bottom: 10px;
+  border-bottom: 1.5px solid rgba(14, 165, 201, 0.15);
+}
+
+.form-section-hd i {
+  color: var(--teal-glow, #0ea5c9);
+  font-size: .85rem;
+}
+
+/* push the button to the other side */
+.form-section-hd .btn-add-agenda {
+  margin-right: auto;
+}
+
+/* ══ ADD AGENDA BUTTON ══ */
+.btn-add-agenda {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, var(--teal-deep) 0%, var(--teal) 50%, var(--teal-glow) 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-family: 'Tajawal', sans-serif;
+  font-size: .78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+  line-height: 1;
+}
+
+.btn-add-agenda:hover {
+  box-shadow: 0 4px 12px rgba(14, 165, 201, .35);
+  transform: translateY(-1px);
+}
+
+.btn-add-agenda i {
+  font-size: .85rem;
+  color: #fff;
 }

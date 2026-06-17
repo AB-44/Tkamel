@@ -70,7 +70,7 @@
                         <div class="dw-title"><i class="fa-regular fa-calendar-check"></i> الاجتماعات القادمة</div>
                         <a href="<?php echo e(route('meetings')); ?>" class="dw-link">عرض الكل</a>
                     </div>
-                    <ul class="dw-list">
+                    <ul class="dw-list" id="dash-meetings-list">
                         <?php $__empty_1 = true; $__currentLoopData = $upcomingMeetings; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $meeting): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                             <li class="dw-item">
                                 <div class="dw-icon" style="background:rgba(29,111,164,0.12);color:var(--blue)">
@@ -348,8 +348,56 @@
             } catch(e) { /* silently fail */ }
         }
 
+        // Refresh upcoming meetings for the dashboard
+        async function refreshDashMeetings() {
+            try {
+                const res = await fetch('/api/meetings', {
+                    credentials: 'same-origin',
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!res.ok) return;
+                const data = await res.json();
+                
+                const list = document.getElementById('dash-meetings-list');
+                if (!list) return;
+
+                const upcoming = (Array.isArray(data) ? data : (data.meetings || []))
+                    .filter(m => m.status === 'upcoming' || !m.status)
+                    .slice(0, 5); // display max 5 meetings
+                
+                if (upcoming.length > 0) {
+                    list.innerHTML = upcoming.map(m => {
+                        const iconClass = m.type === 'online' ? 'fa-video' : 'fa-users';
+                        const catStr = m.cat ? `🏢 ${m.cat} • ` : '';
+                        const dateObj = new Date(m.date + 'T' + (m.time || '00:00') + ':00');
+                        
+                        // Basic format, could use Intl.DateTimeFormat
+                        const day = dateObj.toLocaleDateString('ar-SA', { day: 'numeric', month: 'short' });
+                        const time = m.time ? dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }) : '';
+                        
+                        return `
+                            <li class="dw-item">
+                                <div class="dw-icon" style="background:rgba(29,111,164,0.12);color:var(--blue)">
+                                    <i class="fa-solid ${iconClass}"></i>
+                                </div>
+                                <div class="dw-info">
+                                    <div class="dw-name">${m.title}</div>
+                                    <div class="dw-meta">${catStr}${day} ${time ? '• ' + time : ''}</div>
+                                </div>
+                                <a href="/meetings" class="dw-action">انضمام</a>
+                            </li>
+                        `;
+                    }).join('');
+                } else {
+                    list.innerHTML = '<p style="text-align:center; padding: 1rem; color: #888;">لا توجد اجتماعات قادمة</p>';
+                }
+            } catch(e) { /* silently fail */ }
+        }
+
         refreshDashPending();
+        refreshDashMeetings();
         setInterval(refreshDashPending, 30000);
+        setInterval(refreshDashMeetings, 30000); // refresh every 30s
     </script>
 
   <?php echo $__env->make('layouts.notif-panel', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>

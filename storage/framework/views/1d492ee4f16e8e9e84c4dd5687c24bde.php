@@ -199,26 +199,33 @@
 
           <div class="form-section-hd"><i class="fa-regular fa-clock"></i> التاريخ والوقت</div>
 
-          <div class="row3">
+          <div class="row4">
             <div class="fg" style="margin-bottom:0">
-              <label>تاريخ الاجتماع <span class="req">*</span></label>
+              <label style="font-size:.74rem">تاريخ البداية <span class="req">*</span></label>
               <div class="fld">
-                <span class="fld-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
-                <input type="date" id="f-date">
+                <span class="fld-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
+                <input type="date" id="f-date" style="font-size:.8rem;padding:8px 10px 8px 30px">
               </div>
             </div>
             <div class="fg" style="margin-bottom:0">
-              <label>وقت الاجتماع <span class="req">*</span></label>
+              <label style="font-size:.74rem">تاريخ الانتهاء <span style="font-size:.68rem;color:var(--muted)">(اختياري)</span></label>
               <div class="fld">
-                <span class="fld-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>
-                <input type="time" id="f-time">
+                <span class="fld-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M9 14l2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                <input type="date" id="f-end-date" style="font-size:.8rem;padding:8px 10px 8px 30px">
               </div>
             </div>
             <div class="fg" style="margin-bottom:0">
-              <label>مدة الاجتماع <span style="font-size:.68rem;color:var(--muted)">(بالدقائق)</span></label>
+              <label style="font-size:.74rem">وقت الاجتماع <span class="req">*</span></label>
               <div class="fld">
-                <span class="fld-icon"><i class="fa-regular fa-hourglass-half" style="font-size:.75rem"></i></span>
-                <input type="number" id="f-duration" placeholder="60" min="1" max="480">
+                <span class="fld-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>
+                <input type="time" id="f-time" style="font-size:.8rem;padding:8px 10px 8px 30px">
+              </div>
+            </div>
+            <div class="fg" style="margin-bottom:0">
+              <label style="font-size:.74rem">وقت الانتهاء <span style="font-size:.68rem;color:var(--muted)">(اختياري)</span></label>
+              <div class="fld">
+                <span class="fld-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/><path d="M16 16l-4-4" stroke-linecap="round"/></svg></span>
+                <input type="time" id="f-end-time" style="font-size:.8rem;padding:8px 10px 8px 30px">
               </div>
             </div>
           </div>
@@ -235,15 +242,6 @@
                 <button class="type-btn" id="tb-online" onclick="setMType('online')" type="button">
                   <i class="fa-solid fa-wifi" style="font-size:.8rem"></i> عن بعد
                 </button>
-              </div>
-            </div>
-            <div class="fg" style="margin-bottom:0">
-              <label>توجيه الدعوة <span class="req">*</span></label>
-              <div class="fld">
-                <span class="fld-icon"><i class="fa-solid fa-paper-plane" style="font-size:.72rem"></i></span>
-                <select id="f-invitation">
-                  <option value="عام">عام (جميع الجمعيات)</option>
-                </select>
               </div>
             </div>
           </div>
@@ -269,10 +267,10 @@
             </div>
           </div>
 
-          <div class="form-section-hd" style="margin-top:18px">
+          <div class="form-section-hd">
             <i class="fa-solid fa-list-check"></i> محاور الاجتماع
             <button type="button" class="btn-add-agenda" onclick="addAgendaItem()">
-              <i class="fa-solid fa-plus"></i> إضافة محور
+              <i class="fa-solid fa-circle-plus"></i> إضافة محور
             </button>
           </div>
 
