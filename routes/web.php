@@ -8,8 +8,8 @@ use Illuminate\Support\Facades\Route;
 
 // ── Guest routes ──────────────────────────────────────────────────────────────
 Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
-Route::post('/login', [LoginController::class, 'login'])->name('login.post');
-Route::post('/register', [RegisterController::class, 'register'])->name('register.post');
+Route::post('/login', [LoginController::class, 'login'])->name('login.post') ->middleware('throttle:login');
+Route::post('/register', [RegisterController::class, 'register'])->name('register.post')->middleware('throttle:register');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // ── Root redirect ─────────────────────────────────────────────────────────────
@@ -72,7 +72,7 @@ Route::middleware(AuthMiddleware::class)->group(function () {
 
 // ── JSON API endpoints — defined in web.php to share session middleware ───────
 Route::prefix('api')
-    ->middleware([AuthMiddleware::class])
+    ->middleware([AuthMiddleware::class,'throttle:api'])
     ->group(function () {
 
         // ── Shared GET Endpoints (Admin & Users) ──────────────────────────────
@@ -131,7 +131,7 @@ Route::prefix('api')
             );
 
             // User Profile Settings
-            Route::post('/user/settings/profile', [\App\Http\Controllers\User\SettingsController::class, 'updateProfile']);
+            Route::post('/user/settings/profile', [\App\Http\Controllers\User\SettingsController::class, 'updateProfile'])->middleware('throttle:upload');
             Route::post('/user/settings/password', [\App\Http\Controllers\User\SettingsController::class, 'updatePassword']);
             Route::post('/user/settings/avatar', [\App\Http\Controllers\User\SettingsController::class, 'uploadAvatar']);
         });
@@ -188,7 +188,7 @@ Route::prefix('api')
             // Settings / Profile
             Route::post('/settings/profile', [App\Http\Controllers\Admin\SettingsController::class, 'updateProfile']);
             Route::post('/settings/password', [App\Http\Controllers\Admin\SettingsController::class, 'updatePassword']);
-            Route::post('/settings/avatar', [App\Http\Controllers\Admin\SettingsController::class, 'uploadAvatar']);
+            Route::post('/settings/avatar', [App\Http\Controllers\Admin\SettingsController::class, 'uploadAvatar'])->middleware('throttle:upload');
 
             // Association Categories (Admin CRUD)
             Route::post(
