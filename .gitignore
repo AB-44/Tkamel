@@ -13,4 +13,6 @@
 /.idea
 /.vscode
 /vendor
-
+test*.php
+test*.html
+test*.txt
