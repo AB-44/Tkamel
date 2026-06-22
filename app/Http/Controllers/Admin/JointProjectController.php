@@ -11,6 +11,7 @@ use App\Models\AssociationCategory;
 use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\Request;
+use App\Exceptions\UnauthorizedException;
 use Illuminate\Support\Facades\Auth;
 
 class JointProjectController extends Controller
@@ -329,7 +330,7 @@ class JointProjectController extends Controller
         $assocId = (!Auth::check() && session()->has('association')) ? session('association.id') : null;
 
         if (!$userId && !$assocId) {
-            return response()->json(['success' => false, 'message' => 'يجب تسجيل الدخول لتقديم طلب']);
+            throw new UnauthorizedException();
         }
 
         // Prevent duplicate requests

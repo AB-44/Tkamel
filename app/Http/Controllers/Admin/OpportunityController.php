@@ -12,6 +12,7 @@ use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Exceptions\UnauthorizedException;
 
 class OpportunityController extends Controller
 {
@@ -171,7 +172,7 @@ class OpportunityController extends Controller
         $assocId = (!Auth::check() && session()->has('association')) ? session('association.id') : null;
 
         if (!$userId && !$assocId) {
-            return response()->json(['success' => false, 'message' => 'يجب تسجيل الدخول لتقديم طلب']);
+            throw new UnauthorizedException();
         }
 
         // Prevent duplicate requests

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\ServiceRequest;
 use App\Models\OpportunityRequest;
+use App\Exceptions\UnauthorizedException;
 
 class MyRequestController extends Controller
 {
@@ -16,7 +17,7 @@ class MyRequestController extends Controller
         $assocSession = session('association');
 
         if (!$authUser && !$assocSession) {
-            abort(401);
+            throw new UnauthorizedException();
         }
 
         $serviceReqs = ServiceRequest::query()

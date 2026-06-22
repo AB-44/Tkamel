@@ -133,7 +133,7 @@ Route::prefix('api')
             // User Profile Settings
             Route::post('/user/settings/profile', [\App\Http\Controllers\User\SettingsController::class, 'updateProfile'])->middleware('throttle:upload');
             Route::post('/user/settings/password', [\App\Http\Controllers\User\SettingsController::class, 'updatePassword']);
-            Route::post('/user/settings/avatar', [\App\Http\Controllers\User\SettingsController::class, 'uploadAvatar']);
+            Route::post('/user/settings/avatar', [\App\Http\Controllers\User\SettingsController::class, 'uploadAvatar'])->middleware('throttle:upload');
         });
 
         // ── Admin-Only Endpoints ──────────────────────────────────────────────

@@ -12,6 +12,22 @@ const SECTION_META = {
 
 let _initializedSections = new Set();
 
+/* ── منع تسابق الطلبات عند التنقل السريع بين الأقسام ──
+   كل تبديل سريع يلغي مؤقت التحميل السابق ويبدأ مؤقتًا جديدًا،
+   فلا يُنفَّذ التحميل الفعلي إلا بعد استقرار المستخدم على قسم واحد
+   لمدة قصيرة. هذا يمنع وصول استجابات قديمة (stale responses)
+   بترتيب عشوائي وتسبّبها في اختفاء/فلاش البيانات. */
+let _sectionLoadTimer = null;
+let _loadGeneration = 0;
+function _scheduleSectionLoad(fn, delay = 180) {
+  const myGen = ++_loadGeneration;
+  clearTimeout(_sectionLoadTimer);
+  _sectionLoadTimer = setTimeout(() => {
+    /* تأكد أن هذا آخر طلب جدولة (أي لم يحدث تنقل أحدث منه) */
+    if (myGen === _loadGeneration) fn();
+  }, delay);
+}
+
 /* ── الدالة الرئيسية للتنقل ── */
 function showSection(key) {
   const meta = SECTION_META[key];
@@ -43,13 +59,14 @@ function showSection(key) {
     if (parent) parent.classList.remove('open');
   }
 
-  /* 6. تهيئة القسم عند أول زيارة */
+  /* 6. تهيئة القسم عند أول زيارة + تحديث البيانات عند كل زيارة
+        (مجدولة عبر مؤقت لتفادي تسابق الطلبات عند التنقل السريع) */
   if (!_initializedSections.has(key)) {
     _initializedSections.add(key);
-    _bootSection(key);
-  } else if (key === 'orders') {
-    // Always re-fetch live data when returning to orders tab
-    if (typeof loadAssociationRequests === 'function') loadAssociationRequests();
+    _scheduleSectionLoad(() => _bootSection(key));
+  } else {
+    // إعادة تحميل البيانات عند كل عودة للقسم لتجنب اختفاء البيانات
+    _scheduleSectionLoad(() => _refreshSection(key));
   }
 
   /* 7. تحديث URL hash للسماح بزر الرجوع */
@@ -66,13 +83,36 @@ function _bootSection(key) {
       if (typeof updateStats  === 'function') updateStats();
       break;
     case 'meetings':
-      if (typeof initMeetings === 'function') initMeetings();
+      if (typeof loadMeetings === 'function') loadMeetings();
       break;
     case 'orders':
       if (typeof initOrders   === 'function') initOrders();
       break;
     case 'projects':
-      if (typeof initProjects === 'function') initProjects();
+      if (typeof loadAll === 'function') loadAll();
+      break;
+  }
+}
+
+/* ── تحديث البيانات عند العودة للقسم (لمنع اختفاء البيانات) ── */
+function _refreshSection(key) {
+  switch (key) {
+    case 'volunteer':
+      // إعادة جلب الفرص والطلبات عند العودة لضمان البيانات محدّثة
+      if (typeof fetchOpportunities === 'function') fetchOpportunities();
+      if (typeof fetchRequests      === 'function') fetchRequests();
+      break;
+    case 'orders':
+      // إعادة جلب طلبات الجمعيات عند العودة
+      if (typeof loadAssociationRequests === 'function') loadAssociationRequests();
+      break;
+    case 'meetings':
+      // إعادة جلب الاجتماعات عند العودة
+      if (typeof loadMeetings === 'function') loadMeetings();
+      break;
+    case 'projects':
+      // إعادة جلب المشاريع عند العودة
+      if (typeof loadAll === 'function') loadAll();
       break;
   }
 }

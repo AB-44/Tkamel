@@ -10,6 +10,7 @@ use App\Models\Opportunity;
 use App\Models\JointProject;
 use App\Models\Meeting;
 use App\Models\OpportunityRequest;
+use App\Exceptions\UnauthorizedException;
 
 class DashboardController extends Controller
 {
@@ -54,7 +55,7 @@ class DashboardController extends Controller
         $assocSession = session('association');
 
         if (!$authUser && !$assocSession) {
-            abort(401);
+            throw new UnauthorizedException();
         }
 
         $serviceReqs = \App\Models\ServiceRequest::query()

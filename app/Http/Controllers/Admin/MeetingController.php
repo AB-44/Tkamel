@@ -14,6 +14,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
+use App\Exceptions\UnauthorizedException;
 
 class MeetingController extends Controller
 {
@@ -376,7 +377,7 @@ class MeetingController extends Controller
             }
         }
 
-        return response()->json(['message' => 'غير مصرح'], 401);
+        throw new UnauthorizedException();
     }
 
     /**

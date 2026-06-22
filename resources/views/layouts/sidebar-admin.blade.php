@@ -172,6 +172,17 @@ aside.sidebar .nav-item.active::before {
   background: #0ea5c9;
 }
 
+/* Meetings nav item uses the turquoise/border style */
+aside.sidebar #nav-meetings.active {
+  background: linear-gradient(135deg, rgba(42,184,208,0.16), rgba(46,170,120,0.1)) !important;
+  color: #7de8f5 !important;
+  border: 1px solid rgba(42,184,208,0.18) !important;
+}
+
+aside.sidebar #nav-meetings.active::before {
+  display: none;
+}
+
 /* ── NAV ICON ── */
 aside.sidebar .nav-icon {
   width: 20px;

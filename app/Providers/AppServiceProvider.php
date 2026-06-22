@@ -32,8 +32,12 @@ class AppServiceProvider extends ServiceProvider
         });
 
         //  كل نقاط /api/* (تستخدمها كل الجلسات بعد تسجيل الدخول)
+        //  رُفع الحد من 60 إلى 300 بالدقيقة لأن هذه لوحة تحكم داخلية
+        //  يفتح فيها كل تنقل بين الأقسام عدة طلبات GET متزامنة
+        //  (مثل loadAll في المشاريع التي تطلب 3 endpoints دفعة واحدة)،
+        //  والحد القديم كان يُستهلك بسرعة عند التنقل الطبيعي ويسبب 429.
         RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+            return Limit::perMinute(300)->by($request->user()?->id ?: $request->ip());
         });
             RateLimiter::for('upload', fn (Request $request) =>
             Limit::perMinute(5)->by($request->user()->id)
