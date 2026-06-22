@@ -29,7 +29,9 @@ return Application::configure(basePath: dirname(__DIR__))
                 ], 401);
             }
             return redirect()->route('login');
+
         });
+
 
         $exceptions->render(function (NotFoundException $e, $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
@@ -40,4 +42,34 @@ return Application::configure(basePath: dirname(__DIR__))
             }
             abort(404);
         });
+            $exceptions->report(function (\Throwable $e) {
+        if ($e instanceof \Illuminate\Auth\AuthenticationException ||
+            $e instanceof \Illuminate\Validation\ValidationException ||
+            $e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
+            return false;
+        }
+            \Illuminate\Support\Facades\Log::channel('daily')->critical(
+            'خطأ غير متوقع: ' . $e->getMessage(),
+            [
+                'exception' => get_class($e),
+                'file'      => $e->getFile(),
+                'line'      => $e->getLine(),
+                'url'       => request()->fullUrl(),
+                'user_id'   => auth()->id() ?? 'زائر',
+            ]
+        );
+    });
+    $exceptions->render(function (\Throwable $e, $request) {
+    // فقط الأخطاء اللي مو HTTP errors عادية
+    if (!$e instanceof \Symfony\Component\HttpKernel\Exception\HttpException) {
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'حدث خطأ في النظام، حاول مرة أخرى'
+            ], 500);
+        }
+        // لو طلب عادي (مو API) يروح لصفحة خطأ
+        return response()->view('errors.500', [], 500);
+    }
+});
     })->create();
