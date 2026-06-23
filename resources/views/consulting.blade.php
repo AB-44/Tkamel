@@ -146,7 +146,7 @@
             <div class="ph-actions">
               <button class="btn-primary" onclick="openAddOpp('global')">
                 <div class="btn-icon-wrap" style="background:rgba(255,255,255,0.22);color:white;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-weight:bold">+</div>
-                إضافة فرصة
+                نشر فرصة
               </button>
             </div>
           </div>
