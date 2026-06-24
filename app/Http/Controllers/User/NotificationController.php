@@ -103,4 +103,21 @@ class NotificationController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    /** Delete a single notification */
+    public function deleteOne($id)
+    {
+        [$userId, $associationId] = $this->resolveActorIds();
+
+        $query = Notification::where('id', $id);
+        if ($userId) {
+            $query->where('user_id', $userId);
+        } elseif ($associationId) {
+            $query->where('association_id', $associationId);
+        }
+
+        $query->delete();
+
+        return response()->json(['success' => true]);
+    }
 }

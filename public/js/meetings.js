@@ -629,5 +629,18 @@ function closeAttendees() { closeOv('ov-attendees'); attendeesId = null; }
 
 /* ─── INIT ─────────────────────────────────────────────── */
 setMType('online');
-loadCategories().then(() => loadMeetings());
+loadCategories().then(() => loadMeetings()).then(() => {
+  const urlParams = new URLSearchParams(window.location.search);
+  const reqIdParam = urlParams.get('req_id');
+  const typeParam = urlParams.get('type');
+  if (reqIdParam && typeParam === 'meeting_created') {
+    const targetMeeting = meetings.find(m => String(m.id) === String(reqIdParam));
+    if (targetMeeting) {
+      setTimeout(() => {
+        openDetails(targetMeeting.id);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }, 300);
+    }
+  }
+});
 setInterval(loadMeetings, 60000); // auto-refresh every 60s

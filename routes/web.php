@@ -129,6 +129,10 @@ Route::prefix('api')
                 '/user/notifications/clear-all',
                 [\App\Http\Controllers\User\NotificationController::class, 'clearAll']
             );
+            Route::delete(
+                '/user/notifications/{id}',
+                [\App\Http\Controllers\User\NotificationController::class, 'deleteOne']
+            );
 
             // User Profile Settings
             Route::post('/user/settings/profile', [\App\Http\Controllers\User\SettingsController::class, 'updateProfile'])->middleware('throttle:upload');
@@ -183,6 +187,10 @@ Route::prefix('api')
             Route::post(
                 '/notifications/clear-all',
                 [App\Http\Controllers\Admin\NotificationController::class, 'clearAll']
+            );
+            Route::delete(
+                '/notifications/{id}',
+                [App\Http\Controllers\Admin\NotificationController::class, 'deleteOne']
             );
 
             // Settings / Profile

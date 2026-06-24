@@ -1409,7 +1409,7 @@
   <script>
     window.AppRole = '{{ session("association") ? "association" : (Auth::check() && Auth::user()->role->name === "admin" ? "admin" : "user") }}';
     @if(session('association'))
-      window.AppApplicantName = '{{ session("association")["association_name"] ?? "" }}';
+      window.AppApplicantName = '{{ session("association.name") ?? "" }}';
       window.AppApplicantLabel = 'اسم الجمعية المتقدمة';
     @elseif(Auth::check())
       window.AppApplicantName = '{{ Auth::user()->full_name ?? Auth::user()->name ?? "" }}';

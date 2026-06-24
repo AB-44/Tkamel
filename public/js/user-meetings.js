@@ -420,3 +420,17 @@ document.addEventListener('keydown', e => {
 
 /* ── INIT ── */
 renderAll();
+
+// Auto-open specific meeting if req_id is present in URL
+const urlParams = new URLSearchParams(window.location.search);
+const reqIdParam = urlParams.get('req_id');
+const typeParam = urlParams.get('type');
+if (reqIdParam && typeParam === 'meeting_created') {
+    const targetMeeting = meetings.find(m => String(m.id) === String(reqIdParam));
+    if (targetMeeting) {
+        setTimeout(() => {
+            openDetails(targetMeeting.id);
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }, 300);
+    }
+}

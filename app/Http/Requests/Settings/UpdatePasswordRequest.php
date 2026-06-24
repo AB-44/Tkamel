@@ -12,7 +12,7 @@ class UpdatePasswordRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::check();
+        return Auth::check() || session()->has('association');
     }
 
     /**
@@ -21,6 +21,7 @@ class UpdatePasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'current_password' => ['required', 'string'],
             'new_password'     => ['required', 'string', 'min:8', 'max:255'],
             'confirm_password' => ['required', 'same:new_password'],
         ];
@@ -32,6 +33,7 @@ class UpdatePasswordRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'current_password.required' => 'كلمة المرور الحالية مطلوبة',
             'new_password.required'     => 'كلمة المرور الجديدة مطلوبة',
             'new_password.string'       => 'كلمة المرور يجب أن تكون نصاً',
             'new_password.min'          => 'كلمة المرور يجب ألا تقل عن 8 أحرف',

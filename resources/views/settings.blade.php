@@ -561,9 +561,6 @@
         <button class="stab active" onclick="switchTab('profile')" id="tab-profile" aria-selected="true">
           <i class="fa-regular fa-user"></i> الملف الشخصي
         </button>
-        <button class="stab" onclick="switchTab('notifications')" id="tab-notifications">
-          <i class="fa-regular fa-bell"></i> الإشعارات
-        </button>
         <button class="stab" onclick="switchTab('security')" id="tab-security">
           <i class="fa-solid fa-lock" style="font-size:.8rem"></i> الأمان
         </button>
@@ -631,76 +628,6 @@
           </div>
         </section>
 
-        {{-- ── Notifications ── --}}
-        <section class="settings-panel" id="panel-notifications">
-          <div class="panel-title">إعدادات الإشعارات</div>
-
-          <div class="notif-section-title">الإشعارات العامة</div>
-
-          <div class="toggle-row">
-            <div class="toggle-info">
-              <span class="toggle-label">إشعارات طلبات التسجيل</span>
-              <span class="toggle-sub">إشعار عند تقديم جمعية طلب تسجيل جديد</span>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" checked>
-              <span class="toggle-track"></span>
-            </label>
-          </div>
-
-          <div class="toggle-row">
-            <div class="toggle-info">
-              <span class="toggle-label">إشعارات طلبات الخدمة</span>
-              <span class="toggle-sub">إشعار عند ورود طلب خدمة جديد من مبادرون</span>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" checked>
-              <span class="toggle-track"></span>
-            </label>
-          </div>
-
-          <div class="toggle-row">
-            <div class="toggle-info">
-              <span class="toggle-label">إشعارات الاجتماعات</span>
-              <span class="toggle-sub">تذكير قبل موعد الاجتماع بساعة</span>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" checked>
-              <span class="toggle-track"></span>
-            </label>
-          </div>
-
-          <div class="notif-section-title" style="margin-top:1.5rem">قنوات الإشعار</div>
-
-          <div class="toggle-row">
-            <div class="toggle-info">
-              <span class="toggle-label">إشعارات البريد الإلكتروني</span>
-              <span class="toggle-sub">استلام الإشعارات على بريدك الإلكتروني</span>
-            </div>
-            <label class="toggle">
-              <input type="checkbox">
-              <span class="toggle-track"></span>
-            </label>
-          </div>
-
-          <div class="toggle-row">
-            <div class="toggle-info">
-              <span class="toggle-label">الإشعارات داخل المنصة</span>
-              <span class="toggle-sub">عرض الإشعارات في قائمة التنبيهات</span>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" checked>
-              <span class="toggle-track"></span>
-            </label>
-          </div>
-
-          <div class="panel-footer">
-            <button class="btn-save" onclick="saveChanges('notifications')">
-              <i class="fa-regular fa-floppy-disk"></i> حفظ التغييرات
-            </button>
-          </div>
-        </section>
-
         {{-- ── Security ── --}}
         <section class="settings-panel" id="panel-security">
           <div class="panel-title">إعدادات الأمان</div>
@@ -708,24 +635,25 @@
           <div class="form-grid">
             <div class="form-group full">
               <label class="form-label">كلمة المرور الحالية</label>
-              <input type="password" class="form-input" placeholder="أدخل كلمة المرور الحالية">
+              <div style="position: relative;">
+                <input type="password" class="form-input" id="old-pass" placeholder="أدخل كلمة المرور الحالية للتأكيد" autocomplete="new-password">
+                <i class="fa-regular fa-eye toggle-pass" onclick="togglePass('old-pass', this)" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #9ca3af;"></i>
+              </div>
             </div>
-            <div class="form-group">
+            <div class="form-group full">
               <label class="form-label">كلمة المرور الجديدة</label>
-              <input type="password" class="form-input" id="new-pass" placeholder="أدخل كلمة المرور الجديدة">
+              <div style="position: relative;">
+                <input type="password" class="form-input" id="new-pass" placeholder="أدخل كلمة المرور الجديدة" autocomplete="new-password">
+                <i class="fa-regular fa-eye toggle-pass" onclick="togglePass('new-pass', this)" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #9ca3af;"></i>
+              </div>
             </div>
-            <div class="form-group">
+            <div class="form-group full">
               <label class="form-label">تأكيد كلمة المرور الجديدة</label>
-              <input type="password" class="form-input" id="confirm-pass" placeholder="أعد إدخال كلمة المرور">
+              <div style="position: relative;">
+                <input type="password" class="form-input" id="confirm-pass" placeholder="أعد إدخال كلمة المرور" autocomplete="new-password">
+                <i class="fa-regular fa-eye toggle-pass" onclick="togglePass('confirm-pass', this)" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #9ca3af;"></i>
+              </div>
             </div>
-          </div>
-
-          <div class="twofa-box">
-            <div class="twofa-title">المصادقة الثنائية</div>
-            <div class="twofa-sub">أضف طبقة حماية إضافية لحسابك</div>
-            <button class="btn-twofa">
-              <i class="fa-solid fa-shield-halved"></i> تفعيل المصادقة الثنائية
-            </button>
           </div>
 
           <div class="panel-footer">
@@ -746,29 +674,6 @@
             </div>
             <label class="toggle">
               <input type="checkbox" id="dark-mode-toggle">
-              <span class="toggle-track"></span>
-            </label>
-          </div>
-
-          <div class="accent-row">
-            <div class="accent-label">لون التمييز</div>
-            <div class="accent-swatches">
-              <div class="swatch selected" style="background:#0d7f9f"    data-color="#0d7f9f"    title="أزرق مائي (الافتراضي)" onclick="selectSwatch(this)"></div>
-              <div class="swatch"          style="background:#7c3aed"    data-color="#7c3aed"    title="بنفسجي"               onclick="selectSwatch(this)"></div>
-              <div class="swatch"          style="background:#059669"    data-color="#059669"    title="أخضر"                 onclick="selectSwatch(this)"></div>
-              <div class="swatch"          style="background:#2563eb"    data-color="#2563eb"    title="أزرق"                 onclick="selectSwatch(this)"></div>
-              <div class="swatch"          style="background:#e11d48"    data-color="#e11d48"    title="أحمر وردي"            onclick="selectSwatch(this)"></div>
-              <div class="swatch"          style="background:#f59e0b"    data-color="#f59e0b"    title="ذهبي"                 onclick="selectSwatch(this)"></div>
-            </div>
-          </div>
-
-          <div class="toggle-row">
-            <div class="toggle-info">
-              <span class="toggle-label">الوضع المضغوط</span>
-              <span class="toggle-sub">تقليل المسافات والحشو لعرض أكثر كثافة</span>
-            </div>
-            <label class="toggle">
-              <input type="checkbox" id="compact-toggle">
               <span class="toggle-track"></span>
             </label>
           </div>
@@ -937,6 +842,7 @@
       }
 
       if (section === 'security') {
+        const oldPass = document.getElementById('old-pass')?.value || '';
         const newPass = document.getElementById('new-pass')?.value || '';
         const confirmPass = document.getElementById('confirm-pass')?.value || '';
         const res = await fetch('/api/settings/password', {
@@ -947,16 +853,18 @@
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
           },
           body: JSON.stringify({
+            current_password: oldPass,
             new_password: newPass,
             confirm_password: confirmPass,
           }),
         });
         const data = await res.json();
         if (!res.ok || data.success === false) {
-          const msg = data?.errors?.new_password?.[0] || data?.errors?.confirm_password?.[0] || data?.message || 'تعذر تحديث كلمة المرور';
+          const msg = data?.errors?.current_password?.[0] || data?.errors?.new_password?.[0] || data?.errors?.confirm_password?.[0] || data?.message || 'تعذر تحديث كلمة المرور';
           showToast(msg, 'error');
           return;
         }
+        document.getElementById('old-pass') && (document.getElementById('old-pass').value = '');
         document.getElementById('new-pass') && (document.getElementById('new-pass').value = '');
         document.getElementById('confirm-pass') && (document.getElementById('confirm-pass').value = '');
         showToast(data.message || msgs[section], 'success');
@@ -985,8 +893,25 @@
 
   /* ── URL hash tab activation on load ── */
   const hash = location.hash.replace('#', '');
-  const validTabs = ['profile','notifications','security','appearance','language'];
+  const validTabs = ['profile','security','appearance','language'];
   if (validTabs.includes(hash)) switchTab(hash);
+
+  function togglePass(id, iconEl) {
+    const el = document.getElementById(id);
+    if (el) {
+      if (el.type === 'password') {
+        el.type = 'text';
+        iconEl.classList.remove('fa-eye');
+        iconEl.classList.add('fa-eye-slash');
+        iconEl.style.color = '#0ea5c9';
+      } else {
+        el.type = 'password';
+        iconEl.classList.remove('fa-eye-slash');
+        iconEl.classList.add('fa-eye');
+        iconEl.style.color = '#9ca3af';
+      }
+    }
+  }
 </script>
 </body>
 </html>

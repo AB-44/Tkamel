@@ -13,7 +13,7 @@ class UpdateProfileRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::check();
+        return Auth::check() || session()->has('association');
     }
 
     /**
@@ -21,8 +21,22 @@ class UpdateProfileRequest extends FormRequest
      */
     public function rules(): array
     {
-        $userId = Auth::id();
+        if (session()->has('association')) {
+            $assocId = session('association')['id'];
+            return [
+                'full_name' => ['required', 'string', 'max:255'],
+                'email'     => [
+                    'required',
+                    'email',
+                    'max:255',
+                    Rule::unique('associations', 'email')->ignore($assocId),
+                ],
+                'phone' => ['nullable', 'string', 'max:30'],
+                'bio'   => ['nullable', 'string', 'max:5000'],
+            ];
+        }
 
+        $userId = Auth::id();
         return [
             'full_name' => ['required', 'string', 'max:255'],
             'email'     => [

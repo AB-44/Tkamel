@@ -357,6 +357,31 @@
             });
             statusFilter.addEventListener('change', (e) => { currentStatus = e.target.value; filterItems(); });
             searchInput.addEventListener('input', (e) => { currentQuery = e.target.value.toLowerCase(); filterItems(); });
+
+            // Auto-open request if req_id is in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const reqIdParam = urlParams.get('req_id');
+            const typeParam = urlParams.get('type');
+            if (reqIdParam) {
+                // Determine the correct category if possible
+                let cat = 'all';
+                if (typeParam === 'service_request_created' || typeParam === 'service_request_approved') cat = 'service';
+                else if (typeParam === 'opportunity_approved' || typeParam === 'opportunity_rejected') cat = 'opportunity';
+                else if (typeParam === 'project_join_approved' || typeParam === 'project_join_rejected') cat = 'project';
+                
+                if (cat !== 'all') {
+                    setTypeFilter(cat);
+                }
+                
+                const targetCard = Array.from(items).find(i => String(i.dataset.id) === String(reqIdParam));
+                if (targetCard) {
+                    setTimeout(() => {
+                        const btn = targetCard.querySelector('.mr-btn-details');
+                        if (btn) btn.click();
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                    }, 300);
+                }
+            }
         });
 
         /* ══════════════ MODAL LOGIC ══════════════ */

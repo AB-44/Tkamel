@@ -64,6 +64,10 @@ class SettingsController extends Controller
         $validated = $request->validated();
 
         $user = Auth::user();
+        if (!$user || !Hash::check($validated['current_password'], $user->password_hash)) {
+            return response()->json(['success' => false, 'errors' => ['current_password' => ['كلمة المرور الحالية غير صحيحة']]], 422);
+        }
+
         $user->password_hash = Hash::make($validated['new_password']);
         $user->save();
 

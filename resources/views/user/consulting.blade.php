@@ -466,7 +466,7 @@
   <script src="{{ asset('js/spa-nav.js') }}"></script>
   <script>
     window.AppRole = 'user';
-    window.AppApplicantName = '{{ Auth::user()?->full_name ?? "مستخدم" }}';
+    window.AppApplicantName = '{{ Auth::user()?->full_name ?? session("association.name") ?? "مستخدم" }}';
     window.AppApplicantLabel = 'اسم المتقدم';
 
     function showReadOnlyToast() {

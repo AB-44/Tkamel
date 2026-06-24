@@ -3,50 +3,16 @@
 <div id="notif-panel" class="notif-panel-container" style="display:none;">
   <!-- Header -->
   <div class="notif-header">
-    <div class="notif-header-title">
-      <i class="fa-regular fa-bell"></i> الإشعارات
-    </div>
+    <div class="notif-header-title">الإشعارات</div>
     <div style="display: flex; align-items: center; gap: 8px;">
-      <button onclick="window.clearAllNotifs()" style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'" title="مسح الإشعارات">
-        <i class="fa-solid fa-trash-can"></i> مسح
+      <button onclick="window.markAllRead()" style="background: none; border: none; color: #0ea5c9; font-size: 0.85rem; font-weight: 700; cursor: pointer; padding: 0;">
+        تحديد الكل كمقروء
       </button>
-      <div class="notif-header-badge" id="notif-new-count-badge-wrapper" style="display:none;">
-        <span id="notif-new-count-badge">0</span> جديد
-      </div>
-    </div>
-  </div>
-
-  <!-- Categories Filter -->
-  <div class="notif-filters">
-    <div class="notif-filter-item">
-      <span class="notif-filter-dot" style="background:#8b5cf6;"></span> طلب خدمة
-    </div>
-    <div class="notif-filter-item">
-      <span class="notif-filter-dot" style="background:#3b82f6;"></span> اجتماع
-    </div>
-    <div class="notif-filter-item">
-      <span class="notif-filter-dot" style="background:#10b981;"></span> موافقة
-    </div>
-    <div class="notif-filter-item">
-      <span class="notif-filter-dot" style="background:#f59e0b;"></span> رفض
     </div>
   </div>
 
   <div id="notif-list" class="notif-list-container">
     <div style="padding:48px 16px;text-align:center;color:#64748b;font-size:.9rem;font-weight:600;">لا توجد إشعارات</div>
-  </div>
-
-  <!-- Footer links -->
-  <div class="notif-footer">
-    <a href="{{ route('user.meetings') }}" class="notif-footer-link">
-       الاجتماعات <i class="fa-solid fa-chevron-left"></i>
-    </a>
-    <a href="/user/consulting" class="notif-footer-link">
-       الفرص <i class="fa-solid fa-chevron-left"></i>
-    </a>
-    <a href="/user/services" class="notif-footer-link" style="border-right: none;">
-       الخدمات <i class="fa-solid fa-chevron-left"></i>
-    </a>
   </div>
 </div>
 
@@ -54,98 +20,68 @@
   /* ── Panel Container ── */
   .notif-panel-container {
     flex-direction: column; position: fixed; top: 0; right: auto; left: auto;
-    width: 380px; max-height: 520px; background: #f8fafc;
-    border: none; border-radius: 16px;
+    width: 290px; max-height: 370px; background: #f8fafc;
+    border: none; border-radius: 12px;
     box-shadow: 0 20px 50px rgba(0,0,0,.15), 0 0 0 1px rgba(0,0,0,.05);
     z-index: 99999; overflow: hidden;
   }
 
   /* ── Header ── */
   .notif-header {
-    background: linear-gradient(to left, #6366f1, #0ea5c9);
-    padding: 18px 20px;
+    background: white;
+    padding: 10px 14px 8px;
     display: flex; justify-content: space-between; align-items: center;
-    color: white; flex-shrink: 0;
+    color: #0f172a; flex-shrink: 0;
+    border-bottom: 1px solid #f1f5f9;
   }
   .notif-header-title {
-    font-family: 'Tajawal', sans-serif; font-size: 1.15rem; font-weight: 800;
-    display: flex; gap: 8px; align-items: center;
+    font-family: 'Tajawal', sans-serif; font-size: 0.95rem; font-weight: 800;
   }
-  .notif-header-badge {
-    background: rgba(255,255,255,0.25);
-    padding: 4px 14px; border-radius: 20px;
-    font-size: 0.8rem; font-weight: 700;
-  }
-
-  /* ── Filters ── */
-  .notif-filters {
-    display: flex; padding: 14px 20px; background: white;
-    border-bottom: 1px solid #f1f5f9; gap: 16px;
-    justify-content: flex-end; font-size: 0.8rem; font-weight: 700; color: #64748b;
-    flex-shrink: 0;
-  }
-  .notif-filter-item {
-    display: flex; align-items: center; gap: 6px;
-  }
-  .notif-filter-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-  }
-
-  /* ── Footer ── */
-  .notif-footer {
-    display: flex; background: white; border-top: 1px solid #f1f5f9;
-    font-weight: 700; font-size: 0.9rem; color: #6366f1; flex-shrink: 0;
-  }
-  .notif-footer-link {
-    flex: 1; text-align: center; padding: 16px 4px;
-    border-right: 1px solid #f1f5f9; text-decoration: none; color: inherit;
-    display: flex; justify-content: center; align-items: center; gap: 6px;
-    transition: background .15s;
-  }
-  .notif-footer-link:hover { background: #f8fafc; color: #4f46e5; }
-  .notif-footer-link i { font-size: 0.75rem; }
 
   /* ── List Area ── */
   .notif-list-container {
-    overflow-y: auto; flex: 1; padding: 12px; display: flex; flex-direction: column; gap: 12px;
+    overflow-y: auto; flex: 1; padding: 6px; display: flex; flex-direction: column; gap: 6px;
   }
 
   /* ── Notification rows ── */
   .notif-card {
-    background: white; border-radius: 12px; padding: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,.04); border: 1px solid #f1f5f9;
+    background: white; border-radius: 8px; padding: 8px 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.02); border: 1px solid #f1f5f9;
     cursor: pointer; transition: all .2s; position: relative;
     display: flex; justify-content: space-between; align-items: flex-start;
   }
-  .notif-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,.06); transform: translateY(-1px); }
-  .notif-card.unread { border-right: 3px solid #6366f1; }
+  .notif-card:hover { border-color: #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,.06); transform: translateY(-1px); }
+  .notif-card.unread { border-right: 3px solid #f59e0b; background: #fffcf8; }
 
   .notif-card-right {
-    display: flex; gap: 12px; align-items: flex-start; max-width: 68%;
+    display: flex; gap: 8px; align-items: flex-start; width: 100%;
   }
   .notif-avatar {
-    width: 44px; height: 44px; border-radius: 50%;
+    width: 32px; height: 32px; border-radius: 7px;
     display: flex; align-items: center; justify-content: center;
-    color: white; font-size: 1.1rem; flex-shrink: 0;
+    font-size: 0.85rem; flex-shrink: 0;
   }
-  .notif-avatar.purple { background: #a855f7; }
-  .notif-avatar.blue   { background: #3b82f6; }
-  .notif-avatar.green  { background: #10b981; }
-  .notif-avatar.amber  { background: #f59e0b; }
+  .notif-avatar.purple { background: #f3e8ff; color: #a855f7; }
+  .notif-avatar.blue   { background: #eff6ff; color: #3b82f6; }
+  .notif-avatar.green  { background: #ecfdf5; color: #10b981; }
+  .notif-avatar.amber  { background: #fef3c7; color: #f59e0b; }
 
-  .notif-details { display: flex; flex-direction: column; gap: 2px; }
-  .notif-title { font-weight: 800; color: #0f172a; font-size: 0.9rem; line-height: 1.3; }
-  .notif-subtitle { color: #64748b; font-size: 0.8rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
-  .notif-time { color: #f59e0b; font-size: 0.75rem; margin-top: 4px; display: flex; gap: 4px; align-items: center; font-weight: 600; }
+  .notif-details { display: flex; flex-direction: column; gap: 1px; flex: 1; min-width: 0; }
+  .notif-title { font-weight: 800; color: #0f172a; font-size: 0.8rem; line-height: 1.3; }
+  .notif-subtitle { color: #64748b; font-size: 0.72rem; line-height: 1.4; margin-top: 2px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .notif-time { color: #9ca3af; font-size: 0.65rem; margin-top: 4px; font-weight: 600; }
 
-  .notif-card-left { flex-shrink: 0; }
-  .notif-badge {
-    padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; color: white;
+  /* X delete button */
+  .notif-delete-btn {
+    position: absolute; top: 6px; left: 6px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: transparent; border: none;
+    color: #cbd5e1; font-size: 0.75rem; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; transition: all 0.15s; padding: 0;
   }
-  .notif-badge.purple { background: #a855f7; }
-  .notif-badge.blue   { background: #3b82f6; }
-  .notif-badge.green  { background: #10b981; }
-  .notif-badge.amber  { background: #f59e0b; }
+  .notif-delete-btn:hover { background: #fee2e2; color: #ef4444; }
 
   /* ── Notification bell button ── */
   .notif-btn {
@@ -219,6 +155,7 @@
       const { colorClass, label, icon } = getCategoryConfig(n);
       return `
       <div class="notif-card ${n.is_read ? '' : 'unread'}" onclick="window._onNotifClick('${n.id}', ${n.is_read}, '${n.type}')">
+        <button class="notif-delete-btn" onclick="event.stopPropagation(); window._deleteNotif('${n.id}')" title="حذف">×</button>
         <div class="notif-card-right">
           <div class="notif-avatar ${colorClass}">
             ${icon}
@@ -226,12 +163,7 @@
           <div class="notif-details">
             <div class="notif-title">${n.title}</div>
             <div class="notif-subtitle">${n.body}</div>
-            <div class="notif-time"><i class="fa-regular fa-clock"></i> ${timeAgo(n.created_at)}</div>
-          </div>
-        </div>
-        <div class="notif-card-left">
-          <div class="notif-badge ${colorClass}">
-            ${label}
+            <div class="notif-time">${timeAgo(n.created_at)}</div>
           </div>
         </div>
       </div>`;
@@ -330,14 +262,14 @@
       renderNotifs();
     }
     // Navigate to the relevant page
+    const targetNotif = notifications.find(x => String(x.id) === String(id));
+    const reqId = targetNotif ? (targetNotif.related_id || '') : '';
+    const q = `?req_id=${reqId}&type=${type}`;
+
     if (type === 'meeting_created') {
-      window.location.href = '{{ route("user.meetings") }}';
-    } else if (type === 'opportunity_approved' || type === 'opportunity_rejected') {
-      window.location.href = '{{ route("user.consulting") }}';
-    } else if (type === 'project_join_approved' || type === 'project_join_rejected') {
-      window.location.href = '{{ route("user.consulting") }}';
+      window.location.href = '/user/meetings' + q;
     } else {
-      window.location.href = '{{ route("user.services") }}';
+      window.location.href = '/user/my-requests' + q;
     }
   };
 
@@ -348,6 +280,16 @@
     }).catch(() => {});
     notifications.forEach(n => n.is_read = true);
     updateBadge(0);
+    renderNotifs();
+  };
+
+  window._deleteNotif = async function(id) {
+    await fetch(`/api/user/notifications/${id}`, {
+      method: 'DELETE', credentials: 'same-origin',
+      headers: { 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' }
+    }).catch(() => {});
+    notifications = notifications.filter(x => String(x.id) !== String(id));
+    updateBadge(notifications.filter(x => !x.is_read).length);
     renderNotifs();
   };
 
