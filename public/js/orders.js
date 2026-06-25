@@ -95,6 +95,22 @@ async function loadAssociationRequests() {
     renderRequests(_allData);
     updateOrderStats();
     updateSidebarBadgesWithDb();
+
+    // Auto-open specific request if req_id is present in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const reqIdParam = urlParams.get('req_id');
+    const typeParam = urlParams.get('type');
+    if (reqIdParam && (!typeParam || typeParam === 'association_registration')) {
+      const targetReq = _allData.find(r => String(r._dbId) === String(reqIdParam));
+      if (targetReq) {
+        setTimeout(() => {
+          _activateTab('requests');
+          openRequestModal(targetReq);
+          window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+        }, 500);
+      }
+    }
+
   } catch(e) {}
 }
 
@@ -560,6 +576,26 @@ function filterAssocByCat(cat) {
 }
 
 // ===================== TABS =====================
+// Lightweight tab activation — switches visible tab WITHOUT re-loading data
+function _activateTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id)?.classList.add('active');
+  // Also activate the matching button
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    const onclick = b.getAttribute('onclick') || '';
+    if (onclick.includes(`'${id}'`) || onclick.includes(`"${id}"`)) b.classList.add('active');
+  });
+  // Swap stats grids
+  const grids = { 'requests':'stats-grid-requests', 'services':'stats-grid-services', 'my-associations':'stats-grid-associations', 'opp-requests':'stats-grid-opp-requests', 'proj-requests':'stats-grid-proj-requests' };
+  Object.values(grids).forEach(gid => { const el = document.getElementById(gid); if (el) el.style.display = 'none'; });
+  if (grids[id]) { const el = document.getElementById(grids[id]); if (el) el.style.display = ''; }
+  // Update page title
+  const titles = { 'requests':['صفحة الطلبات','إدارة طلبات إنشاء الحسابات'], 'services':['صفحة الخدمات','إدارة ومتابعة طلبات خدمات الجمعيات'], 'my-associations':['الجمعيات','إدارة كافة الجمعيات المضافة في النظام'], 'opp-requests':['طلبات فرص التطوع','مراجعة وإدارة طلبات التطوع المقدمة'], 'proj-requests':['طلبات المشاريع','مراجعة وإدارة طلبات الانضمام للمشاريع'] };
+  const t = titles[id];
+  if (t) { const te = document.getElementById('orders-page-title-text'); const se = document.getElementById('orders-page-sub'); if (te) te.textContent = t[0]; if (se) se.textContent = t[1]; }
+}
+
 function switchTab(id,btn) {
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -758,6 +794,21 @@ async function loadOppRequests() {
     if (cnt) cnt.textContent = pending > 0 ? pending : '';
     updateOppStats();
     renderOppReqs();
+
+    // Auto-switch to this tab if needed
+    const urlParams = new URLSearchParams(window.location.search);
+    const typeParam  = urlParams.get('type');
+    const reqIdParam = urlParams.get('req_id');
+    if (typeParam === 'opportunity' || typeParam === 'volunteer_request') {
+      setTimeout(() => {
+        _activateTab('opp-requests');
+        if (reqIdParam) {
+          const row = document.querySelector(`#opp-req-tbody tr[data-id='${reqIdParam}']`);
+          if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+      }, 500);
+    }
   } catch(e) { if (tbody) tbody.innerHTML = `<tr><td colspan="6">تعذّر التحميل</td></tr>`; }
 }
 
@@ -869,6 +920,21 @@ async function loadProjRequests() {
     if (cnt) cnt.textContent = pending > 0 ? pending : '';
     updateProjStats();
     renderProjReqs();
+
+    // Auto-switch to this tab if needed
+    const urlParams = new URLSearchParams(window.location.search);
+    const typeParam  = urlParams.get('type');
+    const reqIdParam = urlParams.get('req_id');
+    if (typeParam === 'project_join') {
+      setTimeout(() => {
+        _activateTab('proj-requests');
+        if (reqIdParam) {
+          const row = document.querySelector(`#proj-req-tbody tr[data-id='${reqIdParam}']`);
+          if (row) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+      }, 500);
+    }
   } catch(e) { if (tbody) tbody.innerHTML = `<tr><td colspan="5">تعذّر التحميل</td></tr>`; }
 }
 
@@ -973,12 +1039,22 @@ function initOrders() {
   loadMyAssociations();
   loadOppRequests();
   loadProjRequests();
-  
-  // Sync the UI to the default tab on page load
-  const defaultTabBtn = document.querySelector('.tab-btn[onclick*="my-associations"]');
-  if (defaultTabBtn) {
-    switchTab('my-associations', defaultTabBtn);
+
+  // If deep-linking via URL params, don't switch to default tab
+  // The individual load functions will handle switching to the correct tab
+  const urlParams = new URLSearchParams(window.location.search);
+  const reqIdParam = urlParams.get('req_id');
+  const typeParam  = urlParams.get('type');
+
+  if (!reqIdParam) {
+    // No deep-link — go to the default tab
+    const defaultTabBtn = document.querySelector('.tab-btn[onclick*="my-associations"]');
+    if (defaultTabBtn) {
+      switchTab('my-associations', defaultTabBtn);
+    }
   }
+  // else: let loadAssociationRequests / loadServiceRequests / loadOppRequests / loadProjRequests
+  // handle switchTab + openModal via their own setTimeout blocks
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1037,6 +1113,22 @@ async function loadServiceRequests() {
     renderSrTable();
     updateSrStats();
     updateServiceStats();
+
+    // Auto-open specific request if req_id is present in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const reqIdParam = urlParams.get('req_id');
+    const typeParam = urlParams.get('type');
+    if (reqIdParam && (typeParam === 'service_request' || typeParam === 'service_request_created')) {
+      const targetReq = allServiceReqs.find(r => String(r.id) === String(reqIdParam));
+      if (targetReq) {
+        setTimeout(() => {
+          _activateTab('services');
+          openSrModal(targetReq.id);
+          window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
+        }, 500);
+      }
+    }
+
   } catch (e) {
     if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="sr-empty">تعذّر الاتصال بالخادم</td></tr>`;
   }

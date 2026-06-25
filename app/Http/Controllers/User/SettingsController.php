@@ -35,19 +35,17 @@ class SettingsController extends Controller
 
     public function updateProfile(UpdateProfileRequest $request)
     {
-        $user = Auth::user();
         $validated = $request->validated();
 
-        $user->full_name = $validated['full_name'];
-        $user->email     = $validated['email'];
-        $user->phone     = $validated['phone'] ?? null;
-        $user->bio       = $validated['bio']   ?? null;
-        $user->save();
+        if (Auth::check()) {
+            $user = Auth::user();
+            $user->full_name = $validated['full_name'];
+            $user->email     = $validated['email'];
+            $user->phone     = $validated['phone'] ?? null;
+            $user->bio       = $validated['bio']   ?? null;
+            $user->save();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'تم حفظ بيانات الملف الشخصي',
-            'user'    => [
+            $responseData = [
                 'full_name'  => $user->full_name,
                 'email'      => $user->email,
                 'phone'      => $user->phone ?? null,
@@ -55,7 +53,38 @@ class SettingsController extends Controller
                 'avatar_url' => $user->avatar_path
                     ? asset('storage/' . $user->avatar_path)
                     : null,
-            ],
+            ];
+        } elseif (session()->has('association')) {
+            $assoc = \App\Models\Association::find(session('association')['id']);
+            if (!$assoc) {
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
+            $assoc->association_name = $validated['full_name'];
+            $assoc->email            = $validated['email'];
+            $assoc->phone            = $validated['phone'] ?? null;
+            $assoc->save();
+
+            // Update session data
+            $sessionData = session('association');
+            $sessionData['name'] = $assoc->association_name;
+            $sessionData['email'] = $assoc->email;
+            session(['association' => $sessionData]);
+
+            $responseData = [
+                'full_name'  => $assoc->association_name,
+                'email'      => $assoc->email,
+                'phone'      => $assoc->phone ?? null,
+                'bio'        => null,
+                'avatar_url' => $assoc->avatar ? asset('storage/' . $assoc->avatar) : null,
+            ];
+        } else {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم حفظ بيانات الملف الشخصي',
+            'user'    => $responseData,
         ]);
     }
 
@@ -63,9 +92,23 @@ class SettingsController extends Controller
     {
         $validated = $request->validated();
 
-        $user = Auth::user();
-        $user->password_hash = Hash::make($validated['new_password']);
-        $user->save();
+        if (Auth::check()) {
+            $user = Auth::user();
+            if (!Hash::check($validated['current_password'], $user->password_hash)) {
+                return response()->json(['success' => false, 'errors' => ['current_password' => ['كلمة المرور الحالية غير صحيحة']]], 422);
+            }
+            $user->password_hash = Hash::make($validated['new_password']);
+            $user->save();
+        } elseif (session()->has('association')) {
+            $assoc = \App\Models\Association::find(session('association')['id']);
+            if (!$assoc || !Hash::check($validated['current_password'], $assoc->password_hash)) {
+                return response()->json(['success' => false, 'errors' => ['current_password' => ['كلمة المرور الحالية غير صحيحة']]], 422);
+            }
+            $assoc->password_hash = Hash::make($validated['new_password']);
+            $assoc->save();
+        } else {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
 
         return response()->json([
             'success' => true,

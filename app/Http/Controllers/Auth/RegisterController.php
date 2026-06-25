@@ -116,7 +116,6 @@ class RegisterController extends Controller
 
         $notifications = $admins->map(fn($adminId) => [
             'user_id'      => $adminId,
-            'association_id' => $assoc->id,
             'title'        => $title,
             'body'         => $body,
             'type'         => 'association_registration',

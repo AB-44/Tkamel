@@ -50,4 +50,14 @@ class NotificationController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    /** Delete a single notification */
+    public function deleteOne($id)
+    {
+        Notification::where('id', $id)
+            ->where('user_id', Auth::user()->id)
+            ->delete();
+
+        return response()->json(['success' => true]);
+    }
 }
