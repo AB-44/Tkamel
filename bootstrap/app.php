@@ -44,10 +44,25 @@ return Application::configure(basePath: dirname(__DIR__))
         });
             $exceptions->report(function (\Throwable $e) {
         if ($e instanceof \Illuminate\Auth\AuthenticationException ||
-            $e instanceof \Illuminate\Validation\ValidationException ||
             $e instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException) {
             return false;
         }
+
+        // سجّل أخطاء Validation بشكل خاص (بدون stack trace)
+        if ($e instanceof \Illuminate\Validation\ValidationException) {
+            \Illuminate\Support\Facades\Log::channel('daily')->warning(
+                'خطأ تحقق (Validation): ' . $e->getMessage(),
+                [
+                    'errors'  => $e->errors(),
+                    'url'     => request()->fullUrl(),
+                    'method'  => request()->method(),
+                    'input'   => request()->except(['password', 'password_confirmation']),
+                    'user_id' => auth()->id() ?? 'زائر',
+                ]
+            );
+            return false; // لا تسجّل مرتين
+        }
+
             \Illuminate\Support\Facades\Log::channel('daily')->critical(
             'خطأ غير متوقع: ' . $e->getMessage(),
             [
@@ -69,7 +84,6 @@ return Application::configure(basePath: dirname(__DIR__))
             ], 500);
         }
         // لو طلب عادي (مو API) يروح لصفحة خطأ
-        return response()->view('errors.500', [], 500);
     }
 });
     })->create();

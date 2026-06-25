@@ -1233,6 +1233,7 @@ body {
   overflow-y: auto;
   box-shadow: 0 40px 100px rgba(7, 28, 45, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
   transform: translateY(30px) scale(0.96);
+  opacity: 0;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s;
   display: flex;
   flex-direction: column;
@@ -1249,11 +1250,11 @@ body {
   display: flex;
   align-items: center;
   gap: 14px;
-  position: sticky;
-  top: 0;
+  position: relative;
   background: var(--white);
   z-index: 5;
-  border-radius: 22px 22px 0 0;
+  border-radius: 24px 24px 0 0;
+  flex-shrink: 0;
 }
 
 .modal-hd-icon {
@@ -1307,6 +1308,8 @@ body {
 
 .modal-body {
   padding: 22px 26px;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .modal-ft {
@@ -1316,7 +1319,10 @@ body {
   justify-content: flex-end;
   border-top: 1px solid var(--border);
   background: var(--fog);
-  border-radius: 0 0 22px 22px;
+  border-radius: 0 0 24px 24px;
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
 }
 
 /* ── FORM ── */
@@ -1413,8 +1419,9 @@ body {
 
 .row4 {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 10px;
+  margin-bottom: 14px;
 }
 
 .form-divider {
@@ -2018,6 +2025,62 @@ body {
   padding-bottom: 10px;
   border-bottom: 1.5px solid rgba(14, 165, 201, 0.15);
 }
+
+/* ══ GRADIENT MODAL HEADER ══ */
+.modal-hd-gradient {
+  background: linear-gradient(135deg, var(--teal-deep), var(--teal)) !important;
+  border-bottom: none !important;
+  border-radius: 24px 24px 0 0 !important;
+  padding: 20px 22px !important;
+  flex-shrink: 0;
+}
+
+.modal-hd-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.modal-hd-icon-wrap {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: white;
+  flex-shrink: 0;
+}
+
+.modal-hd-gradient .modal-hd-title {
+  color: white !important;
+  font-size: 1.08rem;
+}
+
+.modal-hd-gradient .modal-hd-sub {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.modal-close-light {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
+  position: absolute;
+  top: 14px;
+  left: 14px;
+}
+
+.modal-close-light:hover {
+  background: rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
 
 .form-section-hd i {
   color: var(--teal-glow, #0ea5c9);

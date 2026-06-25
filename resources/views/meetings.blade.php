@@ -144,17 +144,17 @@
     <!-- ══ CREATE / EDIT MODAL ══ -->
     <div class="overlay" id="ov-create" onclick="bgClose(event,'ov-create')">
       <div class="modal" onclick="event.stopPropagation()">
-        <div class="modal-hd" style="background:linear-gradient(135deg,var(--teal-deep),var(--teal));padding:20px 24px;border-radius:18px 18px 0 0;position:relative">
-          <div style="display:flex;align-items:center;gap:12px">
-            <div style="width:40px;height:40px;border-radius:11px;background:rgba(255,255,255,0.18);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;font-size:1.2rem">
-              <i class="fa-regular fa-calendar-plus" id="mhd-icon" style="color:white"></i>
+        <div class="modal-hd modal-hd-gradient">
+          <div class="modal-hd-inner">
+            <div class="modal-hd-icon-wrap">
+              <i class="fa-regular fa-calendar-plus" id="mhd-icon"></i>
             </div>
             <div>
-              <div id="mhd-title" style="font-size:1.1rem;font-weight:900;color:white">إضافة اجتماع</div>
-              <div id="mhd-sub" style="font-size:0.78rem;color:rgba(255,255,255,0.75)">أدخل تفاصيل الاجتماع الجديد</div>
+              <div class="modal-hd-title" id="mhd-title">إنشاء اجتماع جديد</div>
+              <div class="modal-hd-sub" id="mhd-sub">أدخل تفاصيل الاجتماع الجديد</div>
             </div>
           </div>
-          <button class="modal-close" onclick="closeOv('ov-create')" style="position:absolute;top:14px;left:14px;background:rgba(255,255,255,0.18);border-color:rgba(255,255,255,0.3);color:white">
+          <button class="modal-close modal-close-light" onclick="closeOv('ov-create')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
               <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
             </svg>

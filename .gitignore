@@ -10,6 +10,7 @@
 .env
 .env.backup
 .env.production
+database/*.sqlite
 /.idea
 /.vscode
 /vendor
