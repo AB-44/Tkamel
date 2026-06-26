@@ -13,20 +13,59 @@
     <style>
         #nb-reqs:empty { display:none!important }
 
-        /* ── Service Requests Tab ── */
+        /* Service Requests */
         .sr-loading { padding:48px; text-align:center; color:#94a3b8; font-size:.92rem; }
         .sr-empty   { padding:48px; text-align:center; color:#94a3b8; font-size:.92rem; }
-
         #sr-filter-tabs { display:flex; gap:8px; flex-wrap:wrap; }
-        .sr-tab-btn {
-            padding:6px 18px; border-radius:20px; border:none; cursor:pointer;
-            font-family:inherit; font-size:.82rem; font-weight:700;
-            background:#f1f5f9; color:#64748b; transition:all .2s;
+        .sr-tab-btn { padding:6px 18px; border-radius:20px; border:none; cursor:pointer; font-family:inherit; font-size:.82rem; font-weight:700; background:#f1f5f9; color:#64748b; transition:all .2s; }
+        .sr-tab-btn.active { background:#0891b2; color:#fff; box-shadow:0 2px 8px rgba(8,145,178,.3); }
+
+        /* ═══ Category Cards (New Design) ═══ */
+        .categories-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px; margin-bottom:28px; }
+        .cat-card-new {
+            position:relative; background:#fff; border-radius:18px;
+            border:1.5px solid #e2e8f0; overflow:hidden; cursor:pointer;
+            transition:all .22s; box-shadow:0 2px 10px rgba(0,0,0,.05);
         }
-        .sr-tab-btn.active {
-            background:#0891b2; color:#fff;
-            box-shadow:0 2px 8px rgba(8,145,178,.3);
+        .cat-card-new:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,.1); border-color:var(--cc,#2ab8d0); }
+        .cat-card-new-accent { position:absolute; top:0; right:0; left:0; height:4px; background:var(--cc,#2ab8d0); }
+        .cat-card-new-header { display:flex; align-items:center; gap:12px; padding:16px 14px 10px; }
+        .cat-card-new-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        .cat-card-new-info { flex:1; min-width:0; }
+        .cat-card-new-name { font-weight:800; font-size:.95rem; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .cat-card-new-count { font-size:.76rem; color:#94a3b8; margin-top:2px; }
+        .cat-card-new-actions { display:flex; gap:6px; flex-shrink:0; }
+        .cat-card-new-bar { margin:0 14px; height:5px; border-radius:99px; background:#f1f5f9; }
+        .cat-card-new-fill { height:100%; border-radius:99px; transition:width .4s; }
+        .cat-card-new-footer { display:flex; justify-content:space-between; align-items:center; padding:8px 14px 12px; }
+        .cat-card-all {
+            background:linear-gradient(135deg,#0a5565,#2ab8d0) !important;
+            border-color:transparent !important;
         }
+        .cat-action-btn {
+            width:30px; height:30px; border-radius:8px; border:none; cursor:pointer;
+            display:flex; align-items:center; justify-content:center; font-size:.78rem;
+            transition:all .18s;
+        }
+        .cat-edit-btn { background:rgba(8,145,178,.1); color:#0891b2; }
+        .cat-edit-btn:hover { background:#0891b2; color:#fff; }
+        .cat-delete-btn { background:rgba(239,68,68,.1); color:#ef4444; }
+        .cat-delete-btn:hover { background:#ef4444; color:#fff; }
+
+        /* ═══ Association Items (New Design) ═══ */
+        .assoc-item-new {
+            display:flex; align-items:center; gap:14px; background:#fff;
+            border:1.5px solid #e2e8f0; border-radius:14px; padding:14px 16px;
+            transition:all .2s;
+        }
+        .assoc-item-new:hover { box-shadow:0 4px 16px rgba(0,0,0,.08); border-color:#c7d2fe; }
+        .assoc-item-avatar { width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:1.3rem; }
+        .assoc-item-info { flex:1; min-width:0; }
+        .assoc-item-name { font-weight:800; font-size:.9rem; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .assoc-item-cat { font-size:.75rem; color:#64748b; margin-top:2px; }
+        .assoc-item-email { font-size:.72rem; color:#94a3b8; margin-top:1px; direction:ltr; text-align:right; }
+        .assoc-item-meta { display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; }
+        .assoc-item-date { font-size:.72rem; color:#94a3b8; }
 
         /* SR status selection buttons inside modal */
         .sr-status-btn {
@@ -266,25 +305,24 @@
             </div>
         </div>
 
-        <!-- TAB: ASSOCIATIONS -->
         <div class="tab-content" id="tab-associations">
             <div class="section-head">
                 <h2><i class="fa-solid fa-layer-group" style="margin-left:8px;color:var(--teal)"></i> تصنيفات الجمعيات</h2>
-                <button class="btn btn-primary" onclick="openAddCategoryModal()">+ إضافة تصنيف</button>
+                <button class="btn btn-primary" onclick="openAddCategoryModal()"><i class="fa-solid fa-plus" style="margin-left:6px"></i> إضافة تصنيف</button>
             </div>
-            <div class="categories-grid" id="categoriesGrid"></div>
-            <div class="section-head">
-                <h2><i class="fa-solid fa-building" style="margin-left:8px;color:var(--teal)"></i> الجمعيات المسجلة</h2>
+            <div class="categories-grid" id="categoriesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;margin-bottom:28px"></div>
+
+            <div class="section-head" style="margin-top:8px">
+                <div id="assoc-section-head">
+                    <div style="font-weight:800;font-size:1.05rem;color:var(--text)"><i class="fa-solid fa-building" style="color:var(--teal);margin-left:8px"></i>الجمعيات المسجلة</div>
+                </div>
                 <div class="filter-group">
-                    <button class="btn btn-ghost" onclick="filterAssocByCat('')" style="border-width:2px">
-                        <i class="fas fa-th-large"></i> جميع التصنيفات
-                    </button>
-                    <select id="catFilter" onchange="filterAssoc()">
-                        <option value="">تصفية حسب...</option>
+                    <select id="catFilter" onchange="filterAssoc()" style="padding:7px 12px;border-radius:10px;border:1.5px solid #e2e8f0;font-family:inherit;font-size:.85rem">
+                        <option value="">كل التصنيفات</option>
                     </select>
                 </div>
             </div>
-            <div class="assoc-list" id="assocList"></div>
+            <div class="assoc-list" id="assocList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;margin-top:12px"></div>
         </div>
 
     </main>
@@ -349,26 +387,61 @@
 <div class="modal-overlay" id="add-cat-modal">
     <div class="modal" style="max-width:440px">
         <div class="modal-head">
-            <h3>إضافة تصنيف جديد</h3>
+            <h3><i class="fa-solid fa-layer-group" style="margin-left:8px;color:var(--teal)"></i> إضافة تصنيف جديد</h3>
             <button class="btn btn-ghost" onclick="closeAddCategoryModal()" style="padding:.3rem .7rem">✕</button>
         </div>
         <div class="modal-body" style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem">
             <div>
-                <label style="font-weight:700;font-size:.85rem;display:block;margin-bottom:.4rem">اسم التصنيف *</label>
-                <input id="cat-name-input" type="text" placeholder="مثال: تعليمية" style="width:100%;padding:.7rem 1rem;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:.9rem;outline:none">
+                <label style="font-weight:700;font-size:.85rem;display:block;margin-bottom:.4rem">اسم التصنيف <span style="color:#ef4444">*</span></label>
+                <input id="cat-name-input" type="text" placeholder="مثال: تعليمية" style="width:100%;padding:.7rem 1rem;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:.9rem;outline:none;box-sizing:border-box">
             </div>
             <div>
                 <label style="font-weight:700;font-size:.85rem;display:block;margin-bottom:.4rem">اللون</label>
                 <div style="display:flex;align-items:center;gap:10px">
-                    <input id="cat-color-input" type="color" value="#2ab8d0" style="width:40px;height:40px;border:none;border-radius:8px;cursor:pointer;padding:2px">
+                    <input id="cat-color-input" type="color" value="#2ab8d0" style="width:40px;height:40px;border:none;border-radius:8px;cursor:pointer;padding:2px" onchange="document.getElementById('cat-color-label').textContent=this.value.toUpperCase()">
                     <span id="cat-color-label" style="font-size:.85rem;color:var(--text-muted);font-weight:600">#2AB8D0</span>
                 </div>
+            </div>
+            <div>
+                <label style="font-weight:700;font-size:.85rem;display:block;margin-bottom:.4rem">الأيقونة (رمز تعبيري)</label>
+                <input id="cat-icon-add-input" type="text" placeholder="مثال: 🎓" style="width:100%;padding:.6rem 1rem;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:1.1rem;outline:none;box-sizing:border-box">
             </div>
             <div id="cat-emoji-grid" style="display:flex;flex-wrap:wrap;gap:8px"></div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-ghost"   onclick="closeAddCategoryModal()">إلغاء</button>
-            <button class="btn btn-primary" onclick="saveNewCategory()">حفظ التصنيف</button>
+            <button class="btn btn-ghost" onclick="closeAddCategoryModal()">إلغاء</button>
+            <button class="btn btn-primary" onclick="saveNewCategory()"><i class="fa-solid fa-floppy-disk" style="margin-left:6px"></i> حفظ التصنيف</button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Edit Category Modal ── -->
+<div class="modal-overlay" id="edit-cat-modal">
+    <div class="modal" style="max-width:440px">
+        <div class="modal-head" style="background:linear-gradient(135deg,#0a5565,#2ab8d0)">
+            <h3 style="color:#fff"><i class="fa-solid fa-pen-to-square" style="margin-left:8px"></i> تعديل التصنيف</h3>
+            <button class="btn" onclick="closeEditCategoryModal()" style="padding:.3rem .7rem;background:rgba(255,255,255,.2);color:#fff;border-color:transparent">✕</button>
+        </div>
+        <div class="modal-body" style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem">
+            <div>
+                <label style="font-weight:700;font-size:.85rem;display:block;margin-bottom:.4rem">اسم التصنيف <span style="color:#ef4444">*</span></label>
+                <input id="edit-cat-name-input" type="text" placeholder="اسم التصنيف" style="width:100%;padding:.7rem 1rem;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:.9rem;outline:none;box-sizing:border-box">
+            </div>
+            <div>
+                <label style="font-weight:700;font-size:.85rem;display:block;margin-bottom:.4rem">اللون</label>
+                <div style="display:flex;align-items:center;gap:10px">
+                    <input id="edit-cat-color-input" type="color" value="#2ab8d0" style="width:40px;height:40px;border:none;border-radius:8px;cursor:pointer;padding:2px" onchange="document.getElementById('edit-cat-color-label').textContent=this.value.toUpperCase()">
+                    <span id="edit-cat-color-label" style="font-size:.85rem;color:var(--text-muted);font-weight:600">#2AB8D0</span>
+                </div>
+            </div>
+            <div>
+                <label style="font-weight:700;font-size:.85rem;display:block;margin-bottom:.4rem">الأيقونة (رمز تعبيري)</label>
+                <input id="edit-cat-icon-input" type="text" placeholder="مثال: 🏫" style="width:100%;padding:.6rem 1rem;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:1.1rem;outline:none;box-sizing:border-box">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-ghost" onclick="closeEditCategoryModal()">إلغاء</button>
+            <button class="btn btn-primary" id="edit-cat-save-btn" onclick="saveEditCategory()"><i class="fa-solid fa-floppy-disk" style="margin-left:6px"></i> حفظ التعديلات</button>
         </div>
     </div>
 </div>
@@ -450,6 +523,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<script src="{{ asset('js/orders.js') }}"></script>
+<script src="{{ asset('js/orders.js') }}?v={{ time() }}"></script>
 </body>
 </html>

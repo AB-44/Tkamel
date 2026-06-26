@@ -34,19 +34,19 @@
             <!-- Stats row — matching consulting.css .stat-card style -->
             <div class="stats-row" style="margin-bottom:2rem">
                 <div class="stat-card" style="--sc:var(--teal-glow)">
-                    <div class="s-icon" style="background:rgba(42,184,208,0.1)">🏢</div>
+                    <div class="s-icon" style="background:rgba(42,184,208,0.1)"><i class="fa-regular fa-building"></i></div>
                     <div><span class="s-num" id="dash-assoc-count">{{ number_format($stats['associations_count']) }}</span><span class="s-lbl">إجمالي الجمعيات</span></div>
                 </div>
                 <div class="stat-card" style="--sc:var(--green)">
-                    <div class="s-icon" style="background:rgba(46,170,120,0.1)">💡</div>
+                    <div class="s-icon" style="background:rgba(46,170,120,0.1)"><i class="fa-regular fa-lightbulb"></i></div>
                     <div><span class="s-num">{{ number_format($stats['opportunities_count']) }}</span><span class="s-lbl">الفرص المتاحة</span></div>
                 </div>
                 <div class="stat-card" style="--sc:var(--blue)">
-                    <div class="s-icon" style="background:rgba(29,111,164,0.1)">🤝</div>
+                    <div class="s-icon" style="background:rgba(29,111,164,0.1)"><i class="fa-solid fa-handshake"></i></div>
                     <div><span class="s-num">{{ number_format($stats['projects_count']) }}</span><span class="s-lbl">المشاريع المشتركة</span></div>
                 </div>
                 <div class="stat-card" style="--sc:var(--purple)">
-                    <div class="s-icon" style="background:rgba(109,40,217,0.1)">✅</div>
+                    <div class="s-icon" style="background:rgba(109,40,217,0.1)"><i class="fa-regular fa-circle-check"></i></div>
                     <div><span class="s-num">{{ number_format($stats['completed_requests']) }}</span><span class="s-lbl">إجمالي الطلبات المنجزة</span></div>
                 </div>
             </div>

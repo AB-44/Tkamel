@@ -1,15 +1,8 @@
 // ===================== STATIC DATA (categories & associations tabs only) =====================
 const avatarColors = ['#1f6feb', '#2ea043', '#d29922', '#cf222e', '#8957e5', '#0891b2', '#b45309', '#0e7490'];
 
-const categories = [
-  { name: 'تعليمية', icon: '', color: '#1f6feb', bg: 'rgba(31,111,235,.15)', count: 8,  fill: 80  },
-  { name: 'خيرية',   icon: '', color: '#f85149', bg: 'rgba(207,34,46,.15)',  count: 14, fill: 100 },
-  { name: 'بيئية',   icon: '', color: '#3fb950', bg: 'rgba(46,160,67,.15)',  count: 5,  fill: 36  },
-  { name: 'صحية',    icon: '', color: '#58a6ff', bg: 'rgba(31,111,235,.12)', count: 7,  fill: 50  },
-  { name: 'رياضية',  icon: '', color: '#bc8cff', bg: 'rgba(137,87,229,.15)', count: 10, fill: 71  },
-  { name: 'ثقافية',  icon: '', color: '#e3b341', bg: 'rgba(210,153,34,.15)', count: 6,  fill: 43  },
-];
-const categoryEmojiChoices = [];
+let categories = [];
+const categoryEmojiChoices = ['🏫','🎓','🏥','⚕️','🌱','🤲','🤝','🕌','📚','♿','💻','🌍','🏠','💼','🚀','🎯'];
 let selectedCategoryEmoji = '';
 
 async function fetchOrderCategories() {
@@ -37,18 +30,6 @@ async function fetchOrderCategories() {
   }
 }
 
-const associations = [
-  { name: 'جمعية البر والتقوى',    cat: 'خيرية',   icon: '', bg: 'rgba(207,34,46,.15)',  members: 240, status: 'نشطة',   date: '2020-03-10' },
-  { name: 'جمعية رواد المعرفة',     cat: 'تعليمية', icon: '', bg: 'rgba(31,111,235,.15)', members: 185, status: 'نشطة',   date: '2019-07-22' },
-  { name: 'جمعية البيئة الخضراء',   cat: 'بيئية',   icon: '', bg: 'rgba(46,160,67,.15)',  members: 97,  status: 'نشطة',   date: '2021-01-15' },
-  { name: 'جمعية الأمل الصحي',      cat: 'صحية',    icon: '', bg: 'rgba(31,111,235,.12)', members: 312, status: 'نشطة',   date: '2018-11-05' },
-  { name: 'جمعية الرياضة للجميع',   cat: 'رياضية',  icon: '', bg: 'rgba(137,87,229,.15)', members: 420, status: 'نشطة',   date: '2017-04-30' },
-  { name: 'جمعية الثقافة والفنون',  cat: 'ثقافية',  icon: '', bg: 'rgba(210,153,34,.15)', members: 130, status: 'نشطة',   date: '2022-06-18' },
-  { name: 'جمعية التعليم المستدام', cat: 'تعليمية', icon: '', bg: 'rgba(31,111,235,.15)', members: 220, status: 'نشطة',   date: '2016-09-01' },
-  { name: 'جمعية بناة الوطن',       cat: 'خيرية',   icon: '', bg: 'rgba(207,34,46,.15)', members: 158, status: 'موقوفة', date: '2015-02-14' },
-  { name: 'جمعية سلامة الغذاء',     cat: 'صحية',    icon: '', bg: 'rgba(31,111,235,.12)', members: 89,  status: 'نشطة',   date: '2023-03-20' },
-  { name: 'جمعية الشباب الرياضي',   cat: 'رياضية',  icon: '', bg: 'rgba(137,87,229,.15)', members: 375, status: 'نشطة',   date: '2019-12-11' },
-];
 
 const statusMap = {
   pending:  { label: 'قيد المراجعة', cls: 'badge-pending'  },
@@ -469,8 +450,44 @@ function updateSidebarBadges() {
 // ===================== CATEGORIES =====================
 function renderCategories() {
   const grid = document.getElementById('categoriesGrid'); if (!grid) return;
-  grid.innerHTML = `<div class="category-card" onclick="filterAssocByCat('')" style="display:flex;align-items:center;gap:1.5rem;background:linear-gradient(135deg,var(--teal-deep),var(--teal));color:white;border:none;"><div class="category-icon" style="background:rgba(255,255,255,.2);margin-bottom:0;font-size:1.5rem;"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 010 20"/><path d="M12 2a15.3 15.3 0 000 20"/></svg></div><div><div class="category-name" style="color:white;margin-bottom:0;">جميع التصنيفات</div><div class="category-count" style="color:rgba(255,255,255,.7);">عرض كل الجمعيات</div></div></div>`
-    + categories.map(c=>`<div class="category-card" onclick="filterAssocByCat('${c.name}')"><div class="category-icon" style="background:${c.bg}">${c.icon}</div><div class="category-name">${c.name}</div><div class="category-count">${c.count} جمعية مسجلة</div><div class="category-bar"><div class="category-fill" style="width:${c.fill}%;background:${c.color}"></div></div></div>`).join('');
+
+  const allCard = `
+  <div class="cat-card-new cat-card-all" onclick="filterAssocByCat('')">
+    <div class="cat-card-new-header">
+      <div class="cat-card-new-icon" style="background:rgba(255,255,255,.2)">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="white" stroke-width="2.2">
+          <path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/>
+          <path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 010 20"/><path d="M12 2a15.3 15.3 0 000 20"/>
+        </svg>
+      </div>
+      <div class="cat-card-new-info">
+        <div class="cat-card-new-name" style="color:#fff">جميع التصنيفات</div>
+        <div class="cat-card-new-count" style="color:rgba(255,255,255,.75)">${categories.reduce((s,c)=>s+(c.count||0),0)} جمعية</div>
+      </div>
+    </div>
+  </div>`;
+
+  const catsHtml = categories.map(c => `
+  <div class="cat-card-new" style="--cc:${c.color}" onclick="filterAssocByCat('${c.name}')">
+    <div class="cat-card-new-accent"></div>
+    <div class="cat-card-new-header">
+      <div class="cat-card-new-icon" style="background:${c.color}22;font-size:1.3rem">${c.icon || '<i class="fa-solid fa-tag"></i>'}</div>
+      <div class="cat-card-new-info">
+        <div class="cat-card-new-name">${c.name}</div>
+        <div class="cat-card-new-count">${c.count || 0} جمعية مسجلة</div>
+      </div>
+      <div class="cat-card-new-actions" onclick="event.stopPropagation()">
+        <button class="cat-action-btn cat-edit-btn" title="تعديل" onclick="openEditCategoryModal(${c.id})">
+          <i class="fa-solid fa-pen-to-square"></i>
+        </button>
+        <button class="cat-action-btn cat-delete-btn" title="حذف" onclick="deleteCategory(${c.id})">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  </div>`).join('');
+
+  grid.innerHTML = allCard + catsHtml;
   syncCategoryFilterOptions();
 }
 
@@ -482,15 +499,15 @@ function syncCategoryFilterOptions() {
 }
 
 function openAddCategoryModal() {
-  const modal = document.getElementById('add-cat-modal');
+  const modal = document.getElementById('add-assoc-cat-modal');
   if (!modal) return;
   selectedCategoryEmoji = '';
 
-  const nameInput = document.getElementById('cat-name-input');
+  const nameInput = document.getElementById('assoc-cat-name-input');
   if (nameInput) nameInput.value = '';
 
-  const colorInput = document.getElementById('cat-color-input');
-  const colorLabel = document.getElementById('cat-color-label');
+  const colorInput = document.getElementById('assoc-cat-color-input');
+  const colorLabel = document.getElementById('assoc-cat-color-label');
   if (colorInput) colorInput.value = '#2ab8d0';
   if (colorLabel) colorLabel.textContent = '#2AB8D0';
 
@@ -499,27 +516,16 @@ function openAddCategoryModal() {
 }
 
 function closeAddCategoryModal() {
-  document.getElementById('add-cat-modal')?.classList.remove('open');
-}
-
-function renderEmojiPicker() {
-  const grid = document.getElementById('cat-emoji-grid');
-  if (!grid) return;
-  grid.innerHTML = categoryEmojiChoices.map((emoji) =>
-    `<button type="button" class="emoji-chip ${emoji === selectedCategoryEmoji ? 'active' : ''}" onclick="pickCategoryEmoji('${emoji}')">${emoji}</button>`
-  ).join('');
-}
-
-function pickCategoryEmoji(emoji) {
-  selectedCategoryEmoji = emoji;
-  renderEmojiPicker();
+  document.getElementById('add-assoc-cat-modal')?.classList.remove('open');
 }
 
 async function saveNewCategory() {
-  const nameInput = document.getElementById('cat-name-input');
-  const colorInput = document.getElementById('cat-color-input');
-  const name = nameInput?.value.trim();
+  const nameInput  = document.getElementById('assoc-cat-name-input');
+  const colorInput = document.getElementById('assoc-cat-color-input');
+  const iconInput  = document.getElementById('assoc-cat-icon-add-input');
+  const name  = nameInput?.value.trim();
   const color = colorInput?.value || '#2ab8d0';
+  const icon  = iconInput?.value.trim() || '';
 
   if (!name) {
     showOrdersToast('يرجى إدخال اسم التصنيف', 'error');
@@ -527,7 +533,7 @@ async function saveNewCategory() {
     return;
   }
 
-  const saveBtn = document.querySelector('#add-cat-modal .btn.btn-primary');
+  const saveBtn = document.querySelector('#add-assoc-cat-modal .btn.btn-primary');
   if (saveBtn) saveBtn.disabled = true;
 
   try {
@@ -538,19 +544,13 @@ async function saveNewCategory() {
         'Content-Type': 'application/json',
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
       },
-      body: JSON.stringify({
-        name,
-        icon: selectedCategoryEmoji,
-        color,
-      }),
+      body: JSON.stringify({ name, icon, color }),
     });
     const data = await res.json();
     if (!res.ok || data.success === false) {
-      const msg = data?.errors?.name?.[0] || data?.message || 'تعذّر حفظ التصنيف';
-      showOrdersToast(msg, 'error');
+      showOrdersToast(data?.errors?.name?.[0] || data?.message || 'تعذّر حفظ التصنيف', 'error');
       return;
     }
-
     await fetchOrderCategories();
     renderCategories();
     closeAddCategoryModal();
@@ -562,17 +562,223 @@ async function saveNewCategory() {
   }
 }
 
+function renderEmojiPicker() {
+  const addGrid = document.getElementById('assoc-cat-emoji-grid');
+  const editGrid = document.getElementById('edit-assoc-cat-emoji-grid');
+
+  const getEmojiHtml = (isEdit) => categoryEmojiChoices.map(emoji => `
+    <button type="button" style="cursor:pointer;font-size:1.3rem;padding:6px;border-radius:8px;border:none;background:${emoji === selectedCategoryEmoji ? 'rgba(42,184,208,0.2)' : 'transparent'};transition:all .2s" onclick="pickCategoryEmoji('${emoji}', ${isEdit})">
+      ${emoji}
+    </button>
+  `).join('');
+
+  if (addGrid) addGrid.innerHTML = getEmojiHtml(false);
+  if (editGrid) editGrid.innerHTML = getEmojiHtml(true);
+}
+
+function pickCategoryEmoji(emoji, isEdit) {
+  selectedCategoryEmoji = emoji;
+  const inputId = isEdit ? 'edit-assoc-cat-icon-input' : 'assoc-cat-icon-add-input';
+  const input = document.getElementById(inputId);
+  if (input) input.value = emoji;
+  renderEmojiPicker();
+}
+
+// ─── EDIT CATEGORY MODAL ───
+let _editCatId = null;
+function openEditCategoryModal(id) {
+  const cat = categories.find(c => c.id === id || c.id == id);
+  if (!cat) { showOrdersToast('تعذّر تحديد التصنيف', 'error'); return; }
+  
+  _editCatId = id;
+  const modal = document.getElementById('edit-assoc-cat-modal');
+  if (!modal) return;
+  
+  document.getElementById('edit-assoc-cat-name-input').value = cat.name || '';
+  const colorInput = document.getElementById('edit-assoc-cat-color-input');
+  const colorLabel = document.getElementById('edit-assoc-cat-color-label');
+  if (colorInput) colorInput.value = cat.color || '#2ab8d0';
+  if (colorLabel) colorLabel.textContent = (cat.color || '#2ab8d0').toUpperCase();
+  document.getElementById('edit-assoc-cat-icon-input').value = cat.icon || '';
+  selectedCategoryEmoji = cat.icon || '';
+  renderEmojiPicker();
+  
+  modal.classList.add('open');
+}
+function closeEditCategoryModal() {
+  document.getElementById('edit-assoc-cat-modal')?.classList.remove('open');
+  _editCatId = null;
+}
+async function saveEditCategory() {
+  if (!_editCatId) return;
+  
+  const nameInput = document.getElementById('edit-assoc-cat-name-input');
+  const colorInput = document.getElementById('edit-assoc-cat-color-input');
+  const iconInput = document.getElementById('edit-assoc-cat-icon-input');
+  
+  const name = nameInput?.value.trim();
+  const color = colorInput?.value || '#2ab8d0';
+  const icon = iconInput?.value.trim() || '';
+
+  if (!name) {
+    showOrdersToast('يرجى إدخال اسم التصنيف', 'error');
+    nameInput?.focus();
+    return;
+  }
+  
+  const saveBtn = document.getElementById('edit-assoc-cat-save-btn');
+  if (saveBtn) saveBtn.disabled = true;
+
+  try {
+    const res = await fetch(`/api/association-categories/${_editCatId}`, {
+      method: 'PUT',
+      headers: { 'Accept':'application/json','Content-Type':'application/json','X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content||'' },
+      body: JSON.stringify({ name, color, icon }),
+    });
+    const data = await res.json();
+    if (!res.ok || data.success === false) { showOrdersToast(data.message||'تعذّر الحفظ','error'); return; }
+    await fetchOrderCategories();
+    renderCategories();
+    closeEditCategoryModal();
+    showOrdersToast('تم تحديث التصنيف بنجاح','success');
+  } catch(e) { showOrdersToast('تعذّر الاتصال','error'); }
+  finally { if (saveBtn) saveBtn.disabled = false; }
+}
+
+// ── Delete Category Modal ──
+let _deleteCatId = null;
+
+function deleteCategory(id) {
+  const cat = categories.find(c => c.id === id || c.id == id);
+  if (!cat) return;
+  _deleteCatId = id;
+
+  // Fill modal content
+  const badge = document.getElementById('delete-cat-badge');
+  if (badge) badge.innerHTML = `${cat.icon ? `<span style="margin-left:8px">${cat.icon}</span>` : ''} ${cat.name}`;
+
+  const msg = document.getElementById('delete-cat-msg');
+  if (msg) {
+    const count = cat.count || cat.total_count || 0;
+    msg.textContent = count > 0
+      ? `هذا التصنيف مرتبط بـ ${count} جمعية. لا يمكن التراجع عن هذا الإجراء.`
+      : 'هل أنت متأكد من حذف هذا التصنيف؟ لا يمكن التراجع عن هذا الإجراء.';
+  }
+
+  const modal = document.getElementById('delete-cat-modal');
+  if (modal) modal.classList.add('open');
+}
+
+function closeDeleteCatModal() {
+  _deleteCatId = null;
+  document.getElementById('delete-cat-modal')?.classList.remove('open');
+}
+
+async function confirmDeleteCategory() {
+  if (!_deleteCatId) return;
+  const btn = document.getElementById('confirm-delete-cat-btn');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="margin-left:6px"></i>جاري الحذف...'; }
+
+  try {
+    const res = await fetch(`/api/association-categories/${_deleteCatId}`, {
+      method: 'DELETE',
+      headers: { 'Accept':'application/json','X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content||'' },
+    });
+    const data = await res.json();
+    if (!res.ok || data.success === false) {
+      showOrdersToast(data.message || 'لا يمكن الحذف', 'error');
+    } else {
+      closeDeleteCatModal();
+      await fetchOrderCategories();
+      renderCategories();
+      showOrdersToast('تم حذف التصنيف بنجاح', 'success');
+    }
+  } catch(e) {
+    showOrdersToast('تعذّر الاتصال بالخادم', 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-trash" style="margin-left:6px"></i>تأكيد الحذف'; }
+  }
+}
+
+// Close on backdrop click
+document.addEventListener('DOMContentLoaded', () => {
+  const dm = document.getElementById('delete-cat-modal');
+  if (dm) dm.addEventListener('click', e => { if (e.target === dm) closeDeleteCatModal(); });
+});
+
+
+
 // ===================== ASSOCIATIONS =====================
+let _currentAssocCat = '';
+
 function renderAssoc(data) {
   const list = document.getElementById('assocList'); if (!list) return;
-  list.innerHTML = data.map(a=>`<div class="assoc-item"><div class="assoc-logo" style="background:${a.bg}">${a.icon}</div><div class="assoc-info"><div class="assoc-name">${a.name}</div><div class="assoc-cat">${a.cat}</div></div><div class="assoc-meta"><span>${a.members} عضو</span><span>${formatDate(a.date)}</span><span class="badge ${a.status==='نشطة'?'badge-approved':'badge-rejected'}">${a.status}</span></div></div>`).join('');
+  if (!data.length) {
+    list.innerHTML = `<div class="empty-state"><div class="emoji">🏢</div><div>لا توجد جمعيات في هذا التصنيف</div></div>`;
+    return;
+  }
+  list.innerHTML = data.map(a => {
+    const cat = categories.find(c => c.name === (a.category || a.cat)) || {};
+    const bg  = cat.color ? cat.color + '22' : '#2ab8d022';
+    const icon = cat.icon || '🏢';
+    const statusLabel = a.status === 'approved' ? 'موافق عليها' : a.status === 'pending' ? 'قيد المراجعة' : a.status === 'rejected' ? 'مرفوضة' : 'تحت المراجعة';
+    const statusCls   = a.status === 'approved' ? 'badge-approved' : a.status === 'pending' ? 'badge-pending' : 'badge-rejected';
+    const assocName   = a.association_name || a.name || '—';
+    return `
+    <div class="assoc-item-new">
+      <div class="assoc-item-avatar" style="background:${bg};color:${cat.color||'#2ab8d0'};font-size:1.3rem">${icon}</div>
+      <div class="assoc-item-info">
+        <div class="assoc-item-name">${assocName}</div>
+        <div class="assoc-item-cat">${a.category || a.cat || '—'}</div>
+        <div class="assoc-item-email">${a.email || '—'}</div>
+      </div>
+      <div class="assoc-item-meta">
+        <span class="badge ${statusCls}">${statusLabel}</span>
+        <span class="assoc-item-date">${formatDate(a.created_at || a.date || new Date())}</span>
+      </div>
+    </div>`;
+  }).join('');
 }
-function filterAssoc() { const v=document.getElementById('catFilter')?.value; renderAssoc(v?associations.filter(a=>a.cat===v):associations); }
-function filterAssocByCat(cat) {
-  switchTab('associations',document.querySelectorAll('.tab-btn')[1]);
-  const cf=document.getElementById('catFilter'); if(cf) cf.value=cat;
-  renderAssoc(cat?associations.filter(a=>a.cat===cat):associations);
-  if(cat) setTimeout(()=>document.getElementById('assocList')?.scrollIntoView({behavior:'smooth',block:'start'}),100);
+
+async function filterAssocByCat(cat) {
+  _currentAssocCat = cat;
+
+  // لا تغيير التاب — البقاء داخل نفس تاب الجمعيات
+  const cf = document.getElementById('catFilter');
+  if (cf) cf.value = cat;
+
+  // تحديث رأس القسم
+  const secHead = document.getElementById('assoc-section-head');
+  if (secHead) {
+    const catObj = categories.find(c => c.name === cat);
+    secHead.innerHTML = cat
+      ? `<div style="display:flex;align-items:center;gap:10px">
+           <span style="font-size:1.5rem">${catObj?.icon || '🏢'}</span>
+           <div>
+             <div style="font-weight:800;font-size:1.05rem;color:var(--text)">${cat}</div>
+             <div style="font-size:.78rem;color:#94a3b8">الجمعيات في هذا التصنيف</div>
+           </div>
+         </div>`
+      : `<div style="font-weight:800;font-size:1.05rem;color:var(--text)"><i class="fa-solid fa-building" style="color:var(--teal);margin-left:8px"></i>جميع الجمعيات المسجلة</div>`;
+  }
+
+  const list = document.getElementById('assocList');
+  if (list) list.innerHTML = `<div class="sr-loading" style="padding:32px;text-align:center;color:#94a3b8">جاري التحميل...</div>`;
+
+  try {
+    const url = '/api/associations' + (cat ? `?category=${encodeURIComponent(cat)}` : '');
+    const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    renderAssoc(data.associations || []);
+  } catch(e) {
+    if (list) list.innerHTML = `<div style="padding:32px;text-align:center;color:#ef4444">⚠️ تعذّر تحميل الجمعيات</div>`;
+  }
+}
+
+function filterAssoc() {
+  const v = document.getElementById('catFilter')?.value || '';
+  filterAssocByCat(v);
 }
 
 // ===================== TABS =====================

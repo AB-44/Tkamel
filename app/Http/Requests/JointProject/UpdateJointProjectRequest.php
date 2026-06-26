@@ -22,7 +22,7 @@ class UpdateJointProjectRequest extends FormRequest
     {
         return [
             'name'        => 'required|string|max:255',
-            'category_id' => 'nullable|exists:association_categories,id',
+            'category_id' => 'nullable|string',
             'description' => 'required|string',
             'progress'    => 'nullable|integer|min:0|max:100',
             'start_date'  => 'nullable|date',

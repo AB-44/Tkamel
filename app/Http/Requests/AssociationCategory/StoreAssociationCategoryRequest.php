@@ -22,7 +22,7 @@ class StoreAssociationCategoryRequest extends FormRequest
     {
         return [
             'name'        => 'required|string|max:100|unique:association_categories,name',
-            'icon'        => 'nullable|string|max:10',
+            'icon'        => 'nullable|string|max:20',
             'color'       => 'nullable|string|max:20',
             'description' => 'nullable|string|max:255',
         ];
@@ -39,7 +39,7 @@ class StoreAssociationCategoryRequest extends FormRequest
             'name.max'      => 'اسم التصنيف يجب ألا يتجاوز 100 حرف',
             'name.unique'   => 'هذا التصنيف موجود مسبقاً',
             'icon.string'   => 'الأيقونة يجب أن تكون نصاً',
-            'icon.max'      => 'الأيقونة يجب ألا تتجاوز 10 أحرف',
+            'icon.max'      => 'الأيقونة يجب ألا تتجاوز 20 أحرف',
             'color.string'  => 'اللون يجب أن يكون نصاً',
             'color.max'     => 'اللون يجب ألا يتجاوز 20 حرفاً',
             'description.string' => 'الوصف يجب أن يكون نصاً',

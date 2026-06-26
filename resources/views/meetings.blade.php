@@ -10,7 +10,59 @@
     rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="{{ asset('css/meetings.css') }}">
-<style>#nb-reqs:empty{display:none!important}</style>
+  <style>
+    #nb-reqs:empty{display:none!important}
+
+    /* ── Cat Picker ── */
+    .cat-picker-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px 0 4px;
+    }
+    .cat-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 50px;
+      border: 1.5px solid rgba(0,0,0,0.09);
+      background: #f8fafc;
+      cursor: pointer;
+      font-family: 'Tajawal', sans-serif;
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: #475569;
+      transition: all 0.18s ease;
+      user-select: none;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .cat-pill:hover {
+      border-color: rgba(13,148,136,0.4);
+      background: rgba(13,148,136,0.06);
+      color: #0d9488;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(13,148,136,0.12);
+    }
+    .cat-pill.active {
+      background: linear-gradient(135deg, #0d9488, #0891b2);
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(13,148,136,0.35);
+      transform: translateY(-1px);
+    }
+    .cat-pill-all.active {
+      background: linear-gradient(135deg, #1e40af, #0d9488);
+      box-shadow: 0 4px 14px rgba(30,64,175,0.3);
+    }
+    .cat-pill-ico {
+      font-size: 1rem;
+      line-height: 1;
+    }
+    .cat-pill-lbl {
+      white-space: nowrap;
+    }
+  </style>
 </head>
 
 <body>
@@ -175,10 +227,8 @@
 
           <div class="fg">
             <label>التصنيف <span class="req">*</span></label>
-            <div class="fld">
-              <span class="fld-icon"><i class="fa-solid fa-folder" style="font-size:.75rem"></i></span>
-              <select id="f-cat"><option value="">اختر التصنيف</option></select>
-            </div>
+            <div id="f-cat-picker"></div>
+            <input type="hidden" id="f-cat" />
           </div>
 
           <div class="fg">
@@ -460,6 +510,7 @@
 
     @include('layouts.notif-panel')
 
+    <script src="{{ asset('js/cat-picker.js') }}"></script>
     <script src="{{ asset('js/menu.js') }}"></script>
     <script src="{{ asset('js/meetings.js') }}"></script>
 </body>

@@ -28,14 +28,19 @@ async function fetchOpportunities() {
     const data = await res.json();
     opportunities = data.opportunities.map(o => ({
       id: o.id,
-      catId: (function() {
-        if (!o.type) return '__none__';
-        // Try to find by numeric ID first (new system)
-        const byId = CATEGORIES.find(c => c.id === String(o.type));
-        if (byId) return byId.id;
-        // Fallback: try by legacy string name
-        const byLegacy = CATEGORIES.find(c => c.legacyId === o.type);
-        return byLegacy ? byLegacy.id : String(o.type);
+      catIds: (function() {
+        if (!o.type) return ['__none__'];
+        let types = String(o.type).split(',').map(t => t.trim()).filter(Boolean);
+        let ids = [];
+        types.forEach(t => {
+          if (t === 'all') { ids.push('all'); return; }
+          const byId = CATEGORIES.find(c => c.id === t);
+          if (byId) { ids.push(byId.id); return; }
+          const byLegacy = CATEGORIES.find(c => c.legacyId === t);
+          if (byLegacy) { ids.push(byLegacy.id); return; }
+          ids.push(t);
+        });
+        return ids.length ? ids : ['__none__'];
       })(),
       title: o.title,
       desc: o.description,
@@ -101,13 +106,20 @@ async function fetchRequests() {
 
 /* ══ USER RICH OPP CARD (same format as admin, apply button instead of edit/delete) ══ */
 function richOppCardUser(o) {
-  const cat      = CATEGORIES.find(c => c.id === o.catId);
+  const isAll = o.catIds && o.catIds.includes('all');
+  const cat = (!isAll && o.catIds && o.catIds.length) ? CATEGORIES.find(c => c.id === o.catIds[0]) : null;
   const acc      = cat?.color || '#2ab8d0';
   const typeLabel= o.type === 'onsite' ? 'حضوري' : o.type === 'remote' ? 'عن بعد' : 'مزدوج';
   const typeCls  = o.type === 'onsite' ? 'rich-opp-tag-onsite' : 'rich-opp-tag-remote';
   const stCls    = o.status === 'open'  ? 'rich-opp-tag-open'  : 'rich-opp-tag-closed';
   const stLabel  = o.status === 'open'  ? 'مفتوحة'             : 'مغلقة';
   const deadline = o.deadline ? o.deadline.replace(/(\d{4})-(\d{2})-(\d{2})/, '$3/$2/$1') : '—';
+
+  // Extract link
+  let oppLink = '';
+  if (o.desc && o.desc.includes('رابط الفرصة: ')) {
+    oppLink = o.desc.split('رابط الفرصة: ')[1].split('\n')[0].trim();
+  }
 
   // Apply / status button
   const myReq = requests.find(r => r.oppId === o.id);
@@ -121,8 +133,19 @@ function richOppCardUser(o) {
     else
       applyBtn = `<span class="rich-apply-badge" style="color:#d97706;background:#fef3c7"><i class="fa-solid fa-clock" style="font-size:.7rem;margin-left:4px"></i>تحت المراجعة</span>`;
   } else {
-    applyBtn = `<button class="btn-primary" style="padding:7px 18px;font-size:0.82rem" onclick="openApply(${o.id})"><span class="btn-icon">+</span>تقديم طلب</button>`;
+    if (oppLink) {
+      applyBtn = `<button class="btn-primary" style="padding:7px 18px;font-size:0.82rem" onclick="window.open('${oppLink}', '_blank')"><span class="btn-icon"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>تقديم طلب</button>`;
+    } else {
+      applyBtn = `<button class="btn-primary" style="padding:7px 18px;font-size:0.82rem" onclick="openApply(${o.id})"><span class="btn-icon">+</span>تقديم طلب</button>`;
+    }
   }
+
+  // Build category badge
+  const catBadge = isAll
+    ? `<div class="opp-cat-badge" style="background:rgba(30,64,175,0.09);color:#1e40af;border-color:rgba(30,64,175,0.18)"><span style="font-size:1rem">🌐</span><span>لكل الجمعيات</span></div>`
+    : cat
+      ? `<div class="opp-cat-badge" style="background:${cat.color}18;color:${cat.color};border-color:${cat.color}33"><span style="font-size:1rem">${cat.icon}</span><span>${cat.name}</span></div>`
+      : '';
 
   return `
   <div class="rich-opp-card">
@@ -131,11 +154,11 @@ function richOppCardUser(o) {
         <div class="rich-opp-card-title">${o.title}</div>
         <div class="rich-opp-card-actions">${applyBtn}</div>
       </div>
+      ${catBadge}
       <div class="rich-opp-card-desc">${o.desc || '—'}</div>
       <div class="rich-opp-card-tags">
         <span class="rich-opp-tag ${stCls}">${stLabel}</span>
         <span class="rich-opp-tag ${typeCls}">${typeLabel}</span>
-        ${cat ? `<span class="rich-opp-tag rich-opp-tag-cat">${cat.icon} ${cat.name}</span>` : ''}
       </div>
     </div>
     <div class="rich-opp-card-bottom">
@@ -225,7 +248,7 @@ function renderCats() {
   const agrid = document.getElementById('assoc-cats-grid');
 
   const adminHtml = CATEGORIES.map(c => {
-    const cnt = opportunities.filter(o => o.catId === c.id && o.status === 'open').length;
+    const cnt = opportunities.filter(o => (o.catIds.includes(c.id) || o.catIds.includes('all')) && o.status === 'open').length;
     return `
     <div class="cat-card" style="--cc:${c.color}">
       <div class="cat-card-header" onclick="openCatAdmin('${c.id}')">
@@ -245,7 +268,7 @@ function renderCats() {
 
   // Used by both 'association' role and 'user' role
   const applicantHtml = CATEGORIES.map(c => {
-    const cnt = opportunities.filter(o => o.catId === c.id && o.status === 'open').length;
+    const cnt = opportunities.filter(o => (o.catIds.includes(c.id) || o.catIds.includes('all')) && o.status === 'open').length;
     return `
     <div class="cat-card" style="--cc:${c.color}" onclick="openCatApplicant('${c.id}')">
       <div class="cat-card-header">
@@ -451,7 +474,7 @@ function backToApplicantCats() {
 /* ══ ADMIN OPPS ══ */
 function renderAdminOpps() {
   const q = (document.getElementById('admin-opp-search')?.value || '').toLowerCase();
-  const list = opportunities.filter(o => o.catId === currentCatId && (!q || o.title.toLowerCase().includes(q)));
+  const list = opportunities.filter(o => o.catIds && (o.catIds.includes(currentCatId) || o.catIds.includes('all')) && (!q || o.title.toLowerCase().includes(q)));
   const grid = document.getElementById('admin-opps-grid');
   grid.innerHTML = list.length
     ? list.map(o => oppCardAdmin(o)).join('')
@@ -459,7 +482,8 @@ function renderAdminOpps() {
 }
 
 function oppCardAdmin(o) {
-  const cat = CATEGORIES.find(c => c.id === o.catId);
+  const isAll = o.catIds && o.catIds.includes('all');
+  const cat = (!isAll && o.catIds && o.catIds.length) ? CATEGORIES.find(c => c.id === o.catIds[0]) : null;
   const acc = cat?.color || '#2ab8d0';
   const typeLabel = o.type === 'onsite' ? 'حضوري' : o.type === 'remote' ? 'عن بعد' : 'مزدوج';
   const typeBadge = o.type === 'onsite' ? 'b-onsite' : 'b-remote';
@@ -501,7 +525,7 @@ function oppCardAdmin(o) {
 function renderAssocOpps() { renderApplicantOpps(); }
 function renderApplicantOpps() {
   const q = (document.getElementById('assoc-opp-search')?.value || '').toLowerCase();
-  const list = opportunities.filter(o => o.catId === currentCatId && o.status === 'open' && (!q || o.title.toLowerCase().includes(q)));
+  const list = opportunities.filter(o => (o.catIds.includes(currentCatId) || o.catIds.includes('all')) && o.status === 'open' && (!q || o.title.toLowerCase().includes(q)));
   const grid = document.getElementById('assoc-opps-grid');
   const isUser = document.querySelector('.readonly-notice') || window.location.pathname.includes('/user/');
   grid.innerHTML = list.length
@@ -512,11 +536,18 @@ function renderApplicantOpps() {
 }
 
 function oppCardAssoc(o) {
-  const cat = CATEGORIES.find(c => c.id === o.catId);
+  const isAll = o.catIds && o.catIds.includes('all');
+  const cat = (!isAll && o.catIds && o.catIds.length) ? CATEGORIES.find(c => c.id === o.catIds[0]) : null;
   const acc = cat?.color || '#2ab8d0';
   const myReq = requests.find(r => r.oppId === o.id);
   const typeLabel = o.type === 'onsite' ? 'حضوري' : o.type === 'remote' ? 'عن بعد' : 'مزدوج';
   const typeBadge = o.type === 'onsite' ? 'b-onsite' : 'b-remote';
+
+  // Extract link
+  let oppLink = '';
+  if (o.desc && o.desc.includes('رابط الفرصة: ')) {
+    oppLink = o.desc.split('رابط الفرصة: ')[1].split('\n')[0].trim();
+  }
 
   let footBtn = '';
   if (o.has_applied || myReq) {
@@ -525,8 +556,19 @@ function oppCardAssoc(o) {
     else if (reqStatus === 'approved') footBtn = `<span class="btn-applied" style="color:var(--green)">مقبول</span>`;
     else footBtn = `<span class="btn-applied" style="color:var(--red)">مرفوض</span>`;
   } else {
-    footBtn = `<button class="btn-apply" onclick="openApply(${o.id})">تقديم طلب</button>`;
+    if (oppLink) {
+      footBtn = `<button class="btn-apply" onclick="window.open('${oppLink}', '_blank')"><i class="fa-solid fa-arrow-up-right-from-square" style="margin-left:5px"></i>تقديم طلب</button>`;
+    } else {
+      footBtn = `<button class="btn-apply" onclick="openApply(${o.id})">تقديم طلب</button>`;
+    }
   }
+
+  // Build category badge for assoc card
+  const assocCatBadge = isAll
+    ? `<div class="opp-cat-badge" style="background:rgba(30,64,175,0.09);color:#1e40af;border-color:rgba(30,64,175,0.18);margin-bottom:8px"><span style="font-size:.95rem">🌐</span><span>لكل الجمعيات</span></div>`
+    : cat
+      ? `<div class="opp-cat-badge" style="background:${cat.color}18;color:${cat.color};border-color:${cat.color}33;margin-bottom:8px"><span style="font-size:.95rem">${cat.icon}</span><span>${cat.name}</span></div>`
+      : '';
 
   return `
   <div class="opp-card">
@@ -538,6 +580,7 @@ function oppCardAssoc(o) {
           <span class="badge ${typeBadge}">${typeLabel}</span>
         </div>
       </div>
+      ${assocCatBadge}
       <div class="opp-title">${o.title}</div>
       <div class="opp-desc">${o.desc}</div>
       <div class="opp-meta">
@@ -571,7 +614,9 @@ function renderRequests() {
   }
   list.innerHTML = filtered.map(r => {
     const opp = opportunities.find(o => o.id === r.oppId);
-    const cat = opp ? CATEGORIES.find(c => c.id === opp.catId) : null;
+    const cat = opp && opp.catIds && opp.catIds.length && opp.catIds[0] !== 'all' ? CATEGORIES.find(c => c.id === opp.catIds[0]) : null;
+    const catName = opp && opp.catIds && opp.catIds.includes('all') ? 'للجميع' : (cat ? cat.name : '—');
+    const catIcon = opp && opp.catIds && opp.catIds.includes('all') ? '<i class="fa-solid fa-users"></i>' : (cat ? cat.icon : '');
     const barColor = r.status === 'pending' ? '#f59e0b' : r.status === 'approved' ? '#2eaa78' : '#c62828';
     const statusBadge = r.status === 'pending'
       ? `<span class="req-status-badge rsb-pending">معلق</span>`
@@ -588,7 +633,7 @@ function renderRequests() {
         <div class="req-status-bar" style="background:${barColor}"></div>
         <div class="req-opp-info">
           <div class="req-opp-title">${opp?.title || '—'}</div>
-          <div class="req-opp-cat">${cat?.icon || ''} ${cat?.name || '—'}</div>
+          <div class="req-opp-cat">${catIcon} ${catName}</div>
         </div>
         <div class="req-assoc-info">
           <div class="req-assoc-av">${r.assocName[0]}</div>
@@ -672,16 +717,21 @@ function openAddOpp(mode) {
   const badgeWrap = document.getElementById('opp-cat-badge-wrap');
   const catSelectWrap = document.getElementById('fg-opp-cat');
   const badge = document.getElementById('sel-cat-badge');
-  const catSelect = document.getElementById('f-opp-cat');
   
+  // Clear form FIRST before initializing CatPicker
+  clearOppForm();
+
   if (isGlobal) {
     if (badgeWrap) badgeWrap.style.display = 'none';
     if (catSelectWrap) catSelectWrap.style.display = 'block';
-    if (catSelect) {
-        catSelect.disabled = false;
-        catSelect.innerHTML = CATEGORIES.map(c => `<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
-        catSelect.value = cat.id;
-    }
+    if (window.fCatChoices) { try { window.fCatChoices.destroy(); } catch(e){} }
+    window.fCatChoices = new CatPicker({
+      containerId : 'f-opp-cat-picker',
+      hiddenId    : 'f-opp-cat',
+      categories  : CATEGORIES,
+      selected    : [],
+      multi       : true,
+    });
   } else {
     // Read-only UI: show the selected category as a badge (no dropdown to change it).
     if (badgeWrap) badgeWrap.style.display = 'block';
@@ -693,8 +743,7 @@ function openAddOpp(mode) {
       badge.style.color = cat.color;
     }
   }
-  
-  clearOppForm();
+
   openOv('ov-opp');
 }
 
@@ -702,7 +751,7 @@ function openEditOpp(id) {
   const o = opportunities.find(x => x.id === id);
   if (!o) return;
   editingOppId = id;
-  const cat = CATEGORIES.find(c => c.id === o.catId);
+  const cat = o.catIds && o.catIds.length ? CATEGORIES.find(c => c.id === o.catIds[0]) : null;
   document.getElementById('opp-m-icon').textContent = '✏️';
   document.getElementById('opp-m-title').textContent = 'تعديل الفرصة';
   document.getElementById('opp-m-sub').textContent = o.title;
@@ -712,27 +761,39 @@ function openEditOpp(id) {
   const catSelectWrap = document.getElementById('fg-opp-cat');
   if (badgeWrap) badgeWrap.style.display = 'none';
   if (catSelectWrap) catSelectWrap.style.display = 'block';
-  
-  const catSelect = document.getElementById('f-opp-cat');
-  if (catSelect) {
-      // Editing should allow changing the category.
-      catSelect.disabled = false;
-      catSelect.innerHTML = CATEGORIES.map(c => `<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
-      catSelect.value = o.catId;
-  }
+
+  if (window.fCatChoices) { try { window.fCatChoices.destroy(); } catch(e){} }
+  window.fCatChoices = new CatPicker({
+    containerId : 'f-opp-cat-picker',
+    hiddenId    : 'f-opp-cat',
+    categories  : CATEGORIES,
+    selected    : o.catIds ? o.catIds.filter(c => c !== '__none__') : [],
+    multi       : true,
+  });
   
   document.getElementById('f-opp-title').value = o.title;
   // Extract clean description if the suffix was added
   let cleanDesc = o.desc;
+  let extractedLink = '';
+  
+  if (o.desc.includes('رابط الفرصة: ')) {
+      extractedLink = o.desc.split('رابط الفرصة: ')[1].split('\n')[0].trim();
+  }
+  
   if (cleanDesc.includes('الجهة المستضيفة:')) {
     cleanDesc = cleanDesc.split('\n\nالجهة المستضيفة:')[0].replace(/\\n\\nالجهة المستضيفة:.*/, '').trim();
   }
   document.getElementById('f-opp-desc').value = cleanDesc;
   
+  const linkEl = document.getElementById('f-opp-link');
+  if (linkEl) linkEl.value = extractedLink;
+  
   // Also try to extract city from the suffix
   let extractedCity = o.city;
-  if (o.desc.includes(' - ')) {
+  if (o.desc.includes(' - ') && !o.desc.includes('رابط الفرصة: ')) {
       extractedCity = o.desc.split(' - ').pop();
+  } else if (o.desc.includes(' - ') && o.desc.includes('رابط الفرصة: ')) {
+      extractedCity = o.desc.split('رابط الفرصة:')[0].split(' - ').pop().trim();
   }
   
   document.getElementById('f-opp-org').value = o.org;
@@ -745,7 +806,7 @@ function openEditOpp(id) {
 }
 
 function clearOppForm() {
-  ['f-opp-title', 'f-opp-desc', 'f-opp-org', 'f-opp-city', 'f-opp-seats', 'f-opp-deadline'].forEach(id => {
+  ['f-opp-title', 'f-opp-desc', 'f-opp-org', 'f-opp-city', 'f-opp-seats', 'f-opp-deadline', 'f-opp-link'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
@@ -759,18 +820,28 @@ function saveOpp() {
   const org = document.getElementById('f-opp-org').value.trim();
   const city = document.getElementById('f-opp-city').value.trim();
   const seats = document.getElementById('f-opp-seats').value.trim();
+  const link = document.getElementById('f-opp-link')?.value.trim() || '';
 
   // Fix literal \n issue and avoid duplicating the appended string on edit
   let fullDesc = desc;
   if (!editingOppId || !fullDesc.includes('الجهة المستضيفة:')) {
     fullDesc = desc + '\n\nالجهة المستضيفة: ' + org + (city ? ' - ' + city : '');
+    if (link) fullDesc += '\nرابط الفرصة: ' + link;
   } else if (editingOppId && fullDesc.includes('الجهة المستضيفة:')) {
     // If editing, try to replace the existing org/city suffix with the new one
     fullDesc = desc.replace(/\n\nالجهة المستضيفة: .*/g, '') + '\n\nالجهة المستضيفة: ' + org + (city ? ' - ' + city : '');
+    if (link) fullDesc += '\nرابط الفرصة: ' + link;
   }
 
   const isGlobal = document.getElementById('fg-opp-cat') && document.getElementById('fg-opp-cat').style.display !== 'none';
-  const selectedType = isGlobal && document.getElementById('f-opp-cat') ? document.getElementById('f-opp-cat').value : currentCatId;
+  let selectedType = currentCatId;
+  if (isGlobal && window.fCatChoices) {
+    const vals = window.fCatChoices.getValues();
+    selectedType = Array.isArray(vals) ? vals.join(',') : (vals || currentCatId);
+  } else if (isGlobal) {
+    const h = document.getElementById('f-opp-cat');
+    if (h) selectedType = h.value || currentCatId;
+  }
 
   const payload = {
     title: title,

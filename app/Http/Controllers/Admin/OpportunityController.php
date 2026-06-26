@@ -32,6 +32,40 @@ class OpportunityController extends Controller
         ]);
     }
 
+    /** Returns stats and opportunities filtered for the logged-in user/association */
+    public function userIndex()
+    {
+        $query = Opportunity::withCount('requests')->latest();
+
+        $assocCategoryId = null;
+        if (session()->has('association')) {
+            $assocCategoryId = session('association.category_id')
+                ?? session('association')['category_id']
+                ?? null;
+        }
+
+        if ($assocCategoryId) {
+            $query->where(function ($q) use ($assocCategoryId) {
+                $q->where('type', 'all')
+                  ->orWhereRaw('FIND_IN_SET(?, type)', [(string) $assocCategoryId])
+                  ->orWhereNull('type')
+                  ->orWhere('type', '');
+            });
+        }
+
+        $opportunities = $query->get();
+
+        return response()->json([
+            'opportunities' => $opportunities,
+            'stats' => [
+                'total' => $opportunities->count(),
+                'open'  => $opportunities->where('deadline', '>=', now())->count(),
+                'pending_requests' => OpportunityRequest::where('status', 'pending')->whereNotNull('opportunity_id')->count(),
+                'categories' => $opportunities->pluck('type')->unique()->count(),
+            ]
+        ]);
+    }
+
     /** Create a new volunteering opportunity */
     public function store(StoreOpportunityRequest $request)
     {

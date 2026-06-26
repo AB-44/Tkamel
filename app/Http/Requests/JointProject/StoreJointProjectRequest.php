@@ -22,7 +22,7 @@ class StoreJointProjectRequest extends FormRequest
     {
         return [
             'name'        => 'required|string|max:255',
-            'category_id' => 'required|exists:association_categories,id',
+            'category_id' => 'required|string',
             'description' => 'required|string',
             'status'      => 'nullable|in:planning,active,idea,completed,canceled',
             'start_date'  => 'nullable|date',

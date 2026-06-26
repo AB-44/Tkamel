@@ -11,6 +11,7 @@ class Meeting extends Model
         'date_time', 'end_date_time', 'meeting_type', 'direction', 'link', 'location',
         'status', 'cancel_reason', 'report_summary', 'report_decisions',
         'report_attendees', 'report_actions', 'category', 'presenter', 'date',
+        'end_date', 'end_time',
         'time', 'type', 'location_url', 'notes', 'duration_minutes', 'invitation_direction'
     ];
 

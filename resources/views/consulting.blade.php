@@ -117,6 +117,108 @@
     .btn-cancel:hover { background:#f8fafc; }
     .btn-save { flex:2; padding:11px; border:none; border-radius:12px; background:linear-gradient(135deg,#0d3d49,#2ab8d0); font-family:inherit; font-size:0.88rem; font-weight:800; cursor:pointer; color:#fff; }
     .btn-save:hover { opacity:0.92; }
+
+    #nb-reqs:empty{display:none!important}
+    .cat-picker-wrap { display:flex; flex-wrap:wrap; gap:8px; padding:10px 12px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; min-height:48px; transition:border-color .18s; }
+    .cat-picker-wrap:focus-within { border-color:#0d9488; box-shadow:0 0 0 3px rgba(13,148,136,0.12); }
+    .cat-pill { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:50px; border:1.5px solid rgba(0,0,0,0.09); background:#fff; cursor:pointer; font-family:'Tajawal',sans-serif; font-size:0.83rem; font-weight:600; color:#475569; transition:all 0.18s ease; user-select:none; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+    .cat-pill:hover { border-color:rgba(13,148,136,0.4); background:rgba(13,148,136,0.06); color:#0d9488; transform:translateY(-1px); box-shadow:0 4px 10px rgba(13,148,136,0.12); }
+    .cat-pill.active { background:linear-gradient(135deg,#0d9488,#0891b2); border-color:transparent; color:#fff; box-shadow:0 4px 14px rgba(13,148,136,0.35); transform:translateY(-1px); }
+    .cat-pill-all.active { background:linear-gradient(135deg,#1e40af,#0d9488); box-shadow:0 4px 14px rgba(30,64,175,0.3); }
+    .cat-pill-ico { font-size:1rem; line-height:1; }
+    .cat-pill-lbl { white-space:nowrap; }
+
+    /* ── Category Cards (New Design) ── */
+    .categories-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px; margin-bottom:28px; }
+    .cat-card-new {
+        position:relative; background:#fff; border-radius:18px;
+        border:1.5px solid #e2e8f0; overflow:hidden; cursor:pointer;
+        transition:all .22s; box-shadow:0 2px 10px rgba(0,0,0,.05);
+        min-height: 110px; display: flex; flex-direction: column; justify-content: center;
+    }
+    .cat-card-new:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,0,0,.1); border-color:var(--cc,#2ab8d0); }
+    .cat-card-new-accent { position:absolute; top:0; right:0; left:0; height:4px; background:var(--cc,#2ab8d0); }
+    .cat-card-new-header { display:flex; align-items:center; gap:12px; padding:18px 16px; }
+    .cat-card-new-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .cat-card-new-info { flex:1; min-width:0; }
+    .cat-card-new-name { font-weight:800; font-size:.95rem; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .cat-card-new-count { font-size:.76rem; color:#94a3b8; margin-top:2px; }
+    .cat-card-new-actions { display:flex; gap:6px; flex-shrink:0; }
+    .cat-card-new-bar { margin:0 14px; height:5px; border-radius:99px; background:#f1f5f9; }
+    .cat-card-new-fill { height:100%; border-radius:99px; transition:width .4s; }
+    .cat-card-new-footer { display:flex; justify-content:space-between; align-items:center; padding:8px 14px 12px; }
+    .cat-card-all {
+        background:linear-gradient(135deg,#0a5565,#2ab8d0) !important;
+        border-color:transparent !important;
+    }
+    .cat-action-btn {
+        width:30px; height:30px; border-radius:8px; border:none; cursor:pointer;
+        display:flex; align-items:center; justify-content:center; font-size:.78rem;
+        transition:all .18s;
+    }
+    .cat-edit-btn { background:rgba(8,145,178,.1); color:#0891b2; }
+    .cat-edit-btn:hover { background:#0891b2; color:#fff; }
+    .cat-delete-btn { background:rgba(239,68,68,.1); color:#ef4444; }
+    .cat-delete-btn:hover { background:#ef4444; color:#fff; }
+
+    /* ── Association Items (New Design) ── */
+    .assoc-item-new {
+        display:flex; align-items:center; gap:14px; background:#fff;
+        border:1.5px solid #e2e8f0; border-radius:14px; padding:14px 16px;
+        transition:all .2s;
+    }
+    .assoc-item-new:hover { box-shadow:0 4px 16px rgba(0,0,0,.08); border-color:#c7d2fe; }
+    .assoc-item-avatar { width:46px; height:46px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:1.3rem; }
+    .assoc-item-info { flex:1; min-width:0; }
+    .assoc-item-name { font-weight:800; font-size:.9rem; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .assoc-item-cat { font-size:.75rem; color:#64748b; margin-top:2px; }
+    .assoc-item-email { font-size:.72rem; color:#94a3b8; margin-top:1px; direction:ltr; text-align:right; }
+    .assoc-item-meta { display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; }
+    .assoc-item-date { font-size:.72rem; color:#94a3b8; }
+
+    /* ── Category Modals (add-assoc-cat / edit-assoc-cat) ── */
+    .modal-overlay {
+        position: fixed; inset: 0;
+        background: rgba(10,25,35,0.6);
+        backdrop-filter: blur(8px);
+        z-index: 9000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-overlay .modal {
+        background: #fff;
+        border-radius: 20px;
+        width: 100%;
+        max-width: 480px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 32px 80px rgba(0,0,0,0.25);
+        animation: modalSlideIn .25s cubic-bezier(0.16,1,0.3,1);
+    }
+    @keyframes modalSlideIn {
+        from { transform: translateY(24px) scale(0.96); opacity: 0; }
+        to   { transform: translateY(0)    scale(1);    opacity: 1; }
+    }
+    .modal-overlay .modal-head {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 18px 22px; border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc; border-radius: 20px 20px 0 0;
+    }
+    .modal-overlay .modal-head h3 { font-size: 1rem; font-weight: 800; color: #0f172a; margin: 0; }
+    .modal-overlay .modal-body { padding: 20px 22px; }
+    .modal-overlay .modal-footer {
+        display: flex; gap: 10px; justify-content: flex-end;
+        padding: 14px 22px; border-top: 1px solid #e2e8f0;
+        background: #f8fafc; border-radius: 0 0 20px 20px;
+    }
+    .modal-overlay .btn { padding: 9px 20px; border-radius: 10px; font-family: inherit; font-size: .88rem; font-weight: 700; cursor: pointer; border: 1.5px solid transparent; transition: all .18s; }
+    .modal-overlay .btn-ghost { background: #fff; border-color: #e2e8f0; color: #64748b; }
+    .modal-overlay .btn-ghost:hover { background: #f1f5f9; }
+    .modal-overlay .btn-primary { background: linear-gradient(135deg,#0d3d49,#2ab8d0); color: #fff; border-color: transparent; box-shadow: 0 3px 12px rgba(42,184,208,.35); }
+    .modal-overlay .btn-primary:hover { opacity: .92; }
   </style>
 </head>
 
@@ -718,7 +820,7 @@
           <div class="modal-body">
             <div class="fg"><label>عنوان الاجتماع <span class="req">*</span></label><div class="fld"><span class="fld-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span><input type="text" id="f-title" placeholder="مثال: اجتماع التخطيط الاستراتيجي"></div></div>
             <div class="row2">
-              <div class="fg"><label>التصنيف <span class="req">*</span></label><div class="fld"><span class="fld-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span><select id="f-cat"><option value="">اختر التصنيف</option></select></div></div>
+              <div class="fg"><label>التصنيف <span class="req">*</span></label><div id="f-cat-picker"></div><input type="hidden" id="f-cat" /></div>
               <div class="fg"><label>اسم المقدم <span class="req">*</span></label><div class="fld"><span class="fld-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></span><input type="text" id="f-presenter" placeholder="اسم المقدم"></div></div>
             </div>
             <div class="row2">
@@ -807,44 +909,34 @@
               </button>
             </div>
             
-            {{-- ══ MY ASSOCIATIONS TAB ══ --}}
+            {{-- ══ MY ASSOCIATIONS TAB (Now Categories + Associations) ══ --}}
             <div class="tab-content active" id="tab-my-associations">
-              <div class="table-toolbar" style="margin-bottom: 24px; display: flex; gap: 16px;">
-                <div class="search-box" style="flex: 1;">
-                  <span><i class="fa-solid fa-magnifying-glass"></i></span>
-                  <input type="text" id="myAssocSearch" placeholder="ابحث باسم الجمعية، البريد، الهاتف، التصنيف..." oninput="filterMyAssociations()" />
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+                    <div style="text-align:right">
+                        <h2 style="color:var(--ink);font-weight:800;font-size:1.3rem;margin:0 0 4px 0">
+                            <i class="fa-solid fa-layer-group" style="margin-left:8px;color:var(--teal)"></i>
+                            تصنيفات الجمعيات
+                        </h2>
+                        <p style="color:var(--muted);font-size:0.9rem;margin:0">إدارة التصنيفات والجمعيات المرتبطة بها</p>
+                    </div>
+                    <button class="btn-primary" onclick="openAddCategoryModal()" style="padding:10px 16px;font-size:0.9rem;border-radius:10px;display:flex;align-items:center;gap:6px">
+                        <i class="fa-solid fa-plus"></i> إضافة تصنيف
+                    </button>
                 </div>
-                <div style="display: flex; gap: 8px;">
-                  <select id="myAssocCatFilter" onchange="filterMyAssociations()" style="padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border); font-family: inherit; outline: none; background: #fff;">
-                      <option value="">جميع التصنيفات</option>
-                      <option value="خيرية">خيرية واجتماعية</option>
-                      <option value="ثقافية">ثقافية وتعليمية</option>
-                      <option value="صحية">صحية وبيئية</option>
-                      <option value="رياضية">رياضية وشبابية</option>
-                      <option value="تنموية">تنموية واقتصادية</option>
-                      <option value="دينية">دينية ودعوية</option>
-                  </select>
-                  <button class="btn-primary" onclick="openAddCategoryModal()" style="padding: 10px 16px; font-size: 0.9rem; border-radius: 10px; display: flex; align-items: center; gap: 6px;">
-                    <i class="fa-solid fa-plus"></i> إضافة تصنيف
-                  </button>
+
+                <div class="categories-grid" id="categoriesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;margin-bottom:28px"></div>
+
+                <div class="section-head" style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                    <div id="assoc-section-head">
+                        <div style="font-weight:800;font-size:1.05rem;color:var(--text)"><i class="fa-solid fa-building" style="color:var(--teal);margin-left:8px"></i>الجمعيات المسجلة</div>
+                    </div>
+                    <div class="filter-group">
+                        <select id="catFilter" onchange="filterAssoc()" style="padding:7px 12px;border-radius:10px;border:1.5px solid #e2e8f0;font-family:inherit;font-size:.85rem">
+                            <option value="">كل التصنيفات</option>
+                        </select>
+                    </div>
                 </div>
-              </div>
-              <div class="table-wrap">
-                <table id="myAssocTable" dir="rtl">
-                  <thead>
-                    <tr>
-                      <th>رقم الترخيص</th>
-                      <th>المسؤول</th>
-                      <th>الجمعية</th>
-                      <th>معلومات التواصل</th>
-                      <th>تاريخ التسجيل</th>
-                      <th>الحالة</th>
-                      <th>الإجراءات</th>
-                    </tr>
-                  </thead>
-                  <tbody id="myAssocTbody"></tbody>
-                </table>
-              </div>
+                <div class="assoc-list" id="assocList" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;margin-top:12px"></div>
             </div>
 
             {{-- ══ ACCOUNT CREATION REQUESTS TAB ══ --}}
@@ -1195,7 +1287,12 @@
             <div id="tab-canceled" class="pane grid"></div>
           </main>
           <!-- PROJECTS MODALS -->
+<<<<<<< Updated upstream
           <div class="ov" id="ovNew"><div class="mbox"><div class="mhd"><h2><i class="fa-solid fa-plus" style="color:var(--teal);margin-left:7px;font-size:.9rem"></i>إنشاء مشروع مشترك</h2><button class="mcl" id="clNew"><i class="fa-solid fa-xmark"></i></button></div><form id="fNew"><div class="fg"><label>اسم المشروع</label><input id="nN" placeholder="أدخل اسم المشروع..." required></div><div class="fg"><label>تصنيف المشروع</label><select id="nD" required><option value="">— اختر التصنيف —</option></select></div><div class="fg"><label>هدف المشروع</label><textarea id="nG" placeholder="اشرح هدف المشروع بوضوح..." required></textarea></div><div class="frow"><div class="fg"><label>تاريخ البدء</label><input type="date" id="nS" required></div><div class="fg"><label>تاريخ النهاية</label><input type="date" id="nE" required></div></div><div class="fg"><label>حالة المشروع</label><select id="nSt"><option value="planning">قيد الإعداد والتخطيط</option><option value="active">بدء التنفيذ الفعلي</option><option value="idea">فكرة وعصف ذهني</option></select></div><button type="submit" class="bsub"><i class="fa-solid fa-paper-plane"></i> حفظ المشروع</button></form></div></div>
+=======
+          <div class="ov" id="ovNew"><div class="mbox"><div class="mhd"><h2><i class="fa-solid fa-plus" style="color:var(--teal);margin-left:7px;font-size:.9rem"></i>إنشاء مشروع مشترك</h2><button class="mcl" id="clNew"><i class="fa-solid fa-xmark"></i></button></div><form id="fNew"><div class="fg"><label>اسم المشروع</label><input id="nN" placeholder="أدخل اسم المشروع..." required></div><div class="fg"><label>تصنيف المشروع <span style="color:#e11d48">*</span></label><div id="nD-picker" style="display:flex;flex-wrap:wrap;gap:8px;padding:10px 12px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;min-height:48px;"></div><input type="hidden" id="nD" required /></div><div class="fg"><label>هدف المشروع</label><textarea id="nG" placeholder="اشرح هدف المشروع بوضوح..." required></textarea></div><div class="frow"><div class="fg"><label>تاريخ البدء</label><input type="date" id="nS" required></div><div class="fg"><label>تاريخ النهاية</label><input type="date" id="nE" required></div></div><div class="fg"><label>حالة المشروع</label><select id="nSt"><option value="قيد الإعداد">قيد الإعداد والتخطيط</option><option value="مستمر">بدء التنفيذ الفعلي</option><option value="فكرة">فكرة وعصف ذهني</option></select></div><button type="submit" class="bsub"><i class="fa-solid fa-paper-plane"></i> حفظ المشروع</button></form></div></div>
+
+>>>>>>> Stashed changes
           <div class="ov" id="ovEdit"><div class="mbox"><div class="mhd"><h2><i class="fa-regular fa-pen-to-square" style="color:var(--teal);margin-left:7px;font-size:.9rem"></i>تعديل وإضافة تقدم</h2><button class="mcl" id="clEdit"><i class="fa-solid fa-xmark"></i></button></div><form id="fEdit"><input type="hidden" id="eId"><div class="fg"><label>اسم المشروع</label><input id="eN" required></div><div class="fg"><label>الهدف / الوصف</label><textarea id="eG" rows="2" required></textarea></div><div class="frow"><div class="fg"><label>تاريخ البدء</label><input type="date" id="eS"></div><div class="fg"><label>تاريخ النهاية</label><input type="date" id="eE"></div></div><div class="fg"><label>نسبة الإنجاز (%)</label><input type="number" id="eP" min="0" max="100"></div><div class="fg"><label>إضافة تقدم جديد للسجل</label><textarea id="eU" placeholder="اكتب آخر ما تم إنجازه..."></textarea></div><button type="submit" class="bsub">حفظ التحديث</button></form></div></div>
           <div class="ov" id="ovConfirm"><div class="mbox cbox"><div class="cico"><i class="fa-solid fa-triangle-exclamation"></i></div><h3 id="cTtl"></h3><p id="cMsg"></p><div class="cbtns"><button class="by" id="cY">تأكيد</button><button class="bn" id="cN">تراجع</button></div></div></div>
         </div>{{-- /view-projects --}}
@@ -1234,10 +1331,8 @@
         </div>
         <div class="fg" id="fg-opp-cat">
           <label>تصنيف الفرصة <span class="req-span">*</span></label>
-          <div class="fld">
-            <span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>
-            <select id="f-opp-cat"></select>
-          </div>
+          <div id="f-opp-cat-picker"></div>
+          <input type="hidden" id="f-opp-cat" />
         </div>
 
         {{-- Title --}}
@@ -1255,6 +1350,15 @@
           <div class="fld">
             <span class="fi top"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
             <textarea id="f-opp-desc" placeholder="اشرح طبيعة عمل المتطوع ومتطلبات الانضمام..."></textarea>
+          </div>
+        </div>
+
+        {{-- Link --}}
+        <div class="fg">
+          <label>رابط الفرصة (اختياري)</label>
+          <div class="fld">
+            <span class="fi"><i class="fa-solid fa-link" style="font-size:15px;color:currentColor"></i></span>
+            <input type="url" id="f-opp-link" placeholder="https://example.com/opportunity" style="text-align:left;direction:ltr;">
           </div>
         </div>
 
@@ -1420,9 +1524,97 @@
     @endif
   </script>
 
+  <!-- ── Delete Category Confirm Modal ── -->
+  <div class="modal-overlay" id="delete-cat-modal">
+      <div class="modal" style="max-width:400px;text-align:center">
+          <div style="padding:36px 28px 28px;display:flex;flex-direction:column;align-items:center;gap:16px">
+              <div style="width:72px;height:72px;border-radius:50%;background:rgba(239,68,68,.1);display:flex;align-items:center;justify-content:center;margin-bottom:4px">
+                  <i class="fa-solid fa-trash" style="font-size:1.8rem;color:#ef4444"></i>
+              </div>
+              <div>
+                  <div style="font-size:1.15rem;font-weight:900;color:#0f172a;margin-bottom:6px">حذف التصنيف</div>
+                  <div id="delete-cat-msg" style="font-size:.88rem;color:#64748b;line-height:1.6">هل أنت متأكد من حذف هذا التصنيف؟ لا يمكن التراجع عن هذا الإجراء.</div>
+              </div>
+              <div id="delete-cat-badge" style="background:rgba(239,68,68,.07);border:1.5px solid rgba(239,68,68,.18);border-radius:12px;padding:10px 20px;font-size:.95rem;font-weight:800;color:#dc2626;width:100%;box-sizing:border-box"></div>
+              <div style="display:flex;gap:10px;width:100%;margin-top:4px">
+                  <button onclick="closeDeleteCatModal()" style="flex:1;padding:11px;border-radius:12px;font-family:inherit;font-size:.9rem;font-weight:700;cursor:pointer;border:1.5px solid #e2e8f0;background:#f8fafc;color:#64748b">إلغاء</button>
+                  <button onclick="confirmDeleteCategory()" id="confirm-delete-cat-btn" style="flex:1;padding:11px;border-radius:12px;font-family:inherit;font-size:.9rem;font-weight:800;cursor:pointer;border:none;background:linear-gradient(135deg,#dc2626,#ef4444);color:#fff;box-shadow:0 4px 16px rgba(239,68,68,.35)">
+                      <i class="fa-solid fa-trash" style="margin-left:6px"></i>تأكيد الحذف
+                  </button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- ── Add Category Modal ── -->
+  <div class="modal-overlay" id="add-assoc-cat-modal">
+      <div class="modal" style="max-width:440px">
+          <div class="modal-head">
+              <h3><i class="fa-solid fa-layer-group" style="margin-left:8px;color:var(--teal)"></i> إضافة تصنيف جديد</h3>
+              <button class="btn btn-ghost" onclick="closeAddCategoryModal()" style="padding:.3rem .7rem">✕</button>
+          </div>
+          <div class="modal-body" style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem">
+              <div>
+                  <label style="font-weight:700;font-size:.85rem;display:block;margin-bottom:.4rem">اسم التصنيف <span style="color:#ef4444">*</span></label>
+                  <input id="assoc-cat-name-input" type="text" placeholder="مثال: تعليمية" style="width:100%;padding:.7rem 1rem;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:.9rem;outline:none;box-sizing:border-box">
+              </div>
+              <div>
+                  <label style="font-weight:700;font-size:.85rem;display:block;margin-bottom:.4rem">اللون</label>
+                  <div style="display:flex;align-items:center;gap:10px">
+                      <input id="assoc-cat-color-input" type="color" value="#2ab8d0" style="width:40px;height:40px;border:none;border-radius:8px;cursor:pointer;padding:2px" onchange="document.getElementById('assoc-cat-color-label').textContent=this.value.toUpperCase()">
+                      <span id="assoc-cat-color-label" style="font-size:.85rem;color:var(--text-muted);font-weight:600">#2AB8D0</span>
+                  </div>
+              </div>
+              <div>
+                  <label style="font-weight:700;font-size:.85rem;display:block;margin-bottom:.4rem">الأيقونة (رمز تعبيري)</label>
+                  <input id="assoc-cat-icon-add-input" type="text" placeholder="مثال: 🎓" style="width:100%;padding:.6rem 1rem;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:1.1rem;outline:none;box-sizing:border-box">
+              </div>
+              <div id="assoc-cat-emoji-grid" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+          </div>
+          <div class="modal-footer">
+              <button class="btn btn-ghost" onclick="closeAddCategoryModal()">إلغاء</button>
+              <button class="btn btn-primary" onclick="saveNewCategory()"><i class="fa-solid fa-floppy-disk" style="margin-left:6px"></i> حفظ التصنيف</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- ── Edit Category Modal ── -->
+  <div class="modal-overlay" id="edit-assoc-cat-modal">
+      <div class="modal" style="max-width:440px">
+          <div class="modal-head" style="background:linear-gradient(135deg,#0a5565,#2ab8d0)">
+              <h3 style="color:#fff"><i class="fa-solid fa-pen-to-square" style="margin-left:8px"></i> تعديل التصنيف</h3>
+              <button class="btn" onclick="closeEditCategoryModal()" style="padding:.3rem .7rem;background:rgba(255,255,255,.2);color:#fff;border-color:transparent">✕</button>
+          </div>
+          <div class="modal-body" style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem">
+              <div>
+                  <label style="font-weight:700;font-size:.85rem;display:block;margin-bottom:.4rem">اسم التصنيف <span style="color:#ef4444">*</span></label>
+                  <input id="edit-assoc-cat-name-input" type="text" placeholder="اسم التصنيف" style="width:100%;padding:.7rem 1rem;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:.9rem;outline:none;box-sizing:border-box">
+              </div>
+              <div>
+                  <label style="font-weight:700;font-size:.85rem;display:block;margin-bottom:.4rem">اللون</label>
+                  <div style="display:flex;align-items:center;gap:10px">
+                      <input id="edit-assoc-cat-color-input" type="color" value="#2ab8d0" style="width:40px;height:40px;border:none;border-radius:8px;cursor:pointer;padding:2px" onchange="document.getElementById('edit-assoc-cat-color-label').textContent=this.value.toUpperCase()">
+                      <span id="edit-assoc-cat-color-label" style="font-size:.85rem;color:var(--text-muted);font-weight:600">#2AB8D0</span>
+                  </div>
+              </div>
+              <div>
+                  <label style="font-weight:700;font-size:.85rem;display:block;margin-bottom:.4rem">الأيقونة (رمز تعبيري)</label>
+                  <input id="edit-assoc-cat-icon-input" type="text" placeholder="مثال: 🏫" style="width:100%;padding:.6rem 1rem;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:1.1rem;outline:none;box-sizing:border-box">
+              </div>
+              <div id="edit-assoc-cat-emoji-grid" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+          </div>
+          <div class="modal-footer">
+              <button class="btn btn-ghost" onclick="closeEditCategoryModal()">إلغاء</button>
+              <button class="btn btn-primary" id="edit-assoc-cat-save-btn" onclick="saveEditCategory()"><i class="fa-solid fa-floppy-disk" style="margin-left:6px"></i> حفظ التعديلات</button>
+          </div>
+      </div>
+  </div>
+
+  <script src="{{ asset('js/cat-picker.js') }}"></script>
   <script src="{{ asset('js/consulting.js') }}"></script>
+  <script src="{{ asset('js/menu.js') }}"></script>
   <script src="{{ asset('js/meeting.js') }}"></script>
-  <script src="{{ asset('js/orders.js') }}"></script>
+  <script src="{{ asset('js/orders.js') }}?v={{ rand() }}"></script>
   <script src="{{ asset('js/joint-projects.js') }}"></script>
   <script src="{{ asset('js/spa-nav.js') }}"></script>
   <script>

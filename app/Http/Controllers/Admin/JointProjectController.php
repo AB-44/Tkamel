@@ -25,7 +25,7 @@ class JointProjectController extends Controller
         $query = JointProject::with(['category', 'updates'])->latest();
 
         if ($request->filled('category_id')) {
-            $query->where('category_id', $request->category_id);
+            $query->whereRaw('FIND_IN_SET(?, category_id)', [$request->category_id]);
         }
 
         if ($request->filled('status')) {

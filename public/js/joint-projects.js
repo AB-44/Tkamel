@@ -133,7 +133,10 @@ function buildDropdown() {
     <span class="item-count">${total}</span></div>`;
 
   _categories.forEach(c => {
-    const cnt = _projects.filter(p => String(p.category_id) === String(c.id)).length;
+    const cnt = _projects.filter(p => {
+      const pCats = String(p.category_id || '').split(',');
+      return pCats.includes(String(c.id));
+    }).length;
     html += `<div class="dd-item ${_activeCat === String(c.id) ? 'selected' : ''}" data-cat="${c.id}">
       <span class="item-emoji"></span><span>${c.name}</span>
       <span class="item-count">${cnt}</span></div>`;
@@ -178,7 +181,10 @@ function closeDd() {
 ═══════════════════════════════════════════════════════ */
 function filterProjects(statusGroup) {
   let f = _projects;
-  if (_activeCat !== 'all') f = f.filter(p => String(p.category_id) === String(_activeCat));
+  if (_activeCat !== 'all') f = f.filter(p => {
+    const cats = String(p.category_id || '').split(',');
+    return cats.includes(String(_activeCat));
+  });
   if (_searchQ) {
     const q = _searchQ.toLowerCase();
     f = f.filter(p => p.name.toLowerCase().includes(q) || (p.description || '').toLowerCase().includes(q));
@@ -245,10 +251,23 @@ function fillGrid(id, projs, ico, emptyMsg, mode = 'admin') {
 }
 
 function buildCard(p, mode = 'admin') {
-  const cat = p.category;
+  const catIds = String(p.category_id || '').split(',').filter(Boolean);
+  const firstCatId = catIds[0];
+  const cat = _categories.find(c => String(c.id) === String(firstCatId));
   const catColor = cat?.color || '#2ab8d0';
   const catIcon  = cat?.icon  || '';
-  const catName  = cat?.name  || '—';
+  
+  // Create HTML for multiple category badges
+  let catBadgesHtml = '';
+  if (catIds.length > 0) {
+    catBadgesHtml = catIds.map(id => {
+      const c = _categories.find(x => String(x.id) === String(id));
+      if (!c) return '';
+      return `<span class="bdg" style="background:${c.color}1a;color:${c.color};white-space:nowrap;">${c.name}</span>`;
+    }).join('');
+  } else {
+    catBadgesHtml = `<span class="bdg" style="background:#2ab8d01a;color:#2ab8d0;white-space:nowrap;">—</span>`;
+  }
 
   const st    = STATUS_MAP[p.status] || STATUS_MAP['planning'];
   const isFin = ['completed','canceled'].includes(p.status);
@@ -298,7 +317,7 @@ function buildCard(p, mode = 'admin') {
         </div>
         <div class="cbadges">
           <span class="bdg ${st.cls}"><i class="fa-solid fa-circle" style="font-size:.4rem"></i>${st.label}</span>
-          <span class="bdg" style="background:${catColor}1a;color:${catColor}">${catName}</span>
+          ${catBadgesHtml}
         </div>
       </div>
       <div class="cactions" style="position:relative; z-index:10; display:flex; align-items:center; gap:6px;">${acts}</div>
@@ -322,19 +341,44 @@ function openOv(id) { document.getElementById(id)?.classList.add('open'); }
 function closeOv(id) { document.getElementById(id)?.classList.remove('open'); }
 
 function populateCategorySelects() {
-  ['nD', 'eDCat'].forEach(selId => {
-    const sel = document.getElementById(selId);
-    if (!sel) return;
-    const current = sel.value;
-    sel.innerHTML = '<option value="">— اختر التصنيف —</option>' +
-      _categories.map(c => `<option value="${c.id}" ${String(current)===String(c.id)?'selected':''}>${c.name}</option>`).join('');
-  });
+  // Create CatPicker for New Project modal
+  if (document.getElementById('nD-picker')) {
+    if (window.newProjCatPicker) { try { window.newProjCatPicker.destroy(); } catch(e){} }
+    window.newProjCatPicker = new CatPicker({
+      containerId : 'nD-picker',
+      hiddenId    : 'nD',
+      categories  : _categories,
+      selected    : [],
+      multi       : true,
+    });
+  }
+  // Create CatPicker for Edit Project modal
+  if (document.getElementById('eDCat-picker')) {
+    if (window.editProjCatPicker) { try { window.editProjCatPicker.destroy(); } catch(e){} }
+    window.editProjCatPicker = new CatPicker({
+      containerId : 'eDCat-picker',
+      hiddenId    : 'eDCat',
+      categories  : _categories,
+      selected    : [],
+      multi       : true,
+    });
+  }
 }
 
 /* ── NEW PROJECT ── */
 function openNewModal() {
   document.getElementById('fNew').reset();
-  populateCategorySelects();
+  // Init CatPicker fresh for new project
+  if (document.getElementById('nD-picker')) {
+    if (window.newProjCatPicker) { try { window.newProjCatPicker.destroy(); } catch(e){} }
+    window.newProjCatPicker = new CatPicker({
+      containerId : 'nD-picker',
+      hiddenId    : 'nD',
+      categories  : _categories,
+      selected    : [],
+      multi       : true,
+    });
+  }
   openOv('ovNew');
 }
 
@@ -354,22 +398,25 @@ function openEdit(id) {
     document.getElementById('eE').value   = p.end_date    || '';
     document.getElementById('eP').value   = p.progress    || 0;
     
-    // Safety check for status
     if (document.getElementById('eSt')) {
       document.getElementById('eSt').value = p.status || 'planning';
     }
-    
-    // Safety check for update text
     if (document.getElementById('eU')) {
       document.getElementById('eU').value = '';
     }
 
-    populateCategorySelects();
-    
-    if (document.getElementById('eDCat')) {
-      document.getElementById('eDCat').value = p.category_id || '';
+    // Init CatPicker with current category
+    if (document.getElementById('eDCat-picker')) {
+      if (window.editProjCatPicker) { try { window.editProjCatPicker.destroy(); } catch(e){} }
+      window.editProjCatPicker = new CatPicker({
+        containerId : 'eDCat-picker',
+        hiddenId    : 'eDCat',
+        categories  : _categories,
+        selected    : p.category_id ? String(p.category_id).split(',') : [],
+        multi       : true,
+      });
     }
-    
+
     openOv('ovEdit');
   } catch (err) {
     console.error('Error opening edit modal:', err);

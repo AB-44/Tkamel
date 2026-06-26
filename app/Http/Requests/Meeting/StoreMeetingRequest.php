@@ -23,7 +23,7 @@ class StoreMeetingRequest extends FormRequest
     {
         return [
             'title'                => ['required', 'string', 'max:255'],
-            'category'             => ['required', 'string', 'max:100'],
+            'category'             => ['required', 'string', 'max:500'],
             'presenter'            => ['required', 'string', 'max:255'],
             'date'                 => ['required', 'date'],
             'end_date'             => ['nullable', 'date', 'after_or_equal:date'],

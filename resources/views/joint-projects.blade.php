@@ -9,7 +9,17 @@
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ asset('css/joint-projects.css') }}">
   
-<style>#nb-reqs:empty{display:none!important}</style>
+<style>
+  #nb-reqs:empty{display:none!important}
+  .cat-picker-wrap { display:flex; flex-wrap:wrap; gap:8px; padding:10px 12px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; min-height:48px; transition: border-color .18s; }
+  .cat-picker-wrap:focus-within { border-color:#0d9488; box-shadow: 0 0 0 3px rgba(13,148,136,0.12); }
+  .cat-pill { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:50px; border:1.5px solid rgba(0,0,0,0.09); background:#fff; cursor:pointer; font-family:'Tajawal',sans-serif; font-size:0.83rem; font-weight:600; color:#475569; transition:all 0.18s ease; user-select:none; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+  .cat-pill:hover { border-color:rgba(13,148,136,0.4); background:rgba(13,148,136,0.06); color:#0d9488; transform:translateY(-1px); box-shadow:0 4px 10px rgba(13,148,136,0.12); }
+  .cat-pill.active { background:linear-gradient(135deg,#0d9488,#0891b2); border-color:transparent; color:#fff; box-shadow:0 4px 14px rgba(13,148,136,0.35); transform:translateY(-1px); }
+  .cat-pill-all.active { background:linear-gradient(135deg,#1e40af,#0d9488); box-shadow:0 4px 14px rgba(30,64,175,0.3); }
+  .cat-pill-ico { font-size:1rem; line-height:1; }
+  .cat-pill-lbl { white-space:nowrap; }
+</style>
 </head>
 
 <body>
@@ -215,9 +225,8 @@
           <div class="fg"><label>اسم المشروع</label><input id="nN" placeholder="أدخل اسم المشروع..." required></div>
           <div class="fg">
             <label>تصنيف المشروع</label>
-            <select id="nD" required>
-              <option value="">— اختر التصنيف —</option>
-            </select>
+            <div id="nD-picker"></div>
+            <input type="hidden" id="nD" required />
           </div>
           <div class="fg"><label>هدف المشروع</label><textarea id="nG" placeholder="اشرح هدف المشروع بوضوح..."
               required></textarea></div>
@@ -251,9 +260,8 @@
           <div class="fg"><label>اسم المشروع</label><input id="eN" required></div>
           <div class="fg">
             <label>تصنيف المشروع</label>
-            <select id="eDCat">
-              <option value="">— اختر التصنيف —</option>
-            </select>
+            <div id="eDCat-picker"></div>
+            <input type="hidden" id="eDCat" />
           </div>
           <div class="fg"><label>الهدف / الوصف</label><textarea id="eG" rows="2" required></textarea></div>
           <div class="frow">
@@ -291,6 +299,7 @@
       </div>
     </div>
 
+    <script src="{{ asset('js/cat-picker.js') }}"></script>
     <script src="{{ asset('js/joint-projects.js') }}"></script>
 </body>
 

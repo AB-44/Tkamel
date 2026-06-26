@@ -88,15 +88,19 @@ class LoginController extends Controller
                 return back()->withErrors(['email' => $msg]);
             }
 
+            // Lookup category numeric ID based on string category name
+            $catId = \App\Models\AssociationCategory::where('name', $assoc->category)->value('id');
+
             // Approved — start association session
             $request->session()->regenerate();
             session([
                 'association' => [
-                    'id'       => $assoc->id,
-                    'name'     => $assoc->association_name,
-                    'email'    => $assoc->email,
-                    'category' => $assoc->category, // store category name for filtering
-                    'avatar'   => $assoc->avatar,
+                    'id'          => $assoc->id,
+                    'name'        => $assoc->association_name,
+                    'email'       => $assoc->email,
+                    'category'    => $assoc->category,      // category name (legacy)
+                    'category_id' => $catId,               // numeric ID for filtering
+                    'avatar'      => $assoc->avatar,
                 ]
             ]);
             $request->session()->save();

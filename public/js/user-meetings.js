@@ -28,27 +28,34 @@ const CAT_BADGE = {
 /* ── HELPERS ── */
 function isCurrent(m) {
     if (isCancelled(m)) return false;
-    let ed = m.end_date || m.date;
-    let et = m.end_time || '23:59';
-    let endDt = new Date(ed + 'T' + et + ':00');
-    return endDt >= new Date();
+    return m.status === 'upcoming';
 }
 function isPast(m) {
     if (isCancelled(m)) return false;
-    let ed = m.end_date || m.date;
-    let et = m.end_time || '23:59';
-    let endDt = new Date(ed + 'T' + et + ':00');
-    return endDt < new Date();
+    return m.status === 'past';
 }
 function isCancelled(m) { return m.status === 'cancelled' || m.status === 'canceled'; }
 
-function catIcon(m) {
-    if (m.catItem && m.catItem.icon) return m.catItem.icon;
-    const icons = { خيرية:'🤝', ثقافية:'📚', صحية:'🌿', رياضية:'⚽', تنموية:'📈', دينية:'🕌' };
-    return icons[m.cat] || '📁';
+function renderCatBadges(catStr) {
+    if (!catStr) return '<span class="badge" style="background:#e2e8f0;color:#64748b;font-size:0.65rem">📁 بدون تصنيف</span>';
+    if (catStr === 'all') return '<span class="badge" style="background:#f0f9ff;color:#0ea5e9;border:1px solid #bae6fd;font-size:0.65rem">🌐 لكل الجمعيات</span>';
+
+    const parts = catStr.split(',').map(s => s.trim()).filter(Boolean);
+    return parts.map(p => {
+        // try find by ID first, then by name for legacy data
+        const c = (window.categoriesList || []).find(x => String(x.id) === p || x.name === p);
+        if (c) {
+            return `<span class="badge" style="background:${c.color}15; color:${c.color}; border:1px solid ${c.color}40; font-size:0.65rem">${c.icon || '📁'} ${c.name}</span>`;
+        }
+        return `<span class="badge" style="background:#f1f5f9;color:#64748b;font-size:0.65rem">📁 ${p}</span>`;
+    }).join(' ');
 }
 
-function catAccent(m) { return ACCENT[m.cat] || '#2ab8d0'; }
+function getFirstCat(catStr) {
+    if (!catStr || catStr === 'all') return null;
+    const firstCatId = catStr.split(',')[0].trim();
+    return (window.categoriesList || []).find(c => String(c.id) === firstCatId || c.name === firstCatId);
+}
 
 function fmtDate(d) {
     if (!d) return '—';
@@ -124,12 +131,11 @@ window.renderAll = function renderAll() {
 
 /* ── FULL CARD ── */
 function fullCard(m, i) {
-    const acc    = catAccent(m);
+    const firstCat = getFirstCat(m.cat);
+    const acc = firstCat ? (firstCat.color || '#2ab8d0') : '#2ab8d0';
     const isAtt  = attendingIds.has(m.id);
     const tLabel = m.type === 'online' ? '💻 عن بعد' : '📍 حضوري';
     const tBadge = m.type === 'online' ? 'b-online' : 'b-onsite';
-    const ic     = catIcon(m);
-    const cb     = CAT_BADGE[m.cat] || 'b-online';
 
     const locationRow = (m.type === 'onsite' && m.location)
         ? `<div class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${m.location}</div>` : '';
@@ -142,7 +148,7 @@ function fullCard(m, i) {
       <div class="card-inner">
         <div class="card-badges">
           <span class="badge ${tBadge}">${tLabel}</span>
-          <span class="badge ${cb}">${ic} ${m.cat}</span>
+          ${renderCatBadges(m.cat)}
         </div>
         <div class="card-title">${m.title}</div>
         <div class="card-meta">
@@ -170,10 +176,10 @@ function fullCard(m, i) {
 
 /* ── COMPACT ROW ── */
 function compactRow(m, isCnc, i) {
-    const acc    = isCnc ? '#c62828' : catAccent(m);
+    const firstCat = getFirstCat(m.cat);
+    const catColor = firstCat ? (firstCat.color || '#2ab8d0') : '#2ab8d0';
+    const acc    = isCnc ? '#c62828' : catColor;
     const ds     = fmtDateShort(m.date);
-    const ic     = catIcon(m);
-    const cb     = CAT_BADGE[m.cat] || 'b-online';
     const hasRep = !isCnc && m.report;
 
     return `
@@ -190,7 +196,7 @@ function compactRow(m, isCnc, i) {
         </div>
       </div>
       <div class="ci-badges">
-        <span class="badge ${cb}" style="font-size:0.65rem">${ic} ${m.cat}</span>
+        ${renderCatBadges(m.cat)}
         ${isCnc ? '<span class="ci-cancelled-badge">🚫 ملغي</span>' : ''}
         ${hasRep ? '<span class="badge b-has-report" style="font-size:0.65rem">📋 تقرير</span>' : ''}
       </div>
@@ -246,7 +252,11 @@ function openDetails(id) {
     const isCur = isCurrent(m);
 
     document.getElementById('d-title').textContent    = m.title;
-    document.getElementById('d-cat').textContent      = catIcon(m) + ' ' + m.cat;
+    
+    // Convert IDs to HTML for modal category
+    const modalCatObj = getFirstCat(m.cat);
+    const modalCatStr = m.cat === 'all' ? '🌐 لكل الجمعيات' : (modalCatObj ? (modalCatObj.icon || '📁') + ' ' + modalCatObj.name : '📁 ' + m.cat);
+    document.getElementById('d-cat').textContent      = modalCatStr;
     document.getElementById('d-date').textContent     = fmtDate(m.date);
     document.getElementById('d-time').textContent     = (m.time || '—') + (m.end_time ? ' - ' + m.end_time : '');
     document.getElementById('d-banner-bg').className  = 'det-banner-bg' + (isC ? ' red-bg' : isPast(m) ? ' grey-bg' : '');

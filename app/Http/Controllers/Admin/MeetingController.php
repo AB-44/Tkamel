@@ -113,12 +113,23 @@ class MeetingController extends Controller
             ->orderByDesc('date')
             ->orderByDesc('time');
 
-        // Show meetings where invitation_direction is 'عام', matches category, or is null (defaults to all)
-        if ($assocCategory) {
-            $query->where(function ($q) use ($assocCategory) {
-                $q->where('invitation_direction', 'عام')
-                  ->orWhere('invitation_direction', $assocCategory)
-                  ->orWhereNull('invitation_direction');
+        // Get the association's numeric category_id from session
+        $assocCategoryId = null;
+        if (session()->has('association')) {
+            $assocCategoryId = session('association.category_id')
+                ?? session('association')['category_id']
+                ?? null;
+        }
+
+        // Filter meetings: show if category is 'all', or FIND_IN_SET matches, or category is null/empty
+        if ($assocCategoryId) {
+            $query->where(function ($q) use ($assocCategoryId) {
+                $q->where('category', 'all')
+                  ->orWhereRaw('FIND_IN_SET(?, category)', [(string) $assocCategoryId])
+                  ->orWhereNull('category')
+                  ->orWhere('category', '')
+                  // Legacy: invitation_direction == 'عام' means all
+                  ->orWhere('invitation_direction', 'عام');
             });
         }
 
@@ -260,7 +271,39 @@ class MeetingController extends Controller
             ]);
         }
 
-        // Notify all regular users
+        // ── Notify associations based on category selection ──────────────────────
+        $category = $meeting->category ?? 'all';
+        $catIds   = array_filter(array_map('trim', explode(',', $category)));
+        $isAll    = in_array('all', $catIds) || empty($catIds);
+
+        if ($isAll) {
+            // Send to ALL approved associations
+            $targetAssocIds = Association::where('status', 'approved')->pluck('id');
+        } else {
+            // Fetch category names from association_categories based on the IDs
+            $catNames = \App\Models\AssociationCategory::whereIn('id', $catIds)->pluck('name')->toArray();
+            
+            // Send only to associations whose category string matches one of the selected category names
+            $targetAssocIds = Association::where('status', 'approved')
+                ->where(function($q) use ($catNames) {
+                    $q->whereIn('category', $catNames);
+                })
+                ->pluck('id');
+        }
+
+        foreach ($targetAssocIds as $aid) {
+            Notification::create([
+                'association_id' => $aid,
+                'title'          => 'اجتماع جديد',
+                'body'           => "تمت إضافة اجتماع جديد: {$meeting->title}",
+                'type'           => 'meeting_created',
+                'related_id'     => $meeting->id,
+                'related_type'   => Meeting::class,
+                'is_read'        => false,
+            ]);
+        }
+
+        // Notify all regular users (users always see all meetings)
         $userIds = User::whereHas('role', fn($q) => $q->where('name', 'user'))->pluck('id');
         foreach ($userIds as $uid) {
             Notification::create([
@@ -271,20 +314,6 @@ class MeetingController extends Controller
                 'related_id'   => $meeting->id,
                 'related_type' => Meeting::class,
                 'is_read'      => false,
-            ]);
-        }
-
-        // Notify all approved associations
-        $assocIds = Association::where('status', 'approved')->pluck('id');
-        foreach ($assocIds as $aid) {
-            Notification::create([
-                'association_id' => $aid,
-                'title'          => 'اجتماع جديد',
-                'body'           => "تمت إضافة اجتماع جديد: {$meeting->title}",
-                'type'           => 'meeting_created',
-                'related_id'     => $meeting->id,
-                'related_type'   => Meeting::class,
-                'is_read'        => false,
             ]);
         }
 
@@ -487,52 +516,48 @@ class MeetingController extends Controller
 
     private function syncPastMeetings(): void
     {
-        Meeting::where(function ($q) {
-                $q->where('status', 'upcoming')->orWhereNull('status');
-            })
-            ->where(function ($query) {
-                // If end_date is present, check against end_date and end_time
-                $query->where(function ($q1) {
-                    $q1->whereNotNull('end_date')
-                       ->where(function ($sub1) {
-                           $sub1->whereDate('end_date', '<', now()->toDateString())
-                                ->orWhere(function ($sub2) {
-                                    $sub2->whereDate('end_date', now()->toDateString())
-                                         ->whereNotNull('end_time')
-                                         ->where('end_time', '<', now()->format('H:i'));
-                                });
-                       });
-                })
-                // If end_date is NOT present but end_time IS present, use date and end_time
-                ->orWhere(function ($q2) {
-                    $q2->whereNull('end_date')
-                       ->whereNotNull('end_time')
-                       ->where(function ($sub1) {
-                           $sub1->whereDate('date', '<', now()->toDateString())
-                                ->orWhere(function ($sub2) {
-                                    $sub2->whereDate('date', now()->toDateString())
-                                         ->where('end_time', '<', now()->format('H:i'));
-                                });
-                       });
-                })
-                // If neither end_date nor end_time is present, fallback to date and time
-                ->orWhere(function ($q3) {
-                    $q3->whereNull('end_date')
-                       ->whereNull('end_time')
-                       ->where(function ($sub1) {
-                           $sub1->whereDate('date', '<', now()->toDateString())
-                                ->orWhere(function ($sub2) {
-                                    $sub2->whereDate('date', now()->toDateString())
-                                         ->whereNotNull('time')
-                                         ->where('time', '<', now()->format('H:i'));
-                                });
-                       });
-                });
+        $nowDate = now()->toDateString();
+        $nowTime = now()->format('H:i');
+
+        // ── Mark as PAST ────────────────────────────────────────────────────────
+        // CASE 1: end_date is set → expired when end_date passed, or end_date=today & end_time passed
+        Meeting::where(function ($q) { $q->where('status', 'upcoming')->orWhereNull('status'); })
+            ->whereNotNull('end_date')
+            ->where(function ($q) use ($nowDate, $nowTime) {
+                $q->whereDate('end_date', '<', $nowDate)
+                  ->orWhere(function ($s) use ($nowDate, $nowTime) {
+                      $s->whereDate('end_date', $nowDate)
+                        ->whereNotNull('end_time')
+                        ->where('end_time', '<', $nowTime);
+                  });
             })
             ->update(['status' => 'past']);
 
+        // CASE 2: no end_date but end_time set → expired when date passed, or date=today & end_time passed
+        Meeting::where(function ($q) { $q->where('status', 'upcoming')->orWhereNull('status'); })
+            ->whereNull('end_date')
+            ->whereNotNull('end_time')
+            ->where(function ($q) use ($nowDate, $nowTime) {
+                $q->whereDate('date', '<', $nowDate)
+                  ->orWhere(function ($s) use ($nowDate, $nowTime) {
+                      $s->whereDate('date', $nowDate)
+                        ->where('end_time', '<', $nowTime);
+                  });
+            })
+            ->update(['status' => 'past']);
+
+        // CASE 3: no end_date, no end_time → expired only when DATE itself has fully passed (strict yesterday or earlier)
+        // A meeting today with no end_time stays "upcoming" until end of day
+        Meeting::where(function ($q) { $q->where('status', 'upcoming')->orWhereNull('status'); })
+            ->whereNull('end_date')
+            ->whereNull('end_time')
+            ->whereDate('date', '<', $nowDate)
+            ->update(['status' => 'past']);
+
+        // ── Fix meetings with null status that should be upcoming ───────────────
         Meeting::whereNull('status')
-            ->whereDate('date', '>=', now()->toDateString())
+            ->whereDate('date', '>=', $nowDate)
             ->update(['status' => 'upcoming']);
     }
 }
+

@@ -16,23 +16,28 @@ let mType       = 'online';
 let typeFilter  = 'all';
 
 /* ─── helpers ─────────────────────────────────────────── */
-function getCatObj(m) { return categories.find(c => c.name === m.cat) || {}; }
-function catIcon(m) { return getCatObj(m).icon || '📁'; }
-function catAccent(m) { return getCatObj(m).color || '#2ab8d0'; }
+function renderCatBadges(catStr) {
+  if (!catStr) return '<span class="badge" style="background:#e2e8f0;color:#64748b;font-size:0.65rem">📁 بدون تصنيف</span>';
+  if (catStr === 'all') return '<span class="badge" style="background:#f0f9ff;color:#0ea5e9;border:1px solid #bae6fd;font-size:0.65rem">🌐 لكل الجمعيات</span>';
+
+  const parts = catStr.split(',').map(s => s.trim()).filter(Boolean);
+  return parts.map(p => {
+    // try find by ID first, then by name for legacy data
+    const c = categories.find(x => x.id === p || x.name === p);
+    if (c) {
+      return `<span class="badge" style="background:${c.color}15; color:${c.color}; border:1px solid ${c.color}40; font-size:0.65rem">${c.icon || '📁'} ${c.name}</span>`;
+    }
+    return `<span class="badge" style="background:#f1f5f9;color:#64748b;font-size:0.65rem">📁 ${p}</span>`;
+  }).join(' ');
+}
 
 function isCurrent(m) { 
   if (isCancelled(m)) return false;
-  let ed = m.end_date || m.date;
-  let et = m.end_time || '23:59';
-  let endDt = new Date(ed + 'T' + et + ':00');
-  return endDt >= new Date();
+  return m.status === 'upcoming';
 }
 function isPast(m) { 
   if (isCancelled(m)) return false;
-  let ed = m.end_date || m.date;
-  let et = m.end_time || '23:59';
-  let endDt = new Date(ed + 'T' + et + ':00');
-  return endDt < new Date();
+  return m.status === 'past';
 }
 function isCancelled(m){ return m.status === 'cancelled' || m.status === 'canceled'; }
 
@@ -66,8 +71,15 @@ function populateCategoryFilters() {
     catFilter.innerHTML = '<option value="">كل التصنيفات</option>' + categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
   }
   const fCat = document.getElementById('f-cat');
-  if (fCat) {
-    fCat.innerHTML = '<option value="">اختر التصنيف</option>' + categories.map(c => `<option value="${c.name}">${c.icon} ${c.name}</option>`).join('');
+  if (document.getElementById('f-cat-picker')) {
+    if (window.catChoices) { try { window.catChoices.destroy(); } catch(e){} }
+    window.catChoices = new CatPicker({
+      containerId : 'f-cat-picker',
+      hiddenId    : 'f-cat',
+      categories  : categories,
+      selected    : [],
+      multi       : true,
+    });
   }
   const fInv = document.getElementById('f-invitation');
   if (fInv) {
@@ -130,7 +142,13 @@ function renderAll() {
 
 /* ─── full card ────────────────────────────────────────── */
 function fullCard(m) {
-  const acc    = catAccent(m);
+  let catColor = '#2ab8d0';
+  if (m.cat && m.cat !== 'all') {
+    const firstCatId = m.cat.split(',')[0].trim();
+    const firstCatObj = categories.find(c => c.id === firstCatId || c.name === firstCatId);
+    if (firstCatObj) catColor = firstCatObj.color || '#2ab8d0';
+  }
+  const acc = catColor;
   const tLabel = m.type === 'online' ? '💻 عن بعد' : '📍 حضوري';
   const tBadge = m.type === 'online' ? 'b-online' : 'b-onsite';
   const linkRow = (m.type === 'online' && m.link)
@@ -142,7 +160,7 @@ function fullCard(m) {
       <div class="card-row1">
         <div class="card-badges">
           <span class="badge ${tBadge}">${tLabel}</span>
-          <span class="badge" style="background:${acc}15; color:${acc}; border:1px solid ${acc}40">${catIcon(m)} ${m.cat}</span>
+          ${renderCatBadges(m.cat)}
         </div>
         <div class="card-actions">
           <button class="icn-btn attendees-btn" onclick="event.stopPropagation(); openAttendees(${m.id})" title="الحاضرون" style="position:relative">
@@ -173,7 +191,13 @@ function fullCard(m) {
 
 /* ─── compact row ──────────────────────────────────────── */
 function compactRow(m, isCnc) {
-  const acc = isCnc ? '#c62828' : catAccent(m);
+  let catColor = '#2ab8d0';
+  if (m.cat && m.cat !== 'all') {
+    const firstCatId = m.cat.split(',')[0].trim();
+    const firstCatObj = categories.find(c => c.id === firstCatId || c.name === firstCatId);
+    if (firstCatObj) catColor = firstCatObj.color || '#2ab8d0';
+  }
+  const acc = isCnc ? '#c62828' : catColor;
   const ds  = fmtDateShort(m.date);
   const tLabel = m.type === 'online' ? '💻 عن بعد' : '📍 حضوري';
   const hasReport = !isCnc && m.report;
@@ -204,7 +228,7 @@ function compactRow(m, isCnc) {
       </div>
     </div>
     <div class="ci-badges">
-      <span class="badge" style="background:${acc}15; color:${acc}; border:1px solid ${acc}40; font-size:0.65rem">${catIcon(m)} ${m.cat}</span>
+      ${renderCatBadges(m.cat)}
       ${isCnc ? '<span class="ci-cancelled-badge">🚫 ملغي</span>' : ''}
       ${hasReport ? '<span class="badge b-has-report" style="font-size:0.65rem">📋 تقرير</span>' : ''}
     </div>
@@ -284,9 +308,13 @@ function openEdit(id) {
   document.getElementById('f-link').value          = m.link || '';
   document.getElementById('f-notes').value         = m.notes || '';
 
-  // Category is now a string value
-  const catSel = document.getElementById('f-cat');
-  if (catSel) catSel.value = m.cat || '';
+  // Category - use CatPicker if available
+  if (window.catChoices) {
+    try { window.catChoices.reset(); if (m.cat) window.catChoices.setChoiceByValue(m.cat); } catch(e){}
+  } else {
+    const h = document.getElementById('f-cat');
+    if (h) h.value = m.cat || '';
+  }
 
   // Invitation direction
   const invSel = document.getElementById('f-invitation');
@@ -316,10 +344,12 @@ function openEdit(id) {
 }
 
 function clearForm() {
-  ['f-title','f-cat','f-presenter','f-date','f-end-date','f-time','f-end-time','f-location','f-location-url',
+  ['f-title','f-presenter','f-date','f-end-date','f-time','f-end-time','f-location','f-location-url',
    'f-link','f-notes','f-report-summary','f-report-decisions','f-report-attendees','f-report-actions'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });
+  // Clear CatPicker
+  if (window.catChoices) { try { window.catChoices.reset(); } catch(e){} }
   const agendaList = document.getElementById('agenda-list');
   if (agendaList) agendaList.innerHTML = '';
   const invSel = document.getElementById('f-invitation');
@@ -330,7 +360,13 @@ async function saveMeeting() {
   const title     = (document.getElementById('f-title')?.value || '').trim();
   const presenter = (document.getElementById('f-presenter')?.value || '').trim();
   const date      = document.getElementById('f-date')?.value || '';
-  const category  = document.getElementById('f-cat')?.value;
+  let category;
+  if (window.catChoices) {
+    const vals = window.catChoices.getValues();
+    category = Array.isArray(vals) ? vals.join(',') : vals;
+  } else {
+    category = document.getElementById('f-cat')?.value || null;
+  }
   const mType     = document.getElementById('tb-online')?.classList.contains('on-online') ? 'online' : 'onsite';
 
   if (!title || !presenter || !date || !category) { 
@@ -452,6 +488,10 @@ function openDetails(id) {
   const m = meetings.find(x => x.id === id);
   if (!m) return;
   viewingId = id;
+  const firstCatId = m.cat ? m.cat.split(',')[0].trim() : null;
+  const firstCatObj = firstCatId === 'all' ? null : categories.find(c => c.id === firstCatId || c.name === firstCatId);
+  const acc = firstCatObj ? (firstCatObj.color || '#2ab8d0') : '#2ab8d0';
+
   const isC = isCancelled(m);
 
   document.getElementById('d-title').textContent = m.title;

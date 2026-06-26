@@ -13,8 +13,19 @@ Route::post('/register', [RegisterController::class, 'register'])->name('registe
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // ── Root redirect ─────────────────────────────────────────────────────────────
+// Route::get('/', function () {
+//     return redirect()->route('login');
+// });
+
 Route::get('/', function () {
-    return redirect()->route('login');
+    if (\Illuminate\Support\Facades\Auth::check() || session('association')) {
+        if (session('association') && !\Illuminate\Support\Facades\Auth::check()) {
+            return redirect()->route('dashboard');
+        }
+        $roleName = \Illuminate\Support\Facades\Auth::user()?->role?->name ?? 'user';
+        return redirect($roleName === 'admin' ? route('dashboard') : route('user.dashboard'));
+    }
+    return view('landing');
 });
 
 // ── Protected routes — any authenticated user ─────────────────────────────────
@@ -83,7 +94,7 @@ Route::prefix('api')
 
         Route::get(
             '/opportunities',
-            [App\Http\Controllers\Admin\OpportunityController::class, 'index']
+            [App\Http\Controllers\Admin\OpportunityController::class, 'userIndex']
         );
 
         Route::get(
