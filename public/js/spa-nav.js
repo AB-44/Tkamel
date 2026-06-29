@@ -4,10 +4,12 @@
 ══════════════════════════════════════════════════ */
 
 const SECTION_META = {
+  dashboard: { title: 'لوحة التحكم',        crumb: 'لوحة التحكم',        navId: 'nav-dashboard', viewId: 'view-dashboard' },
   volunteer: { title: 'فرص التطوع',         crumb: 'فرص التطوع',         navId: 'nav-volunteer', viewId: 'view-admin' },
   meetings:  { title: 'إدارة الاجتماعات',   crumb: 'إدارة الاجتماعات',   navId: 'nav-meetings',  viewId: 'view-meetings' },
   orders:    { title: 'الطلبات',             crumb: 'الطلبات',             navId: 'nav-orders',    viewId: 'view-orders' },
   projects:  { title: 'المشاريع المشتركة',   crumb: 'المشاريع المشتركة',   navId: 'nav-projects',  viewId: 'view-projects' },
+  settings:  { title: 'الملف الشخصي',        crumb: 'الملف الشخصي',        navId: 'nav-settings',  viewId: 'view-settings' },
 };
 
 let _initializedSections = new Set();
@@ -78,12 +80,15 @@ function showSection(key) {
 /* ── تهيئة أولى لكل قسم ── */
 function _bootSection(key) {
   switch (key) {
+    case 'dashboard':
+      if (typeof dashInit === 'function') dashInit();
+      break;
     case 'volunteer':
       if (typeof renderCats   === 'function') renderCats();
       if (typeof updateStats  === 'function') updateStats();
       break;
     case 'meetings':
-      if (typeof loadMeetings === 'function') loadMeetings();
+      if (typeof mtgLoadMeetings === 'function') mtgLoadMeetings();
       break;
     case 'orders':
       if (typeof initOrders   === 'function') initOrders();
@@ -91,12 +96,19 @@ function _bootSection(key) {
     case 'projects':
       if (typeof loadAll === 'function') loadAll();
       break;
+    case 'settings':
+      if (typeof settingsInit === 'function') settingsInit();
+      break;
   }
 }
 
 /* ── تحديث البيانات عند العودة للقسم (لمنع اختفاء البيانات) ── */
 function _refreshSection(key) {
   switch (key) {
+    case 'dashboard':
+      // إعادة جلب بيانات لوحة التحكم عند العودة
+      if (typeof dashLoadMain === 'function') dashLoadMain();
+      break;
     case 'volunteer':
       // إعادة جلب الفرص والطلبات عند العودة لضمان البيانات محدّثة
       if (typeof fetchOpportunities === 'function') fetchOpportunities();
@@ -108,7 +120,7 @@ function _refreshSection(key) {
       break;
     case 'meetings':
       // إعادة جلب الاجتماعات عند العودة
-      if (typeof loadMeetings === 'function') loadMeetings();
+      if (typeof mtgLoadMeetings === 'function') mtgLoadMeetings();
       break;
     case 'projects':
       // إعادة جلب المشاريع عند العودة

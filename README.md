@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="./assets/tkamel.png" alt="TAKAMOL Logo" width="380">
+<img src="./assets/tkamel.png" alt="TAKAMOL Logo" width="450">
 
 # 🤝 تكامل | TAKAMOL
 

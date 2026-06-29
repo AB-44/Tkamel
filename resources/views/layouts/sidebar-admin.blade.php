@@ -274,7 +274,37 @@ aside.sidebar .sb-foot .logout-btn:hover {
   aside.sidebar { width: 200px !important; }
   .main { margin-right: 200px; width: calc(100vw - 200px); }
 }
+
+/* ── PAGE TRANSITION (smooths full-page navigations between routes) ── */
+html.pg-nav body {
+  opacity: 0;
+}
+body {
+  opacity: 1;
+  transition: opacity 0.16s ease;
+}
 </style>
+
+<script>
+  /* Mark the document as "about to navigate" the instant a real (non-SPA)
+     nav link is clicked, so the page fades out instead of flashing white
+     while the browser loads the next page — matching the smooth feel of
+     the orders/projects sections which never reload at all. */
+  document.documentElement.classList.remove('pg-nav');
+  document.addEventListener('click', function (e) {
+    const link = e.target.closest('a.nav-item, a.nav-sub-item');
+    if (!link) return;
+    if (link.target === '_blank' || e.metaKey || e.ctrlKey) return;
+    const href = link.getAttribute('href');
+    if (!href || href.startsWith('#') || link.hasAttribute('onclick')) return;
+    e.preventDefault();
+    document.documentElement.classList.add('pg-nav');
+    setTimeout(function () { window.location.href = href; }, 140);
+  });
+  window.addEventListener('pageshow', function () {
+    document.documentElement.classList.remove('pg-nav');
+  });
+</script>
 
 <aside class="sidebar">
 
@@ -289,7 +319,8 @@ aside.sidebar .sb-foot .logout-btn:hover {
 
     <div class="sb-section">الرئيسية</div>
 
-    <a href="{{ route('dashboard') }}"
+    <a href="{{ route('consulting') }}#dashboard"
+       onclick="if(typeof showSection==='function'){showSection('dashboard');return false;}"
        class="nav-item {{ $nav==='dashboard' ? 'active' : '' }}"
        id="nav-dashboard">
       <div class="nav-icon">
@@ -307,7 +338,8 @@ aside.sidebar .sb-foot .logout-btn:hover {
     <div class="sb-section">إدارة الأنشطة</div>
 
     <a class="nav-item {{ $nav==='meetings' ? 'active' : '' }}" id="nav-meetings"
-       href="{{ route('meetings') }}">
+       href="{{ route('consulting') }}#meetings"
+       onclick="if(typeof showSection==='function'){showSection('meetings');return false;}">
       <div class="nav-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round">
@@ -362,8 +394,9 @@ aside.sidebar .sb-foot .logout-btn:hover {
 
     <div class="sb-section">النظام</div>
 
-    <a class="nav-item {{ $nav==='settings' ? 'active' : '' }}"
-       href="{{ route('settings') }}">
+    <a class="nav-item {{ $nav==='settings' ? 'active' : '' }}" id="nav-settings"
+       href="{{ route('consulting') }}#settings"
+       onclick="if(typeof showSection==='function'){showSection('settings');return false;}">
       <div class="nav-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round">

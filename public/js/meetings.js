@@ -6,7 +6,7 @@ const CSRF  = document.querySelector('meta[name="csrf-token"]')?.content || '';
 const TODAY = new Date().toISOString().split('T')[0];
 
 let meetings    = [];
-let categories  = [];
+let mtgCategories  = [];
 let editingId   = null;
 let deletingId  = null;
 let cancelingId = null;
@@ -16,14 +16,14 @@ let mType       = 'online';
 let typeFilter  = 'all';
 
 /* ─── helpers ─────────────────────────────────────────── */
-function renderCatBadges(catStr) {
+function mtgRenderCatBadges(catStr) {
   if (!catStr) return '<span class="badge" style="background:#e2e8f0;color:#64748b;font-size:0.65rem">📁 بدون تصنيف</span>';
   if (catStr === 'all') return '<span class="badge" style="background:#f0f9ff;color:#0ea5e9;border:1px solid #bae6fd;font-size:0.65rem">🌐 لكل الجمعيات</span>';
 
   const parts = catStr.split(',').map(s => s.trim()).filter(Boolean);
   return parts.map(p => {
     // try find by ID first, then by name for legacy data
-    const c = categories.find(x => x.id === p || x.name === p);
+    const c = mtgCategories.find(x => x.id === p || x.name === p);
     if (c) {
       return `<span class="badge" style="background:${c.color}15; color:${c.color}; border:1px solid ${c.color}40; font-size:0.65rem">${c.icon || '📁'} ${c.name}</span>`;
     }
@@ -31,44 +31,44 @@ function renderCatBadges(catStr) {
   }).join(' ');
 }
 
-function isCurrent(m) { 
-  if (isCancelled(m)) return false;
+function mtgIsCurrent(m) { 
+  if (mtgIsCancelled(m)) return false;
   return m.status === 'upcoming';
 }
-function isPast(m) { 
-  if (isCancelled(m)) return false;
+function mtgIsPast(m) { 
+  if (mtgIsCancelled(m)) return false;
   return m.status === 'past';
 }
-function isCancelled(m){ return m.status === 'cancelled' || m.status === 'canceled'; }
+function mtgIsCancelled(m){ return m.status === 'cancelled' || m.status === 'canceled'; }
 
-function fmtDate(d) {
+function mtgFmtDate(d) {
   if (!d) return '—';
   return new Date(d + 'T00:00:00').toLocaleDateString('ar-SA', { weekday:'short', year:'numeric', month:'long', day:'numeric' });
 }
-function fmtDateShort(d) {
+function mtgFmtDateShort(d) {
   if (!d) return { day:'—', month:'' };
   const dt = new Date(d + 'T00:00:00');
   return { day: dt.getDate(), month: dt.toLocaleDateString('ar-SA', { month:'short' }) };
 }
-function ini(n) { const p = (n||'').trim().split(' '); return p.length >= 2 ? (p[0][0]||'') + (p[1][0]||'') : (n||'?')[0]; }
-function domainShort(u) { try { return new URL(u).hostname.replace('www.',''); } catch { return u; } }
+function mtgIni(n) { const p = (n||'').trim().split(' '); return p.length >= 2 ? (p[0][0]||'') + (p[1][0]||'') : (n||'?')[0]; }
+function mtgDomainShort(u) { try { return new URL(u).hostname.replace('www.',''); } catch { return u; } }
 
 /* ─── API ─────────────────────────────────────────────── */
-async function loadCategories() {
+async function mtgLoadCategories() {
   try {
     const res = await fetch('/api/association-categories', { headers: { 'Accept': 'application/json' } });
     const data = await res.json();
-    categories = (data.categories || []).map(c => ({
+    mtgCategories = (data.categories || []).map(c => ({
       id: String(c.id), name: c.name, icon: c.icon || '📁', color: c.color || '#2ab8d0'
     }));
-    populateCategoryFilters();
+    mtgPopulateCategoryFilters();
   } catch (e) { console.error('Failed to load categories', e); }
 }
 
-function populateCategoryFilters() {
+function mtgPopulateCategoryFilters() {
   const catFilter = document.getElementById('catFilter');
   if (catFilter) {
-    catFilter.innerHTML = '<option value="">كل التصنيفات</option>' + categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+    catFilter.innerHTML = '<option value="">كل التصنيفات</option>' + mtgCategories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
   }
   const fCat = document.getElementById('f-cat');
   if (document.getElementById('f-cat-picker')) {
@@ -76,7 +76,7 @@ function populateCategoryFilters() {
     window.catChoices = new CatPicker({
       containerId : 'f-cat-picker',
       hiddenId    : 'f-cat',
-      categories  : categories,
+      categories  : mtgCategories,
       selected    : [],
       multi       : true,
     });
@@ -86,24 +86,24 @@ function populateCategoryFilters() {
     fInv.innerHTML = '<option value="عام">عام (جميع الجمعيات)</option>' + 
                      '<option value="تقني">تقني (الجمعيات التقنية)</option>' + 
                      '<option value="ميداني">ميداني (الجمعيات الميدانية)</option>' + 
-                     categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+                     mtgCategories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
   }
 }
 
-async function loadMeetings() {
+async function mtgLoadMeetings() {
   try {
     const res  = await fetch('/api/meetings', { credentials:'same-origin', headers:{ Accept:'application/json' } });
     if (!res.ok) throw new Error();
     const data = await res.json();
     meetings = Array.isArray(data) ? data : (data.meetings || []);
-    renderAll();
+    mtgRenderAll();
   } catch {
-    showToast('⚠️','فشل تحميل الاجتماعات');
+    mtgShowToast('⚠️','فشل تحميل الاجتماعات');
   }
 }
 
 /* ─── filter ──────────────────────────────────────────── */
-function getFiltered() {
+function mtgGetFiltered() {
   const q  = (document.getElementById('searchInput')?.value||'').trim().toLowerCase();
   const ct = document.getElementById('catFilter')?.value || '';
   return meetings.filter(m => {
@@ -115,44 +115,44 @@ function getFiltered() {
 }
 
 /* ─── render ──────────────────────────────────────────── */
-function renderAll() {
-  const list = getFiltered();
-  const cur  = list.filter(isCurrent).sort((a,b) => a.date.localeCompare(b.date));
-  const past = list.filter(isPast).sort((a,b) => b.date.localeCompare(a.date));
-  const canc = list.filter(isCancelled).sort((a,b) => b.date.localeCompare(a.date));
+function mtgRenderAll() {
+  const list = mtgGetFiltered();
+  const cur  = list.filter(mtgIsCurrent).sort((a,b) => a.date.localeCompare(b.date));
+  const past = list.filter(mtgIsPast).sort((a,b) => b.date.localeCompare(a.date));
+  const canc = list.filter(mtgIsCancelled).sort((a,b) => b.date.localeCompare(a.date));
 
   document.getElementById('bc-cur').textContent  = cur.length;
   document.getElementById('bc-past').textContent = past.length;
   document.getElementById('bc-canc').textContent = canc.length;
 
   document.getElementById('grid-cur').innerHTML = cur.length
-    ? cur.map(m => fullCard(m)).join('')
+    ? cur.map(m => mtgFullCard(m)).join('')
     : '<div class="empty"><span class="empty-emoji">📋</span><h3>لا توجد اجتماعات حالية</h3><p>أنشئ اجتماعاً جديداً أو عدّل معايير البحث</p></div>';
 
   document.getElementById('list-past').innerHTML = past.length
-    ? past.map(m => compactRow(m, false)).join('')
+    ? past.map(m => mtgCompactRow(m, false)).join('')
     : '<div class="compact-empty"><span class="compact-empty-emoji">📁</span><p>لا توجد اجتماعات سابقة</p></div>';
 
   document.getElementById('list-canc').innerHTML = canc.length
-    ? canc.map(m => compactRow(m, true)).join('')
+    ? canc.map(m => mtgCompactRow(m, true)).join('')
     : '<div class="compact-empty"><span class="compact-empty-emoji">✅</span><p>لا توجد اجتماعات ملغاة</p></div>';
 
-  updateStats();
+  mtgUpdateStats();
 }
 
 /* ─── full card ────────────────────────────────────────── */
-function fullCard(m) {
+function mtgFullCard(m) {
   let catColor = '#2ab8d0';
   if (m.cat && m.cat !== 'all') {
     const firstCatId = m.cat.split(',')[0].trim();
-    const firstCatObj = categories.find(c => c.id === firstCatId || c.name === firstCatId);
+    const firstCatObj = mtgCategories.find(c => c.id === firstCatId || c.name === firstCatId);
     if (firstCatObj) catColor = firstCatObj.color || '#2ab8d0';
   }
   const acc = catColor;
   const tLabel = m.type === 'online' ? '💻 عن بعد' : '📍 حضوري';
   const tBadge = m.type === 'online' ? 'b-online' : 'b-onsite';
   const linkRow = (m.type === 'online' && m.link)
-    ? `<div class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg><a class="link-pill" href="${m.link}" target="_blank">🔗 ${domainShort(m.link)}</a></div>` : '';
+    ? `<div class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg><a class="link-pill" href="${m.link}" target="_blank">🔗 ${mtgDomainShort(m.link)}</a></div>` : '';
   return `
   <div class="meeting-card">
     <div class="card-stripe" style="background:linear-gradient(90deg,${acc},${acc}88)"></div>
@@ -160,60 +160,60 @@ function fullCard(m) {
       <div class="card-row1">
         <div class="card-badges">
           <span class="badge ${tBadge}">${tLabel}</span>
-          ${renderCatBadges(m.cat)}
+          ${mtgRenderCatBadges(m.cat)}
         </div>
         <div class="card-actions">
-          <button class="icn-btn attendees-btn" onclick="event.stopPropagation(); openAttendees(${m.id})" title="الحاضرون" style="position:relative">
+          <button class="icn-btn attendees-btn" onclick="event.stopPropagation(); mtgOpenAttendees(${m.id})" title="الحاضرون" style="position:relative">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
             ${(m.attendee_count||0) > 0 ? `<span style="position:absolute;top:-5px;left:-5px;background:#22c55e;color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;">${m.attendee_count}</span>` : ''}
           </button>
-          <button class="icn-btn edit" onclick="openEdit(${m.id})" title="تعديل"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-          <button class="icn-btn cancel-btn" onclick="openCancel(${m.id})" title="إلغاء"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></button>
-          <button class="icn-btn del" onclick="openDelete(${m.id})" title="حذف"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+          <button class="icn-btn edit" onclick="mtgOpenEdit(${m.id})" title="تعديل"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+          <button class="icn-btn cancel-btn" onclick="mtgOpenCancel(${m.id})" title="إلغاء"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></button>
+          <button class="icn-btn del" onclick="mtgOpenDelete(${m.id})" title="حذف"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
         </div>
       </div>
       <div class="card-title">${m.title}</div>
       <div class="card-meta">
-        <div class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>${fmtDate(m.date)}${m.time ? ' — ' + m.time : ''}</div>
+        <div class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>${mtgFmtDate(m.date)}${m.time ? ' — ' + m.time : ''}</div>
         ${m.location ? `<div class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${m.location}</div>` : ''}
         ${linkRow}
       </div>
     </div>
     <div class="card-foot">
       <div class="presenter">
-        <div class="p-av">${ini(m.presenter)}</div>
+        <div class="p-av">${mtgIni(m.presenter)}</div>
         <div><div class="p-name">${m.presenter}</div><div class="p-role">المقدم</div></div>
       </div>
-      <button class="btn-view" onclick="openDetails(${m.id})">التفاصيل</button>
+      <button class="btn-view" onclick="mtgOpenDetails(${m.id})">التفاصيل</button>
     </div>
   </div>`;
 }
 
 /* ─── compact row ──────────────────────────────────────── */
-function compactRow(m, isCnc) {
+function mtgCompactRow(m, isCnc) {
   let catColor = '#2ab8d0';
   if (m.cat && m.cat !== 'all') {
     const firstCatId = m.cat.split(',')[0].trim();
-    const firstCatObj = categories.find(c => c.id === firstCatId || c.name === firstCatId);
+    const firstCatObj = mtgCategories.find(c => c.id === firstCatId || c.name === firstCatId);
     if (firstCatObj) catColor = firstCatObj.color || '#2ab8d0';
   }
   const acc = isCnc ? '#c62828' : catColor;
-  const ds  = fmtDateShort(m.date);
+  const ds  = mtgFmtDateShort(m.date);
   const tLabel = m.type === 'online' ? '💻 عن بعد' : '📍 حضوري';
   const hasReport = !isCnc && m.report;
   const actionBtns = isCnc
-    ? `<button class="icn-btn attendees-btn" onclick="event.stopPropagation(); openAttendees(${m.id})" title="الحاضرون" style="position:relative">
+    ? `<button class="icn-btn attendees-btn" onclick="event.stopPropagation(); mtgOpenAttendees(${m.id})" title="الحاضرون" style="position:relative">
          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
          ${(m.attendee_count||0) > 0 ? `<span style="position:absolute;top:-5px;left:-5px;background:#22c55e;color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;">${m.attendee_count}</span>` : ''}
        </button>
-       <button class="icn-btn edit" onclick="openEdit(${m.id})" title="تعديل"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-       <button class="icn-btn del" onclick="openDelete(${m.id})" title="حذف"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>`
-    : `<button class="icn-btn attendees-btn" onclick="event.stopPropagation(); openAttendees(${m.id})" title="الحاضرون" style="position:relative">
+       <button class="icn-btn edit" onclick="mtgOpenEdit(${m.id})" title="تعديل"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+       <button class="icn-btn del" onclick="mtgOpenDelete(${m.id})" title="حذف"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>`
+    : `<button class="icn-btn attendees-btn" onclick="event.stopPropagation(); mtgOpenAttendees(${m.id})" title="الحاضرون" style="position:relative">
          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
          ${(m.attendee_count||0) > 0 ? `<span style="position:absolute;top:-5px;left:-5px;background:#22c55e;color:#fff;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;">${m.attendee_count}</span>` : ''}
        </button>
-       <button class="icn-btn edit" onclick="openEdit(${m.id})" title="تعديل / إضافة تقرير"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-       <button class="icn-btn del" onclick="openDelete(${m.id})" title="حذف"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>`;
+       <button class="icn-btn edit" onclick="mtgOpenEdit(${m.id})" title="تعديل / إضافة تقرير"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+       <button class="icn-btn del" onclick="mtgOpenDelete(${m.id})" title="حذف"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>`;
   return `
   <div class="compact-item${isCnc?' cancelled-row':''}">
     <div class="ci-bar" style="background:${acc}"></div>
@@ -228,29 +228,29 @@ function compactRow(m, isCnc) {
       </div>
     </div>
     <div class="ci-badges">
-      ${renderCatBadges(m.cat)}
+      ${mtgRenderCatBadges(m.cat)}
       ${isCnc ? '<span class="ci-cancelled-badge">🚫 ملغي</span>' : ''}
       ${hasReport ? '<span class="badge b-has-report" style="font-size:0.65rem">📋 تقرير</span>' : ''}
     </div>
     <div class="ci-actions">
       ${actionBtns}
-      <button class="icn-btn" onclick="openDetails(${m.id})" title="التفاصيل"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></button>
+      <button class="icn-btn" onclick="mtgOpenDetails(${m.id})" title="التفاصيل"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></button>
     </div>
   </div>`;
 }
 
 /* ─── stats ────────────────────────────────────────────── */
-function updateStats() {
+function mtgUpdateStats() {
   document.getElementById('s-total').textContent  = meetings.length;
-  document.getElementById('s-cur').textContent    = meetings.filter(isCurrent).length;
-  document.getElementById('s-past').textContent   = meetings.filter(isPast).length;
-  document.getElementById('s-canc').textContent   = meetings.filter(isCancelled).length;
+  document.getElementById('s-cur').textContent    = meetings.filter(mtgIsCurrent).length;
+  document.getElementById('s-past').textContent   = meetings.filter(mtgIsPast).length;
+  document.getElementById('s-canc').textContent   = meetings.filter(mtgIsCancelled).length;
   document.getElementById('s-online').textContent = meetings.filter(m => m.type === 'online').length;
 }
 
 /* ─── collapsible sections ─────────────────────────────── */
 const secState = { past:true, canc:true };
-function toggleSec(key) {
+function mtgToggleSec(key) {
   secState[key] = !secState[key];
   const el  = document.getElementById('sec-' + key);
   const tog = document.getElementById('tog-' + key);
@@ -269,26 +269,26 @@ function toggleSec(key) {
 document.querySelectorAll('#sec-past, #sec-canc').forEach(el => { el.style.transition = 'max-height 0.3s ease'; });
 
 /* ─── type filter ──────────────────────────────────────── */
-function setTypeF(f) {
+function mtgSetTypeF(f) {
   typeFilter = f;
   ['all','online','onsite'].forEach(x => document.getElementById('chip-' + x)?.classList.toggle('on', x === f));
-  renderAll();
+  mtgRenderAll();
 }
 
 /* ─── CREATE / EDIT MODAL ──────────────────────────────── */
-function openCreate() {
+function mtgOpenCreate() {
   editingId = null;
   document.getElementById('mhd-icon').innerHTML  = '<i class="fa-regular fa-calendar-plus" style="color:white"></i>';
   document.getElementById('mhd-title').textContent = 'إنشاء اجتماع جديد';
   document.getElementById('mhd-sub').textContent   = 'أضف تفاصيل الاجتماع أدناه';
   document.getElementById('save-lbl').textContent  = '💾 حفظ الاجتماع';
   document.getElementById('report-section').style.display = 'none';
-  clearForm();
-  setMType('online');
-  openOv('ov-create');
+  mtgClearForm();
+  mtgSetMType('online');
+  mtgOpenOv('ov-create');
 }
 
-function openEdit(id) {
+function mtgOpenEdit(id) {
   const m = meetings.find(x => x.id === id);
   if (!m) return;
   editingId = id;
@@ -325,11 +325,11 @@ function openEdit(id) {
   if (agendaList) {
     agendaList.innerHTML = '';
     (m.agendaItems || []).forEach(a => {
-      addAgendaItemWithData(a.title, a.duration, a.presenter);
+      mtgAddAgendaItemWithData(a.title, a.duration, a.presenter);
     });
   }
 
-  const showReport = isPast(m);
+  const showReport = mtgIsPast(m);
   document.getElementById('report-section').style.display = showReport ? 'block' : 'none';
   if (showReport && m.report) {
     document.getElementById('f-report-summary').value   = m.report.summary || '';
@@ -338,12 +338,12 @@ function openEdit(id) {
     document.getElementById('f-report-actions').value   = m.report.actions || '';
   }
 
-  setMType(m.type || 'online');
-  closeOv('ov-details');
-  openOv('ov-create');
+  mtgSetMType(m.type || 'online');
+  mtgCloseOv('ov-details');
+  mtgOpenOv('ov-create');
 }
 
-function clearForm() {
+function mtgClearForm() {
   ['f-title','f-presenter','f-date','f-end-date','f-time','f-end-time','f-location','f-location-url',
    'f-link','f-notes','f-report-summary','f-report-decisions','f-report-attendees','f-report-actions'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
@@ -356,7 +356,7 @@ function clearForm() {
   if (invSel) invSel.value = 'عام';
 }
 
-async function saveMeeting() {
+async function mtgSaveMeeting() {
   const title     = (document.getElementById('f-title')?.value || '').trim();
   const presenter = (document.getElementById('f-presenter')?.value || '').trim();
   const date      = document.getElementById('f-date')?.value || '';
@@ -370,7 +370,7 @@ async function saveMeeting() {
   const mType     = document.getElementById('tb-online')?.classList.contains('on-online') ? 'online' : 'onsite';
 
   if (!title || !presenter || !date || !category) { 
-    showToast('⚠️', 'يرجى ملء الحقول المطلوبة (العنوان، المتحدث، التاريخ، والتصنيف)'); 
+    mtgShowToast('⚠️', 'يرجى ملء الحقول المطلوبة (العنوان، المتحدث، التاريخ، والتصنيف)'); 
     return; 
   }
 
@@ -428,17 +428,17 @@ async function saveMeeting() {
       if (res.status === 422) {
         const data = await res.json();
         console.error('Validation errors:', data.errors);
-        showToast('❌', 'يرجى التأكد من إدخال جميع الحقول المطلوبة بشكل صحيح');
+        mtgShowToast('❌', 'يرجى التأكد من إدخال جميع الحقول المطلوبة بشكل صحيح');
       } else {
-        showToast('❌', 'حدث خطأ أثناء الحفظ');
+        mtgShowToast('❌', 'حدث خطأ أثناء الحفظ');
       }
       return;
     }
-    showToast(editingId ? '✏️':'✅', editingId ? 'تم تعديل الاجتماع بنجاح' : 'تم إنشاء الاجتماع بنجاح');
-    closeOv('ov-create');
-    await loadMeetings();
+    mtgShowToast(editingId ? '✏️':'✅', editingId ? 'تم تعديل الاجتماع بنجاح' : 'تم إنشاء الاجتماع بنجاح');
+    mtgCloseOv('ov-create');
+    await mtgLoadMeetings();
   } catch (e) {
-    showToast('❌', e.message || 'حدث خطأ');
+    mtgShowToast('❌', e.message || 'حدث خطأ');
   } finally {
     if (saveBtn) saveBtn.textContent = editingId ? '💾 حفظ التعديلات' : '💾 حفظ الاجتماع';
   }
@@ -447,11 +447,11 @@ async function saveMeeting() {
 /* ─── AGENDA ITEMS ─────────────────────────────────────── */
 let agendaCount = 0;
 
-function addAgendaItem() {
-  addAgendaItemWithData('', null, '');
+function mtgAddAgendaItem() {
+  mtgAddAgendaItemWithData('', null, '');
 }
 
-function addAgendaItemWithData(title, duration, presenter) {
+function mtgAddAgendaItemWithData(title, duration, presenter) {
   const idx = agendaCount++;
   const list = document.getElementById('agenda-list');
   if (!list) return;
@@ -469,38 +469,40 @@ function addAgendaItemWithData(title, duration, presenter) {
 }
 
 /* ─── type toggle ──────────────────────────────────────── */
-function setMType(t) {
+function mtgSetMType(t) {
   mType = t;
   document.getElementById('tb-online').className = 'type-btn' + (t === 'online' ? ' on-online' : '');
   document.getElementById('tb-onsite').className = 'type-btn' + (t === 'onsite' ? ' on-onsite' : '');
   document.getElementById('fg-link').style.display     = t === 'online' ? 'block' : 'none';
   document.getElementById('fg-location').style.display = t === 'onsite' ? 'block' : 'none';
+  const fgLocUrl = document.getElementById('fg-location-url');
+  if (fgLocUrl) fgLocUrl.style.display = t === 'onsite' ? 'block' : 'none';
 }
 
-function copyLink() {
+function mtgCopyLink() {
   const v = document.getElementById('f-link')?.value.trim();
-  if (!v) { showToast('⚠️','أدخل الرابط أولاً'); return; }
-  navigator.clipboard?.writeText(v).then(() => showToast('📋','تم نسخ الرابط'));
+  if (!v) { mtgShowToast('⚠️','أدخل الرابط أولاً'); return; }
+  navigator.clipboard?.writeText(v).then(() => mtgShowToast('📋','تم نسخ الرابط'));
 }
 
 /* ─── DETAILS MODAL ────────────────────────────────────── */
-function openDetails(id) {
+function mtgOpenDetails(id) {
   const m = meetings.find(x => x.id === id);
   if (!m) return;
   viewingId = id;
   const firstCatId = m.cat ? m.cat.split(',')[0].trim() : null;
-  const firstCatObj = firstCatId === 'all' ? null : categories.find(c => c.id === firstCatId || c.name === firstCatId);
+  const firstCatObj = firstCatId === 'all' ? null : mtgCategories.find(c => c.id === firstCatId || c.name === firstCatId);
   const acc = firstCatObj ? (firstCatObj.color || '#2ab8d0') : '#2ab8d0';
 
-  const isC = isCancelled(m);
+  const isC = mtgIsCancelled(m);
 
   document.getElementById('d-title').textContent = m.title;
   document.getElementById('d-cat').textContent   = catIcon(m) + ' ' + m.cat;
-  document.getElementById('d-date').textContent  = fmtDate(m.date);
+  document.getElementById('d-date').textContent  = mtgFmtDate(m.date);
   document.getElementById('d-time').textContent  = m.time || '—';
-  document.getElementById('d-banner-bg').className = 'det-banner-bg' + (isC ? ' red-bg' : isPast(m) ? ' grey-bg' : '');
+  document.getElementById('d-banner-bg').className = 'det-banner-bg' + (isC ? ' red-bg' : mtgIsPast(m) ? ' grey-bg' : '');
   document.getElementById('d-type-badge').textContent = m.type === 'online' ? '💻 عن بعد' : '📍 حضوري';
-  document.getElementById('d-av').textContent    = ini(m.presenter);
+  document.getElementById('d-av').textContent    = mtgIni(m.presenter);
   document.getElementById('d-pname').textContent = m.presenter;
 
   const locCell = document.getElementById('d-loc-cell');
@@ -541,67 +543,67 @@ function openDetails(id) {
   else cw.style.display = 'none';
 
   document.getElementById('det-edit-btn').style.display = isC ? 'none' : '';
-  openOv('ov-details');
+  mtgOpenOv('ov-details');
 }
-function editFromDet() { if (viewingId) openEdit(viewingId); }
+function mtgEditFromDet() { if (viewingId) mtgOpenEdit(viewingId); }
 
 /* ─── DELETE ───────────────────────────────────────────── */
-function openDelete(id) { deletingId = id; openOv('ov-delete'); }
-async function doDelete() {
+function mtgOpenDelete(id) { deletingId = id; mtgOpenOv('ov-delete'); }
+async function mtgDoDelete() {
   try {
     await fetch(`/meetings/${deletingId}`, {
       method:'DELETE', credentials:'same-origin',
       headers:{ 'X-CSRF-TOKEN':CSRF, 'Accept':'application/json' }
     });
-    showToast('🗑️','تم حذف الاجتماع');
-    closeOv('ov-delete');
-    await loadMeetings();
-  } catch { showToast('❌','فشل الحذف'); }
+    mtgShowToast('🗑️','تم حذف الاجتماع');
+    mtgCloseOv('ov-delete');
+    await mtgLoadMeetings();
+  } catch { mtgShowToast('❌','فشل الحذف'); }
   deletingId = null;
 }
 
 /* ─── CANCEL ───────────────────────────────────────────── */
-function openCancel(id) { cancelingId = id; if(document.getElementById('f-cancel-reason')) document.getElementById('f-cancel-reason').value = ''; openOv('ov-cancel'); }
-async function doCancel() {
+function mtgOpenCancel(id) { cancelingId = id; if(document.getElementById('f-cancel-reason')) document.getElementById('f-cancel-reason').value = ''; mtgOpenOv('ov-cancel'); }
+async function mtgDoCancel() {
   const r = (document.getElementById('f-cancel-reason')?.value || '').trim();
-  if (!r) { showToast('⚠️','يرجى إدخال سبب الإلغاء'); return; }
+  if (!r) { mtgShowToast('⚠️','يرجى إدخال سبب الإلغاء'); return; }
   try {
     await fetch(`/meetings/${cancelingId}/cancel`, {
       method:'POST', credentials:'same-origin',
       headers:{ 'Content-Type':'application/json', 'X-CSRF-TOKEN':CSRF, 'Accept':'application/json' },
       body: JSON.stringify({ cancel_reason: r })
     });
-    showToast('🚫','تم إلغاء الاجتماع');
-    closeOv('ov-cancel');
-    await loadMeetings();
-  } catch { showToast('❌','فشل الإلغاء'); }
+    mtgShowToast('🚫','تم إلغاء الاجتماع');
+    mtgCloseOv('ov-cancel');
+    await mtgLoadMeetings();
+  } catch { mtgShowToast('❌','فشل الإلغاء'); }
   cancelingId = null;
 }
 
 /* ─── MODAL UTILS ──────────────────────────────────────── */
-function openOv(id)       { document.getElementById(id)?.classList.add('open'); }
-function closeOv(id)      { document.getElementById(id)?.classList.remove('open'); }
-function bgClose(e, id)   { if (e.target === document.getElementById(id)) closeOv(id); }
+function mtgOpenOv(id)       { document.getElementById(id)?.classList.add('open'); }
+function mtgCloseOv(id)      { document.getElementById(id)?.classList.remove('open'); }
+function mtgBgClose(e, id)   { if (e.target === document.getElementById(id)) mtgCloseOv(id); }
 
 /* ─── TOAST ────────────────────────────────────────────── */
-let tTimer;
-function showToast(icon, msg) {
+let mtgToastTimer;
+function mtgShowToast(icon, msg) {
   const el = document.getElementById('toast');
   if (!el) return;
   document.getElementById('t-icon').textContent = icon;
   document.getElementById('t-msg').textContent  = msg;
   el.classList.add('show');
-  clearTimeout(tTimer);
-  tTimer = setTimeout(() => el.classList.remove('show'), 3000);
+  clearTimeout(mtgToastTimer);
+  mtgToastTimer = setTimeout(() => el.classList.remove('show'), 3000);
 }
 
 /* ─── KEYBOARD ─────────────────────────────────────────── */
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') ['ov-create','ov-details','ov-delete','ov-cancel','ov-attendees'].forEach(closeOv);
+  if (e.key === 'Escape') ['ov-create','ov-details','ov-delete','ov-cancel','ov-attendees'].forEach(mtgCloseOv);
 });
 
 /* ─── ATTENDEES MODAL ───────────────────────────────────── */
-async function openAttendees(id) {
+async function mtgOpenAttendees(id) {
   attendeesId = id;
   const m = meetings.find(x => x.id === id);
   const titleEl = document.getElementById('att-meeting-title');
@@ -612,7 +614,7 @@ async function openAttendees(id) {
   if (countEl) countEl.textContent = '...';
   if (listEl)  listEl.innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text-muted)">⏳ جاري التحميل...</div>';
 
-  openOv('ov-attendees');
+  mtgOpenOv('ov-attendees');
 
   try {
     const res = await fetch(`/api/meetings/${id}/attendees`, {
@@ -665,11 +667,11 @@ async function openAttendees(id) {
   }
 }
 
-function closeAttendees() { closeOv('ov-attendees'); attendeesId = null; }
+function mtgCloseAttendees() { mtgCloseOv('ov-attendees'); attendeesId = null; }
 
 /* ─── INIT ─────────────────────────────────────────────── */
-setMType('online');
-loadCategories().then(() => loadMeetings()).then(() => {
+mtgSetMType('online');
+mtgLoadCategories().then(() => mtgLoadMeetings()).then(() => {
   const urlParams = new URLSearchParams(window.location.search);
   const reqIdParam = urlParams.get('req_id');
   const typeParam = urlParams.get('type');
@@ -677,10 +679,10 @@ loadCategories().then(() => loadMeetings()).then(() => {
     const targetMeeting = meetings.find(m => String(m.id) === String(reqIdParam));
     if (targetMeeting) {
       setTimeout(() => {
-        openDetails(targetMeeting.id);
+        mtgOpenDetails(targetMeeting.id);
         window.history.replaceState({}, document.title, window.location.pathname);
       }, 300);
     }
   }
 });
-setInterval(loadMeetings, 60000); // auto-refresh every 60s
+setInterval(mtgLoadMeetings, 60000); // auto-refresh every 60s

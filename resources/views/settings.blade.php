@@ -174,20 +174,26 @@
     .btn-upload {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
-      padding: 8px 16px;
+      gap: 8px;
+      padding: 11px 26px;
       background: var(--btn-bg);
       color: #fff;
       border: none;
-      border-radius: 9px;
-      font-size: 0.84rem;
-      font-weight: 700;
+      border-radius: 12px;
+      font-size: 0.92rem;
+      font-weight: 800;
       cursor: pointer;
       font-family: 'Tajawal', sans-serif;
-      transition: background 0.17s;
+      transition: background 0.17s, transform 0.15s, box-shadow 0.17s;
+      box-shadow: 0 4px 14px rgba(13, 127, 159, 0.3);
     }
 
-    .btn-upload:hover { background: var(--btn-hover); }
+    .btn-upload:hover {
+      background: var(--btn-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(13, 127, 159, 0.38);
+    }
+    .btn-upload:active { transform: translateY(0); }
 
     .avatar-hint {
       font-size: 0.76rem;

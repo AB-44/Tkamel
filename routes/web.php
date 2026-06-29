@@ -40,7 +40,8 @@ Route::middleware(AuthMiddleware::class)->group(function () {
         Route::get('/volunteer', fn() => redirect('/consulting#volunteer'))->name('volunteer');
 
         // ── Meeting routes (Admin) ────────────────────────────────────────────
-        Route::get('/meetings', [MeetingController::class, 'index'])->name('meetings');
+        Route::get('/meetings', fn() => redirect('/consulting#meetings'))->name('meetings');
+        Route::get('/meetings/page', [MeetingController::class, 'index'])->name('meetings.page');
         Route::get('/api/meetings', [MeetingController::class, 'list'])->name('meetings.list');
         Route::post('/meetings', [MeetingController::class, 'store'])->name('meetings.store');
         Route::put('/meetings/{meeting}', [MeetingController::class, 'update'])->name('meetings.update');
@@ -208,6 +209,9 @@ Route::prefix('api')
             Route::post('/settings/profile', [App\Http\Controllers\Admin\SettingsController::class, 'updateProfile']);
             Route::post('/settings/password', [App\Http\Controllers\Admin\SettingsController::class, 'updatePassword']);
             Route::post('/settings/avatar', [App\Http\Controllers\Admin\SettingsController::class, 'uploadAvatar'])->middleware('throttle:upload');
+
+            // Dashboard (JSON for the SPA dashboard section inside consulting.blade.php)
+            Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'dashboardApi']);
 
             // Association Categories (Admin CRUD)
             Route::post(

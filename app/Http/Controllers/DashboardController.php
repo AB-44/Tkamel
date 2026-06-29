@@ -47,6 +47,94 @@ class DashboardController extends Controller
     }
 
     /**
+     * Admin Dashboard — JSON (used by the SPA dashboard section inside consulting.blade.php)
+     */
+    public function dashboardApi()
+    {
+        $stats = [
+            'associations_count'  => Association::where('status', 'approved')->count(),
+            'opportunities_count' => Opportunity::count(),
+            'projects_count'      => JointProject::count(),
+            'completed_requests'  => OpportunityRequest::where('status', 'approved')->count()
+                                   + Association::where('status', 'approved')->count(),
+        ];
+
+        $upcomingMeetings = $this->getUpcomingMeetings()->map(function ($m) {
+            return [
+                'title'     => $m->title,
+                'date_time' => $m->date_time,
+                'category'  => is_string($m->category) ? $m->category : ($m->category->name ?? null),
+                'type'      => $m->type,
+            ];
+        })->values();
+
+        $activeProjects = JointProject::with('category')->orderBy('created_at', 'desc')->take(2)->get()
+            ->map(function ($p) {
+                $statusMap = [
+                    'planning' => ['label' => 'قيد الإعداد', 'color' => 'b-prep'],
+                    'active'   => ['label' => 'مستمر',       'color' => 'b-active'],
+                    'idea'     => ['label' => 'فكرة',         'color' => 'b-idea'],
+                ];
+                $st = $statusMap[$p->status] ?? ['label' => $p->status, 'color' => 'b-prep'];
+                return [
+                    'name'          => $p->name,
+                    'category_name' => $p->category->name ?? null,
+                    'category_icon' => $p->category->icon ?? '🏢',
+                    'start_date'    => $p->start_date,
+                    'status_label'  => $st['label'],
+                    'status_color'  => $st['color'],
+                ];
+            })->values();
+
+        $latestOpportunities = Opportunity::with('targets')->orderBy('created_at', 'desc')->take(2)->get()
+            ->map(function ($o) {
+                return [
+                    'title'         => $o->title,
+                    'direction'     => $o->direction,
+                    'deadline'      => $o->deadline,
+                    'category_name' => null,
+                    'category_icon' => '💡',
+                    'is_closed'     => $o->deadline ? \Carbon\Carbon::parse($o->deadline)->isPast() : false,
+                ];
+            })->values();
+
+        $latestOppRequests = OpportunityRequest::with(['opportunity', 'user', 'association'])
+            ->whereNotNull('opportunity_id')
+            ->orderBy('created_at', 'desc')
+            ->take(2)
+            ->get()
+            ->map(function ($req) {
+                return [
+                    'title'      => $req->opportunity->title ?? 'طلب فرصة محذوفة',
+                    'applicant'  => $req->association?->association_name ?? $req->user?->full_name ?? $req->user?->name ?? '—',
+                    'created_at' => $req->created_at,
+                ];
+            })->values();
+
+        $latestProjApps = OpportunityRequest::with(['project', 'user', 'association'])
+            ->whereNotNull('project_id')
+            ->orderBy('created_at', 'desc')
+            ->take(2)
+            ->get()
+            ->map(function ($app) {
+                return [
+                    'title'      => $app->project->name ?? 'مشروع محذوف',
+                    'applicant'  => $app->association?->association_name ?? $app->user?->full_name ?? $app->user?->name ?? '—',
+                    'created_at' => $app->created_at,
+                ];
+            })->values();
+
+        return response()->json([
+            'stats'                 => $stats,
+            'upcoming_meetings'     => $upcomingMeetings,
+            'active_projects'       => $activeProjects,
+            'latest_opportunities'  => $latestOpportunities,
+            'latest_opp_requests'   => $latestOppRequests,
+            'latest_proj_apps'      => $latestProjApps,
+        ]);
+    }
+
+    /**
      * Volunteer / Regular User Dashboard
      */
     public function userDashboard()

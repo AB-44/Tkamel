@@ -69,6 +69,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 'exception' => get_class($e),
                 'file'      => $e->getFile(),
                 'line'      => $e->getLine(),
+                
                 'url'       => request()->fullUrl(),
                 'user_id'   => auth()->id() ?? 'زائر',
             ]

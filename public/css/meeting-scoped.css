@@ -945,8 +945,8 @@
   transform: none;
 }
 
-.fld input,
-.fld select,
+#view-meetings .fld input,
+#view-meetings .fld select,
 #view-meetings .fld textarea {
   width: 100%;
   padding: 10px 40px 10px 13px;
@@ -969,15 +969,15 @@
   min-height: 76px;
 }
 
-.fld input:focus,
-.fld select:focus,
+#view-meetings .fld input:focus,
+#view-meetings .fld select:focus,
 #view-meetings .fld textarea:focus {
   border-color: var(--teal-glow);
   background: white;
   box-shadow: 0 0 0 3px rgba(42, 184, 208, 0.1);
 }
 
-.fld input::placeholder,
+#view-meetings .fld input::placeholder,
 #view-meetings .fld textarea::placeholder {
   color: #b8c8d0;
 }
@@ -1012,7 +1012,7 @@
   letter-spacing: 1px;
 }
 
-.form-divider::before,
+#view-meetings .form-divider::before,
 #view-meetings .form-divider::after {
   content: '';
   flex: 1;
@@ -1511,51 +1511,56 @@
 }
 
 /* ══ SCROLLBARS ══ */
-.modal::-webkit-scrollbar,
+#view-meetings .modal::-webkit-scrollbar,
 #view-meetings .det-modal::-webkit-scrollbar {
   width: 5px;
 }
 
-.modal::-webkit-scrollbar-thumb,
+#view-meetings .modal::-webkit-scrollbar-thumb,
 #view-meetings .det-modal::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 4px;
 }
 
 #view-meetings .sidebar-nav::-webkit-scrollbar {
-  .main {
-    margin-right: 0;
-    width: 100%;
-  }
+  width: 3px;
+}
 
-  .stats-row {
+#view-meetings .sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+
+/* ══ RESPONSIVE ══ */
+@media (max-width: 960px) {
+  #view-meetings .stats-row {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
 @media (max-width: 680px) {
-  .content {
+  #view-meetings .content {
     padding: 18px 14px;
   }
 
-  .topbar {
-    padding: 0 16px;
-  }
-
-  .stats-row {
+  #view-meetings .stats-row {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }
 
-  .meetings-grid {
+  #view-meetings .meetings-grid {
     grid-template-columns: 1fr;
   }
 
-  .row2 {
+  #view-meetings .row2 {
     grid-template-columns: 1fr;
   }
 
-  .det-grid {
+  #view-meetings .row4 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  #view-meetings .det-grid {
     grid-template-columns: 1fr;
   }
 }
