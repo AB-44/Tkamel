@@ -262,6 +262,10 @@ Route::prefix('api')
                 '/opportunity-requests/{id}/reject',
                 [App\Http\Controllers\Admin\OpportunityController::class, 'rejectRequest']
             );
+            Route::post(
+                '/opportunity-requests/{id}/process',
+                [App\Http\Controllers\Admin\OpportunityController::class, 'processRequest']
+            );
 
             // Joint Projects (Admin CRUD)
             Route::post(
@@ -293,6 +297,10 @@ Route::prefix('api')
             Route::post(
                 '/project-join-requests/{id}/reject',
                 [App\Http\Controllers\Admin\JointProjectController::class, 'rejectJoinRequest']
+            );
+            Route::post(
+                '/project-join-requests/{id}/process',
+                [App\Http\Controllers\Admin\JointProjectController::class, 'processJoinRequest']
             );
         });
     });

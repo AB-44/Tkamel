@@ -188,6 +188,15 @@ class OpportunityController extends Controller
         return response()->json(['success' => true, 'message' => 'تم رفض طلب التطوع']);
     }
 
+    /** Process an opportunity request */
+    public function processRequest($id)
+    {
+        $req = OpportunityRequest::findOrFail($id);
+        $req->update(['status' => 'processing']);
+
+        return response()->json(['success' => true, 'message' => 'تم تغيير حالة الطلب إلى قيد المعالجة']);
+    }
+
     /** Delete an opportunity */
     public function destroy($id)
     {

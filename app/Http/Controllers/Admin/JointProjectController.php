@@ -194,7 +194,7 @@ class JointProjectController extends Controller
      */
     public function joinRequests()
     {
-        $requests = \App\Models\OpportunityRequest::with(['user', 'opportunity'])
+        $requests = \App\Models\OpportunityRequest::with(['user', 'association', 'project'])
             ->whereNotNull('project_id')
             ->orWhere(function($q) {
                 // fallback: fetch any requests that have notes referencing joint projects
@@ -211,6 +211,14 @@ class JointProjectController extends Controller
                     'user'       => $r->user ? [
                         'id'        => $r->user->id,
                         'full_name' => $r->user->full_name ?? $r->user->name,
+                        'email'     => $r->user->email,
+                        'phone'     => $r->user->phone,
+                    ] : null,
+                    'association' => $r->association ? [
+                        'id'               => $r->association->id,
+                        'association_name' => $r->association->association_name,
+                        'email'            => $r->association->email,
+                        'phone'            => $r->association->phone,
                     ] : null,
                     'project'    => $r->project ? [
                         'id'    => $r->project->id,
@@ -292,6 +300,15 @@ class JointProjectController extends Controller
         }
 
         return response()->json(['success' => true, 'message' => 'تم رفض الطلب']);
+    }
+
+    /** Process a project join request */
+    public function processJoinRequest($id)
+    {
+        $req = \App\Models\OpportunityRequest::findOrFail($id);
+        $req->update(['status' => 'processing']);
+
+        return response()->json(['success' => true, 'message' => 'تم تغيير حالة الطلب إلى قيد المعالجة']);
     }
 
     /** Format a project for the API response */

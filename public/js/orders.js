@@ -2,7 +2,7 @@
 const avatarColors = ['#1f6feb', '#2ea043', '#d29922', '#cf222e', '#8957e5', '#0891b2', '#b45309', '#0e7490'];
 
 let categories = [];
-const categoryEmojiChoices = ['🏫','🎓','🏥','⚕️','🌱','🤲','🤝','🕌','📚','♿','💻','🌍','🏠','💼','🚀','🎯'];
+const categoryEmojiChoices = ['🏫', '🎓', '🏥', '⚕️', '🌱', '🤲', '🤝', '🕌', '📚', '♿', '💻', '🌍', '🏠', '💼', '🚀', '🎯'];
 let selectedCategoryEmoji = '';
 
 async function fetchOrderCategories() {
@@ -32,17 +32,17 @@ async function fetchOrderCategories() {
 
 
 const statusMap = {
-  pending:  { label: 'قيد المراجعة', cls: 'badge-pending'  },
-  approved: { label: 'موافق عليها',   cls: 'badge-approved' },
-  rejected: { label: 'مرفوض',         cls: 'badge-rejected' },
-  review:   { label: 'يحتاج تعديل',  cls: 'badge-review'   },
+  pending: { label: 'قيد المراجعة', cls: 'badge-pending' },
+  approved: { label: 'موافق عليها', cls: 'badge-approved' },
+  rejected: { label: 'مرفوض', cls: 'badge-rejected' },
+  review: { label: 'يحتاج تعديل', cls: 'badge-review' },
 };
 
 const catIconMap = {};
 
-function initials(n) { return (n||'').split(' ').slice(0,2).map(w=>w[0]).join(''); }
-function formatDate(d) { return new Date(d).toLocaleDateString('ar-SA',{year:'numeric',month:'short',day:'numeric'}); }
-function escQ(s) { return (s||'').replace(/'/g,"\\'"); }
+function initials(n) { return (n || '').split(' ').slice(0, 2).map(w => w[0]).join(''); }
+function formatDate(d) { return new Date(d).toLocaleDateString('ar-SA', { year: 'numeric', month: 'short', day: 'numeric' }); }
+function escQ(s) { return (s || '').replace(/'/g, "\\'"); }
 
 // ===================== DB DATA =====================
 let dbAssocRequests = [];
@@ -57,18 +57,18 @@ async function loadAssociationRequests() {
     const data = await res.json();
 
     dbAssocRequests = data.map(a => ({
-      id: 'REG-' + String(a.id).padStart(3,'0'),
-      _dbId:   a.id,
-      name:    a.manager_name,
-      email:   a.email,
-      type:    'تسجيل جمعية',
-      assoc:   a.association_name,
-      cat:     a.category,
-      phone:   a.phone,
+      id: 'REG-' + String(a.id).padStart(3, '0'),
+      _dbId: a.id,
+      name: a.manager_name,
+      email: a.email,
+      type: 'تسجيل جمعية',
+      assoc: a.association_name,
+      cat: a.category,
+      phone: a.phone,
       license: a.license_number,
-      notes:   a.admin_notes || '',
-      date:    a.created_at,
-      status:  a.status || 'pending',
+      notes: a.admin_notes || '',
+      date: a.created_at,
+      status: a.status || 'pending',
       _source: 'db',
     }));
 
@@ -92,35 +92,35 @@ async function loadAssociationRequests() {
       }
     }
 
-  } catch(e) {}
+  } catch (e) { }
 }
 
 // ── Live stats for the 4 header cards ────────────────────────────────────────
 function updateOrderStats() {
-  const data  = dbAssocRequests;
-  const total    = data.length;
-  const pending  = data.filter(r => r.status === 'pending' || r.status === 'review').length;
+  const data = dbAssocRequests;
+  const total = data.length;
+  const pending = data.filter(r => r.status === 'pending' || r.status === 'review').length;
   const approved = data.filter(r => r.status === 'approved').length;
   const rejected = data.filter(r => r.status === 'rejected').length;
 
   // This month count
-  const now       = new Date();
+  const now = new Date();
   const thisMonth = data.filter(r => {
     const d = new Date(r.date);
     return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
   }).length;
 
-  const approvalRate  = total > 0 ? ((approved / total) * 100).toFixed(1) : 0;
+  const approvalRate = total > 0 ? ((approved / total) * 100).toFixed(1) : 0;
   const rejectionRate = total > 0 ? ((rejected / total) * 100).toFixed(1) : 0;
 
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
 
-  set('os-total',          total);
-  set('os-month',          thisMonth > 0 ? `↑ ${thisMonth} هذا الشهر` : 'لا طلبات هذا الشهر');
-  set('os-pending',        pending);
-  set('os-approved',       approved);
-  set('os-approval-rate',  total > 0 ? `↑ ${approvalRate}% نسبة القبول` : '—');
-  set('os-rejected',       rejected);
+  set('os-total', total);
+  set('os-month', thisMonth > 0 ? `↑ ${thisMonth} هذا الشهر` : 'لا طلبات هذا الشهر');
+  set('os-pending', pending);
+  set('os-approved', approved);
+  set('os-approval-rate', total > 0 ? `↑ ${approvalRate}% نسبة القبول` : '—');
+  set('os-rejected', rejected);
   set('os-rejection-rate', total > 0 ? `${rejectionRate}% نسبة الرفض` : '—');
 }
 
@@ -135,9 +135,9 @@ function renderRequests(data) {
   }
 
   tbody.innerHTML = data.map((r, i) => {
-    const s       = statusMap[r.status] || { label: r.status, cls: 'badge-pending' };
-    const col     = avatarColors[i % avatarColors.length];
-    const isDb    = r._source === 'db';
+    const s = statusMap[r.status] || { label: r.status, cls: 'badge-pending' };
+    const col = avatarColors[i % avatarColors.length];
+    const isDb = r._source === 'db';
     const isPending = r.status === 'pending';
     const catIcon = catIconMap[r.cat] || '';
 
@@ -197,10 +197,10 @@ function filterByStatus(val) { activeStatus = val; applyFilter(); }
 function applyFilter() {
   let data = _allData;
   if (activeStatus) data = data.filter(r => r.status === activeStatus);
-  if (searchVal)    data = data.filter(r =>
-    (r.name||'').toLowerCase().includes(searchVal) ||
-    (r.email||'').toLowerCase().includes(searchVal) ||
-    (r.assoc||'').toLowerCase().includes(searchVal)
+  if (searchVal) data = data.filter(r =>
+    (r.name || '').toLowerCase().includes(searchVal) ||
+    (r.email || '').toLowerCase().includes(searchVal) ||
+    (r.assoc || '').toLowerCase().includes(searchVal)
   );
   renderRequests(data);
 }
@@ -211,8 +211,8 @@ let _actionDbId = null, _actionType = null;
 function openActionModal(dbId, type, assocName) {
   _actionDbId = dbId; _actionType = type;
   const isReject = type === 'reject';
-  const modal    = document.getElementById('action-modal'); if (!modal) return;
-  const card     = modal.querySelector('.modal');
+  const modal = document.getElementById('action-modal'); if (!modal) return;
+  const card = modal.querySelector('.modal');
 
   const iconEl = document.getElementById('action-modal-icon');
   if (iconEl) {
@@ -228,11 +228,11 @@ function openActionModal(dbId, type, assocName) {
          </svg>`;
   }
   document.getElementById('action-modal-title').textContent = isReject ? 'رفض طلب التسجيل' : 'طلب تعديل البيانات';
-  document.getElementById('action-modal-sub').textContent   = 'جمعية: ' + (assocName || '');
+  document.getElementById('action-modal-sub').textContent = 'جمعية: ' + (assocName || '');
   document.getElementById('action-notes-label').textContent = isReject ? 'سبب الرفض *' : 'التعديلات المطلوبة *';
   const btn = document.getElementById('action-confirm-btn');
   btn.textContent = isReject ? 'تأكيد الرفض' : 'إرسال طلب التعديل';
-  btn.className   = isReject ? 'btn btn-danger' : 'btn btn-review';
+  btn.className = isReject ? 'btn btn-danger' : 'btn btn-review';
   const ta = document.getElementById('action-notes');
   ta.value = ''; ta.placeholder = isReject ? 'أدخل سبب الرفض بوضوح...' : 'أدخل التعديلات المطلوبة...';
 
@@ -260,7 +260,7 @@ async function confirmAction() {
     document.getElementById('action-notes')?.focus(); return;
   }
   const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
-  const btn  = document.getElementById('action-confirm-btn');
+  const btn = document.getElementById('action-confirm-btn');
   if (btn) btn.disabled = true;
   try {
     const res = await fetch(`/api/association-requests/${_actionDbId}/${_actionType}`, {
@@ -276,7 +276,7 @@ async function confirmAction() {
     } else {
       showOrdersToast(data.errors?.notes?.[0] || data.message || 'حدث خطأ', 'error');
     }
-  } catch(e) { showOrdersToast('تعذّر الاتصال', 'error'); }
+  } catch (e) { showOrdersToast('تعذّر الاتصال', 'error'); }
   finally { if (btn) btn.disabled = false; }
 }
 
@@ -317,14 +317,14 @@ async function doAction(dbId, action, opts = {}) {
     });
     const data = await res.json();
     if (data.success || res.ok) { showOrdersToast(data.message || 'تمت العملية بنجاح', 'success'); await loadAssociationRequests(); }
-  } catch(e) { showOrdersToast('تعذّر الاتصال', 'error'); }
+  } catch (e) { showOrdersToast('تعذّر الاتصال', 'error'); }
 }
 
 // ===================== DETAILS MODAL =====================
 function openRequestModal(r) {
-  const s       = statusMap[r.status] || { label: r.status, cls: 'badge-pending' };
+  const s = statusMap[r.status] || { label: r.status, cls: 'badge-pending' };
   const catIcon = catIconMap[r.cat] || '';
-  const isDb    = r._source === 'db';
+  const isDb = r._source === 'db';
   const isPending = r.status === 'pending';
   const modalBody = document.getElementById('modalBody');
   if (!modalBody) return;
@@ -432,16 +432,16 @@ function showOrdersToast(msg, type) {
     t.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:9999;padding:12px 22px;border-radius:12px;font-size:.88rem;font-weight:700;font-family:Tajawal,sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.15);transition:opacity .3s;min-width:240px;text-align:center;';
     document.body.appendChild(t);
   }
-  t.style.background = type==='success'?'#0d9488':type==='error'?'#dc2626':'#1d6fa4';
-  t.style.color='#fff'; t.textContent=msg; t.style.opacity='1';
-  clearTimeout(t._t); t._t=setTimeout(()=>{t.style.opacity='0';},3500);
+  t.style.background = type === 'success' ? '#0d9488' : type === 'error' ? '#dc2626' : '#1d6fa4';
+  t.style.color = '#fff'; t.textContent = msg; t.style.opacity = '1';
+  clearTimeout(t._t); t._t = setTimeout(() => { t.style.opacity = '0'; }, 3500);
 }
 
 // ===================== BADGES =====================
 function updateSidebarBadgesWithDb() {
-  const n = dbAssocRequests.filter(r=>r.status==='pending').length;
+  const n = dbAssocRequests.filter(r => r.status === 'pending').length;
   const nb = document.getElementById('nb-reqs');
-  if (nb) nb.textContent = n>0 ? n : '';
+  if (nb) nb.textContent = n > 0 ? n : '';
 }
 function updateSidebarBadges() {
   // nb-opps is managed by consulting.js based on real opportunity data
@@ -462,7 +462,7 @@ function renderCategories() {
       </div>
       <div class="cat-card-new-info">
         <div class="cat-card-new-name" style="color:#fff">جميع التصنيفات</div>
-        <div class="cat-card-new-count" style="color:rgba(255,255,255,.75)">${categories.reduce((s,c)=>s+(c.count||0),0)} جمعية</div>
+        <div class="cat-card-new-count" style="color:rgba(255,255,255,.75)">${categories.reduce((s, c) => s + (c.count || 0), 0)} جمعية</div>
       </div>
     </div>
   </div>`;
@@ -520,12 +520,12 @@ function closeAddCategoryModal() {
 }
 
 async function saveNewCategory() {
-  const nameInput  = document.getElementById('assoc-cat-name-input');
+  const nameInput = document.getElementById('assoc-cat-name-input');
   const colorInput = document.getElementById('assoc-cat-color-input');
-  const iconInput  = document.getElementById('assoc-cat-icon-add-input');
-  const name  = nameInput?.value.trim();
+  const iconInput = document.getElementById('assoc-cat-icon-add-input');
+  const name = nameInput?.value.trim();
   const color = colorInput?.value || '#2ab8d0';
-  const icon  = iconInput?.value.trim() || '';
+  const icon = iconInput?.value.trim() || '';
 
   if (!name) {
     showOrdersToast('يرجى إدخال اسم التصنيف', 'error');
@@ -589,11 +589,11 @@ let _editCatId = null;
 function openEditCategoryModal(id) {
   const cat = categories.find(c => c.id === id || c.id == id);
   if (!cat) { showOrdersToast('تعذّر تحديد التصنيف', 'error'); return; }
-  
+
   _editCatId = id;
   const modal = document.getElementById('edit-assoc-cat-modal');
   if (!modal) return;
-  
+
   document.getElementById('edit-assoc-cat-name-input').value = cat.name || '';
   const colorInput = document.getElementById('edit-assoc-cat-color-input');
   const colorLabel = document.getElementById('edit-assoc-cat-color-label');
@@ -602,7 +602,7 @@ function openEditCategoryModal(id) {
   document.getElementById('edit-assoc-cat-icon-input').value = cat.icon || '';
   selectedCategoryEmoji = cat.icon || '';
   renderEmojiPicker();
-  
+
   modal.classList.add('open');
 }
 function closeEditCategoryModal() {
@@ -611,11 +611,11 @@ function closeEditCategoryModal() {
 }
 async function saveEditCategory() {
   if (!_editCatId) return;
-  
+
   const nameInput = document.getElementById('edit-assoc-cat-name-input');
   const colorInput = document.getElementById('edit-assoc-cat-color-input');
   const iconInput = document.getElementById('edit-assoc-cat-icon-input');
-  
+
   const name = nameInput?.value.trim();
   const color = colorInput?.value || '#2ab8d0';
   const icon = iconInput?.value.trim() || '';
@@ -625,23 +625,23 @@ async function saveEditCategory() {
     nameInput?.focus();
     return;
   }
-  
+
   const saveBtn = document.getElementById('edit-assoc-cat-save-btn');
   if (saveBtn) saveBtn.disabled = true;
 
   try {
     const res = await fetch(`/api/association-categories/${_editCatId}`, {
       method: 'PUT',
-      headers: { 'Accept':'application/json','Content-Type':'application/json','X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content||'' },
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' },
       body: JSON.stringify({ name, color, icon }),
     });
     const data = await res.json();
-    if (!res.ok || data.success === false) { showOrdersToast(data.message||'تعذّر الحفظ','error'); return; }
+    if (!res.ok || data.success === false) { showOrdersToast(data.message || 'تعذّر الحفظ', 'error'); return; }
     await fetchOrderCategories();
     renderCategories();
     closeEditCategoryModal();
-    showOrdersToast('تم تحديث التصنيف بنجاح','success');
-  } catch(e) { showOrdersToast('تعذّر الاتصال','error'); }
+    showOrdersToast('تم تحديث التصنيف بنجاح', 'success');
+  } catch (e) { showOrdersToast('تعذّر الاتصال', 'error'); }
   finally { if (saveBtn) saveBtn.disabled = false; }
 }
 
@@ -682,7 +682,7 @@ async function confirmDeleteCategory() {
   try {
     const res = await fetch(`/api/association-categories/${_deleteCatId}`, {
       method: 'DELETE',
-      headers: { 'Accept':'application/json','X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content||'' },
+      headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' },
     });
     const data = await res.json();
     if (!res.ok || data.success === false) {
@@ -693,7 +693,7 @@ async function confirmDeleteCategory() {
       renderCategories();
       showOrdersToast('تم حذف التصنيف بنجاح', 'success');
     }
-  } catch(e) {
+  } catch (e) {
     showOrdersToast('تعذّر الاتصال بالخادم', 'error');
   } finally {
     if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-trash" style="margin-left:6px"></i>تأكيد الحذف'; }
@@ -719,14 +719,14 @@ function renderAssoc(data) {
   }
   list.innerHTML = data.map(a => {
     const cat = categories.find(c => c.name === (a.category || a.cat)) || {};
-    const bg  = cat.color ? cat.color + '22' : '#2ab8d022';
+    const bg = cat.color ? cat.color + '22' : '#2ab8d022';
     const icon = cat.icon || '🏢';
     const statusLabel = a.status === 'approved' ? 'موافق عليها' : a.status === 'pending' ? 'قيد المراجعة' : a.status === 'rejected' ? 'مرفوضة' : 'تحت المراجعة';
-    const statusCls   = a.status === 'approved' ? 'badge-approved' : a.status === 'pending' ? 'badge-pending' : 'badge-rejected';
-    const assocName   = a.association_name || a.name || '—';
+    const statusCls = a.status === 'approved' ? 'badge-approved' : a.status === 'pending' ? 'badge-pending' : 'badge-rejected';
+    const assocName = a.association_name || a.name || '—';
     return `
     <div class="assoc-item-new">
-      <div class="assoc-item-avatar" style="background:${bg};color:${cat.color||'#2ab8d0'};font-size:1.3rem">${icon}</div>
+      <div class="assoc-item-avatar" style="background:${bg};color:${cat.color || '#2ab8d0'};font-size:1.3rem">${icon}</div>
       <div class="assoc-item-info">
         <div class="assoc-item-name">${assocName}</div>
         <div class="assoc-item-cat">${a.category || a.cat || '—'}</div>
@@ -771,7 +771,7 @@ async function filterAssocByCat(cat) {
     if (!res.ok) throw new Error();
     const data = await res.json();
     renderAssoc(data.associations || []);
-  } catch(e) {
+  } catch (e) {
     if (list) list.innerHTML = `<div style="padding:32px;text-align:center;color:#ef4444">⚠️ تعذّر تحميل الجمعيات</div>`;
   }
 }
@@ -793,29 +793,29 @@ function _activateTab(id) {
     if (onclick.includes(`'${id}'`) || onclick.includes(`"${id}"`)) b.classList.add('active');
   });
   // Swap stats grids
-  const grids = { 'requests':'stats-grid-requests', 'services':'stats-grid-services', 'my-associations':'stats-grid-associations', 'opp-requests':'stats-grid-opp-requests', 'proj-requests':'stats-grid-proj-requests' };
+  const grids = { 'requests': 'stats-grid-requests', 'services': 'stats-grid-services', 'my-associations': 'stats-grid-associations', 'opp-requests': 'stats-grid-opp-requests', 'proj-requests': 'stats-grid-proj-requests' };
   Object.values(grids).forEach(gid => { const el = document.getElementById(gid); if (el) el.style.display = 'none'; });
   if (grids[id]) { const el = document.getElementById(grids[id]); if (el) el.style.display = ''; }
   // Update page title
-  const titles = { 'requests':['صفحة الطلبات','إدارة طلبات إنشاء الحسابات'], 'services':['صفحة الخدمات','إدارة ومتابعة طلبات خدمات الجمعيات'], 'my-associations':['الجمعيات','إدارة كافة الجمعيات المضافة في النظام'], 'opp-requests':['طلبات فرص التطوع','مراجعة وإدارة طلبات التطوع المقدمة'], 'proj-requests':['طلبات المشاريع','مراجعة وإدارة طلبات الانضمام للمشاريع'] };
+  const titles = { 'requests': ['صفحة الطلبات', 'إدارة طلبات إنشاء الحسابات'], 'services': ['صفحة الخدمات', 'إدارة ومتابعة طلبات خدمات الجمعيات'], 'my-associations': ['الجمعيات', 'إدارة كافة الجمعيات المضافة في النظام'], 'opp-requests': ['طلبات فرص التطوع', 'مراجعة وإدارة طلبات التطوع المقدمة'], 'proj-requests': ['طلبات المشاريع', 'مراجعة وإدارة طلبات الانضمام للمشاريع'] };
   const t = titles[id];
   if (t) { const te = document.getElementById('orders-page-title-text'); const se = document.getElementById('orders-page-sub'); if (te) te.textContent = t[0]; if (se) se.textContent = t[1]; }
 }
 
-function switchTab(id,btn) {
-  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('tab-'+id)?.classList.add('active');
-  if(btn) btn.classList.add('active');
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id)?.classList.add('active');
+  if (btn) btn.classList.add('active');
 
   // ── Swap page title, subtitle, and stats grid based on active tab ──
-  const titleEl  = document.getElementById('orders-page-title-text');
-  const subEl    = document.getElementById('orders-page-sub');
-  const gridReq   = document.getElementById('stats-grid-requests');
-  const gridSvc   = document.getElementById('stats-grid-services');
+  const titleEl = document.getElementById('orders-page-title-text');
+  const subEl = document.getElementById('orders-page-sub');
+  const gridReq = document.getElementById('stats-grid-requests');
+  const gridSvc = document.getElementById('stats-grid-services');
   const gridAssoc = document.getElementById('stats-grid-associations');
-  const gridOpp   = document.getElementById('stats-grid-opp-requests');
-  const gridProj  = document.getElementById('stats-grid-proj-requests');
+  const gridOpp = document.getElementById('stats-grid-opp-requests');
+  const gridProj = document.getElementById('stats-grid-proj-requests');
 
   // Hide all grids first
   if (gridReq) gridReq.style.display = 'none';
@@ -826,29 +826,29 @@ function switchTab(id,btn) {
 
   if (id === 'services') {
     if (titleEl) titleEl.textContent = 'صفحة الخدمات';
-    if (subEl)   subEl.textContent   = 'إدارة ومتابعة طلبات خدمات الجمعيات';
+    if (subEl) subEl.textContent = 'إدارة ومتابعة طلبات خدمات الجمعيات';
     if (gridSvc) gridSvc.style.display = '';
     loadServiceRequests();
   } else if (id === 'requests') {
     if (titleEl) titleEl.textContent = 'صفحة الطلبات';
-    if (subEl)   subEl.textContent   = 'إدارة طلبات إنشاء الحسابات';
+    if (subEl) subEl.textContent = 'إدارة طلبات إنشاء الحسابات';
     if (gridReq) gridReq.style.display = '';
   } else if (id === 'my-associations') {
     if (titleEl) titleEl.textContent = 'الجمعيات';
-    if (subEl)   subEl.textContent   = 'إدارة كافة الجمعيات المضافة في النظام';
+    if (subEl) subEl.textContent = 'إدارة كافة الجمعيات المضافة في النظام';
     if (gridAssoc) gridAssoc.style.display = '';
     loadMyAssociations();
   } else if (id === 'associations') {
     if (titleEl) titleEl.textContent = 'تصنيفات الجمعيات';
-    if (subEl)   subEl.textContent   = 'إدارة التصنيفات الخاصة بالجمعيات';
+    if (subEl) subEl.textContent = 'إدارة التصنيفات الخاصة بالجمعيات';
   } else if (id === 'opp-requests') {
     if (titleEl) titleEl.textContent = 'طلبات فرص التطوع';
-    if (subEl)   subEl.textContent   = 'مراجعة وإدارة طلبات التطوع المقدمة';
+    if (subEl) subEl.textContent = 'مراجعة وإدارة طلبات التطوع المقدمة';
     if (gridOpp) gridOpp.style.display = '';
     loadOppRequests();
   } else if (id === 'proj-requests') {
     if (titleEl) titleEl.textContent = 'طلبات المشاريع';
-    if (subEl)   subEl.textContent   = 'مراجعة وإدارة طلبات الانضمام للمشاريع';
+    if (subEl) subEl.textContent = 'مراجعة وإدارة طلبات الانضمام للمشاريع';
     if (gridProj) gridProj.style.display = '';
     loadProjRequests();
   }
@@ -876,14 +876,14 @@ function updateMyAssociationsStats(data) {
   const elTotal = document.getElementById('assoc-stat-total');
   const elCats = document.getElementById('assoc-stat-cats');
   const elAvg = document.getElementById('assoc-stat-avg');
-  
+
   if (elTotal) elTotal.textContent = data.length;
-  
+
   if (elCats) {
     const cats = new Set(data.map(a => a.category).filter(Boolean));
     elCats.textContent = cats.size || 0;
   }
-  
+
   if (elAvg) {
     // just a fake average based on length for demonstration
     elAvg.textContent = Math.max(1, Math.floor(data.length / 3));
@@ -893,18 +893,18 @@ function updateMyAssociationsStats(data) {
 function filterMyAssociations() {
   const search = (document.getElementById('myAssocSearch')?.value || '').toLowerCase();
   const cat = document.getElementById('myAssocCatFilter')?.value || '';
-  
+
   const filtered = allMyAssociations.filter(a => {
     if (cat && a.category !== cat) return false;
     if (search) {
       return (a.association_name || '').toLowerCase().includes(search) ||
-             (a.email || '').toLowerCase().includes(search) ||
-             (a.phone || '').toLowerCase().includes(search) ||
-             (a.category || '').toLowerCase().includes(search);
+        (a.email || '').toLowerCase().includes(search) ||
+        (a.phone || '').toLowerCase().includes(search) ||
+        (a.category || '').toLowerCase().includes(search);
     }
     return true;
   });
-  
+
   renderMyAssociations(filtered);
 }
 
@@ -915,7 +915,7 @@ function renderMyAssociations(data) {
     tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="emoji"></div><div>لا توجد جمعيات تطابق بحثك</div></div></td></tr>`;
     return;
   }
-  
+
   tbody.innerHTML = data.map((assoc, i) => {
     const col = avatarColors[i % avatarColors.length];
     const cat = assoc.category || 'عام';
@@ -925,7 +925,7 @@ function renderMyAssociations(data) {
     const phone = assoc.phone || '—';
     const date = formatDate(assoc.created_at || new Date());
     const license = assoc.license_number || '—';
-    
+
     // Using a nice active status badge since these are "approved"
     const statusHtml = `<span class="badge badge-approved" style="background: rgba(16, 185, 129, 0.15); color: #059669; border: 1px solid rgba(16,185,129,0.2);">
       <span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-left:4px;"></span>نشطة
@@ -976,12 +976,12 @@ function renderMyAssociations(data) {
 
 // ===================== SIDEBAR =====================
 function toggleServices() {
-  const p=document.getElementById('np-services'), s=document.getElementById('submenu-services');
-  if(!s) return; const o=s.classList.contains('open');
-  s.classList.toggle('open',!o); if(p) p.classList.toggle('open',!o);
+  const p = document.getElementById('np-services'), s = document.getElementById('submenu-services');
+  if (!s) return; const o = s.classList.contains('open');
+  s.classList.toggle('open', !o); if (p) p.classList.toggle('open', !o);
 }
-function showAdminRequests(el) { switchTab('requests',document.querySelectorAll('.tab-btn')[0]); }
-function showToast(i,m){} function toggleNotifs(){ if(typeof window._realToggleNotifs==='function') window._realToggleNotifs(); } function openMeetingsPage(){} function backToVolunteer(){}
+function showAdminRequests(el) { switchTab('requests', document.querySelectorAll('.tab-btn')[0]); }
+function showToast(i, m) { } function toggleNotifs() { if (typeof window._realToggleNotifs === 'function') window._realToggleNotifs(); } function openMeetingsPage() { } function backToVolunteer() { }
 
 // ===================== VOLUNTEER OPPORTUNITY REQUESTS =====================
 let allOppReqs = [], oppReqFilter = 'all';
@@ -1003,7 +1003,7 @@ async function loadOppRequests() {
 
     // Auto-switch to this tab if needed
     const urlParams = new URLSearchParams(window.location.search);
-    const typeParam  = urlParams.get('type');
+    const typeParam = urlParams.get('type');
     const reqIdParam = urlParams.get('req_id');
     if (typeParam === 'opportunity' || typeParam === 'volunteer_request') {
       setTimeout(() => {
@@ -1015,28 +1015,28 @@ async function loadOppRequests() {
         window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
       }, 500);
     }
-  } catch(e) { if (tbody) tbody.innerHTML = `<tr><td colspan="6">تعذّر التحميل</td></tr>`; }
+  } catch (e) { if (tbody) tbody.innerHTML = `<tr><td colspan="6">تعذّر التحميل</td></tr>`; }
 }
 
 function updateOppStats() {
   const data = allOppReqs;
-  const total    = data.length;
-  const pending  = data.filter(r => r.status === 'pending').length;
+  const total = data.length;
+  const pending = data.filter(r => r.status === 'pending').length;
   const approved = data.filter(r => r.status === 'approved').length;
   const rejected = data.filter(r => r.status === 'rejected').length;
-  const now      = new Date();
+  const now = new Date();
   const thisMonth = data.filter(r => {
     const d = new Date(r.created_at);
     return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
   }).length;
   const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-  set('opp-stat-total',    total);
-  set('opp-stat-pending',  pending);
+  set('opp-stat-total', total);
+  set('opp-stat-pending', pending);
   set('opp-stat-approved', approved);
   set('opp-stat-rejected', rejected);
-  set('opp-stat-month',    thisMonth > 0 ? `↑ ${thisMonth} هذا الشهر` : 'لا طلبات هذا الشهر');
-  set('opp-stat-rate',     total > 0 ? `↑ ${((approved/total)*100).toFixed(1)}% نسبة القبول` : '—');
-  set('opp-stat-rej-rate', total > 0 ? `${((rejected/total)*100).toFixed(1)}% نسبة الرفض` : '—');
+  set('opp-stat-month', thisMonth > 0 ? `↑ ${thisMonth} هذا الشهر` : 'لا طلبات هذا الشهر');
+  set('opp-stat-rate', total > 0 ? `↑ ${((approved / total) * 100).toFixed(1)}% نسبة القبول` : '—');
+  set('opp-stat-rej-rate', total > 0 ? `${((rejected / total) * 100).toFixed(1)}% نسبة الرفض` : '—');
 }
 
 function filterOppReqs(status) {
@@ -1065,21 +1065,21 @@ function renderOppReqs() {
     tbody.innerHTML = `<tr><td colspan="6"><div class="empty-state"><div>لا توجد طلبات في هذه الفئة</div></div></td></tr>`;
     return;
   }
-  const statusLabels = { pending: { l: 'جديد', cls: 'badge-pending' }, approved: { l: 'مقبول', cls: 'badge-approved' }, rejected: { l: 'مرفوض', cls: 'badge-rejected' } };
+  const statusLabels = { pending: { l: 'جديد', cls: 'badge-pending' }, processing: { l: 'قيد المعالجة', cls: 'badge-processing' }, approved: { l: 'مقبول', cls: 'badge-approved' }, rejected: { l: 'مرفوض', cls: 'badge-rejected' } };
   tbody.innerHTML = list.map((r, i) => {
     const col = avatarColors[i % avatarColors.length];
     const userName = r.user?.full_name || r.association?.association_name || '—';
     const oppTitle = r.opportunity?.title || '—';
-    const oppCat   = r.opportunity?.type || '—';
-    const date     = r.created_at ? formatDate(r.created_at) : '—';
-    const s        = statusLabels[r.status] || { l: r.status, cls: 'badge-pending' };
-    const actions  = r.status === 'pending' ? `
-      <button class="action-btn approve-btn" title="قبول" onclick="doOppReqAction(${r.id},'approve')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>
-      </button>
-      <button class="action-btn reject-btn" title="رفض" onclick="doOppReqAction(${r.id},'reject')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>` : `<span style="font-size:.72rem;color:var(--text-muted)">تمت المعالجة</span>`;
+    const oppCat = r.opportunity?.type || '—';
+    const date = r.created_at ? formatDate(r.created_at) : '—';
+    const s = statusLabels[r.status] || { l: r.status, cls: 'badge-pending' };
+    const actions = `
+      <button class="action-btn view-btn" title="عرض التفاصيل" onclick="openOppReqModal(${r.id})">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>`;
     return `<tr>
       <td><div class="user-cell"><div class="avatar" style="background:${col}">${initials(userName)}</div><div class="user-name">${userName}</div></div></td>
       <td style="font-weight:600;font-size:.87rem">${oppTitle}</td>
@@ -1091,22 +1091,119 @@ function renderOppReqs() {
   }).join('');
 }
 
-async function doOppReqAction(id, action) {
+let selectedOppReqId = null;
+
+function openOppReqModal(id) {
+  const r = allOppReqs.find(req => req.id === id);
+  if (!r) return;
+  selectedOppReqId = id;
+
+  const applicant = r.user || r.association || {};
+  const isAssoc = !!r.association;
+  const name = isAssoc ? r.association.association_name : (r.user?.full_name || '—');
+  const email = applicant.email || '—';
+  const phone = applicant.phone || '—';
+
+  const statusLabels = { pending: { l: 'جديد', cls: 'badge-pending' }, processing: { l: 'قيد المعالجة', cls: 'badge-processing' }, approved: { l: 'مقبول', cls: 'badge-approved' }, rejected: { l: 'مرفوض', cls: 'badge-rejected' } };
+  const s = statusLabels[r.status] || { l: r.status, cls: 'badge-pending' };
+
+  document.getElementById('opp-req-modal-av').textContent = initials(name);
+  document.getElementById('opp-req-modal-name').textContent = name + (isAssoc ? ' (جمعية)' : ' (متطوع)');
+  document.getElementById('opp-req-modal-email').textContent = email;
+  document.getElementById('opp-req-modal-phone').textContent = phone;
+  document.getElementById('opp-req-modal-title').textContent = r.opportunity?.title || '—';
+  document.getElementById('opp-req-modal-type').textContent = r.opportunity?.type || '—';
+  document.getElementById('opp-req-modal-notes').textContent = r.notes || 'لا توجد ملاحظات';
+  document.getElementById('opp-req-modal-created').textContent = r.created_at ? formatDate(r.created_at) : '—';
+
+  const statusEl = document.getElementById('opp-req-modal-status');
+  statusEl.textContent = s.l;
+  statusEl.className = 'badge ' + s.cls;
+
+  const actionSection = document.getElementById('opp-req-action-section');
+  if (actionSection) {
+    if (r.status === 'pending') {
+      actionSection.style.display = 'block';
+      const procBtn = document.querySelector('#opp-req-action-section .btn-pill-process');
+      if (procBtn) procBtn.style.display = 'flex';
+      document.getElementById('opp-req-reject-reason-wrap').style.display = 'none';
+      document.getElementById('opp-req-reject-confirm-btn-wrap').style.display = 'none';
+      document.getElementById('opp-req-reject-reason').value = '';
+    } else if (r.status === 'processing') {
+      actionSection.style.display = 'block';
+      const procBtn = document.querySelector('#opp-req-action-section .btn-pill-process');
+      if (procBtn) procBtn.style.display = 'none';
+      document.getElementById('opp-req-reject-reason-wrap').style.display = 'none';
+      document.getElementById('opp-req-reject-confirm-btn-wrap').style.display = 'none';
+      document.getElementById('opp-req-reject-reason').value = '';
+    } else {
+      actionSection.style.display = 'none';
+    }
+  }
+
+  document.getElementById('opp-req-modal').classList.add('open');
+}
+
+function closeOppReqModal() {
+  document.getElementById('opp-req-modal')?.classList.remove('open');
+  selectedOppReqId = null;
+}
+
+function toggleOppReqRejectInput() {
+  const wrap = document.getElementById('opp-req-reject-reason-wrap');
+  const confirmBtnWrap = document.getElementById('opp-req-reject-confirm-btn-wrap');
+  if (wrap.style.display === 'none') {
+    wrap.style.display = 'block';
+    confirmBtnWrap.style.display = 'block';
+    document.getElementById('opp-req-reject-reason').focus();
+  } else {
+    wrap.style.display = 'none';
+    confirmBtnWrap.style.display = 'none';
+  }
+}
+
+async function submitOppReqStatus(action) {
+  if (!selectedOppReqId) return;
+
   const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
+  const body = {};
+
+  if (action === 'reject') {
+    const reason = document.getElementById('opp-req-reject-reason').value.trim();
+    if (!reason || reason.length < 5) {
+      showOrdersToast('يرجى إدخال سبب الرفض (5 أحرف على الأقل)', 'error');
+      return;
+    }
+    body.notes = reason;
+  }
+
+  let btnClass = '.btn-pill-approve';
+  if (action === 'process') btnClass = '.btn-pill-process';
+  if (action === 'reject') btnClass = '.btn-danger';
+
+  const btn = document.querySelector(`#opp-req-modal ${btnClass}`);
+  if (btn) btn.disabled = true;
+
   try {
-    const res = await fetch(`/api/opportunity-requests/${id}/${action}`, {
-      method: 'POST', credentials: 'same-origin',
+    const res = await fetch(`/api/opportunity-requests/${selectedOppReqId}/${action}`, {
+      method: 'POST',
+      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
-      body: JSON.stringify({}),
+      body: JSON.stringify(body),
     });
     const data = await res.json();
-    if (data.success || res.ok) {
-      showOrdersToast(data.message || 'تمت العملية بنجاح', 'success');
+    if (res.ok && (data.success || data.success !== false)) {
+      closeOppReqModal();
+      showOrdersToast(data.message || 'تم تحديث حالة الطلب بنجاح', 'success');
       await loadOppRequests();
     } else {
-      showOrdersToast(data.message || 'حدث خطأ', 'error');
+      showOrdersToast(data.message || 'حدث خطأ أثناء حفظ الحالة', 'error');
     }
-  } catch(e) { showOrdersToast('تعذّر الاتصال', 'error'); }
+  } catch (e) {
+    showOrdersToast('تعذّر الاتصال بالخادم', 'error');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
 
 // ===================== PROJECT JOIN REQUESTS =====================
@@ -1129,7 +1226,7 @@ async function loadProjRequests() {
 
     // Auto-switch to this tab if needed
     const urlParams = new URLSearchParams(window.location.search);
-    const typeParam  = urlParams.get('type');
+    const typeParam = urlParams.get('type');
     const reqIdParam = urlParams.get('req_id');
     if (typeParam === 'project_join') {
       setTimeout(() => {
@@ -1141,28 +1238,28 @@ async function loadProjRequests() {
         window.history.replaceState({}, document.title, window.location.pathname + window.location.hash);
       }, 500);
     }
-  } catch(e) { if (tbody) tbody.innerHTML = `<tr><td colspan="5">تعذّر التحميل</td></tr>`; }
+  } catch (e) { if (tbody) tbody.innerHTML = `<tr><td colspan="5">تعذّر التحميل</td></tr>`; }
 }
 
 function updateProjStats() {
   const data = allProjReqs;
-  const total    = data.length;
-  const pending  = data.filter(r => r.status === 'pending').length;
+  const total = data.length;
+  const pending = data.filter(r => r.status === 'pending').length;
   const approved = data.filter(r => r.status === 'approved').length;
   const rejected = data.filter(r => r.status === 'rejected').length;
-  const now      = new Date();
+  const now = new Date();
   const thisMonth = data.filter(r => {
     const d = new Date(r.created_at);
     return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
   }).length;
   const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-  set('proj-stat-total',    total);
-  set('proj-stat-pending',  pending);
+  set('proj-stat-total', total);
+  set('proj-stat-pending', pending);
   set('proj-stat-approved', approved);
   set('proj-stat-rejected', rejected);
-  set('proj-stat-month',    thisMonth > 0 ? `↑ ${thisMonth} هذا الشهر` : 'لا طلبات هذا الشهر');
-  set('proj-stat-rate',     total > 0 ? `↑ ${((approved/total)*100).toFixed(1)}% نسبة القبول` : '—');
-  set('proj-stat-rej-rate', total > 0 ? `${((rejected/total)*100).toFixed(1)}% نسبة الرفض` : '—');
+  set('proj-stat-month', thisMonth > 0 ? `↑ ${thisMonth} هذا الشهر` : 'لا طلبات هذا الشهر');
+  set('proj-stat-rate', total > 0 ? `↑ ${((approved / total) * 100).toFixed(1)}% نسبة القبول` : '—');
+  set('proj-stat-rej-rate', total > 0 ? `${((rejected / total) * 100).toFixed(1)}% نسبة الرفض` : '—');
 }
 
 function filterProjReqs(status) {
@@ -1185,26 +1282,26 @@ function renderProjReqs() {
   if (projReqFilter && projReqFilter !== 'all') list = list.filter(r => r.status === projReqFilter);
   if (q) list = list.filter(r =>
     (r.project?.title || '').toLowerCase().includes(q) ||
-    (r.user?.full_name || '').toLowerCase().includes(q)
+    (r.user?.full_name || r.association?.association_name || '').toLowerCase().includes(q)
   );
   if (!list.length) {
     tbody.innerHTML = `<tr><td colspan="5"><div class="empty-state"><div>لا توجد طلبات في هذه الفئة</div></div></td></tr>`;
     return;
   }
-  const statusLabels = { pending: { l: 'جديد', cls: 'badge-pending' }, approved: { l: 'مقبول', cls: 'badge-approved' }, rejected: { l: 'مرفوض', cls: 'badge-rejected' } };
+  const statusLabels = { pending: { l: 'جديد', cls: 'badge-pending' }, processing: { l: 'قيد المعالجة', cls: 'badge-processing' }, approved: { l: 'مقبول', cls: 'badge-approved' }, rejected: { l: 'مرفوض', cls: 'badge-rejected' } };
   tbody.innerHTML = list.map((r, i) => {
-    const col  = avatarColors[i % avatarColors.length];
-    const user = r.user?.full_name || '—';
+    const col = avatarColors[i % avatarColors.length];
+    const user = r.user?.full_name || r.association?.association_name || '—';
     const proj = r.project?.title || '—';
     const date = r.created_at ? formatDate(r.created_at) : '—';
-    const s    = statusLabels[r.status] || { l: r.status, cls: 'badge-pending' };
-    const actions = r.status === 'pending' ? `
-      <button class="action-btn approve-btn" title="قبول" onclick="doProjReqAction(${r.id},'approve')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="20 6 9 17 4 12"/></svg>
-      </button>
-      <button class="action-btn reject-btn" title="رفض" onclick="doProjReqAction(${r.id},'reject')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>` : `<span style="font-size:.72rem;color:var(--text-muted)">تمت المعالجة</span>`;
+    const s = statusLabels[r.status] || { l: r.status, cls: 'badge-pending' };
+    const actions = `
+      <button class="action-btn view-btn" title="عرض التفاصيل" onclick="openProjReqModal(${r.id})">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>`;
     return `<tr>
       <td><div class="user-cell"><div class="avatar" style="background:${col}">${initials(user)}</div><div class="user-name">${user}</div></div></td>
       <td style="font-weight:600;font-size:.87rem">${proj}</td>
@@ -1215,22 +1312,89 @@ function renderProjReqs() {
   }).join('');
 }
 
-async function doProjReqAction(id, action) {
+let selectedProjReqId = null;
+
+function openProjReqModal(id) {
+  const r = allProjReqs.find(req => req.id === id);
+  if (!r) return;
+  selectedProjReqId = id;
+
+  const applicant = r.user || r.association || {};
+  const isAssoc = !!r.association;
+  const name = isAssoc ? r.association.association_name : (r.user?.full_name || '—');
+  const email = applicant.email || '—';
+  const phone = applicant.phone || '—';
+
+  const statusLabels = { pending: { l: 'جديد', cls: 'badge-pending' }, processing: { l: 'قيد المعالجة', cls: 'badge-processing' }, approved: { l: 'مقبول', cls: 'badge-approved' }, rejected: { l: 'مرفوض', cls: 'badge-rejected' } };
+  const s = statusLabels[r.status] || { l: r.status, cls: 'badge-pending' };
+
+  document.getElementById('proj-req-modal-av').textContent = initials(name);
+  document.getElementById('proj-req-modal-name').textContent = name + (isAssoc ? ' (جمعية)' : ' (متطوع)');
+  document.getElementById('proj-req-modal-email').textContent = email;
+  document.getElementById('proj-req-modal-phone').textContent = phone;
+  document.getElementById('proj-req-modal-title').textContent = r.project?.title || '—';
+  document.getElementById('proj-req-modal-notes').textContent = r.notes || 'لا توجد ملاحظات';
+  document.getElementById('proj-req-modal-created').textContent = r.created_at ? formatDate(r.created_at) : '—';
+
+  const statusEl = document.getElementById('proj-req-modal-status');
+  statusEl.textContent = s.l;
+  statusEl.className = 'badge ' + s.cls;
+
+  const actionSection = document.getElementById('proj-req-action-section');
+  if (actionSection) {
+    if (r.status === 'pending') {
+      actionSection.style.display = 'block';
+      const procBtn = document.querySelector('#proj-req-action-section .btn-pill-process');
+      if (procBtn) procBtn.style.display = 'flex';
+    } else if (r.status === 'processing') {
+      actionSection.style.display = 'block';
+      const procBtn = document.querySelector('#proj-req-action-section .btn-pill-process');
+      if (procBtn) procBtn.style.display = 'none';
+    } else {
+      actionSection.style.display = 'none';
+    }
+  }
+
+  document.getElementById('proj-req-modal').classList.add('open');
+}
+
+function closeProjReqModal() {
+  document.getElementById('proj-req-modal')?.classList.remove('open');
+  selectedProjReqId = null;
+}
+
+async function submitProjReqStatus(action) {
+  if (!selectedProjReqId) return;
+
   const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+  let btnClass = '.btn-pill-approve';
+  if (action === 'process') btnClass = '.btn-pill-process';
+  if (action === 'reject') btnClass = '.btn-pill-reject';
+
+  const btn = document.querySelector(`#proj-req-modal ${btnClass}`);
+  if (btn) btn.disabled = true;
+
   try {
-    const res = await fetch(`/api/project-join-requests/${id}/${action}`, {
-      method: 'POST', credentials: 'same-origin',
+    const res = await fetch(`/api/project-join-requests/${selectedProjReqId}/${action}`, {
+      method: 'POST',
+      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
       body: JSON.stringify({}),
     });
     const data = await res.json();
-    if (data.success || res.ok) {
-      showOrdersToast(data.message || 'تمت العملية بنجاح', 'success');
+    if (res.ok && (data.success || data.success !== false)) {
+      closeProjReqModal();
+      showOrdersToast(data.message || 'تم تحديث حالة الطلب بنجاح', 'success');
       await loadProjRequests();
     } else {
-      showOrdersToast(data.message || 'حدث خطأ', 'error');
+      showOrdersToast(data.message || 'حدث خطأ أثناء حفظ الحالة', 'error');
     }
-  } catch(e) { showOrdersToast('تعذّر الاتصال', 'error'); }
+  } catch (e) {
+    showOrdersToast('تعذّر الاتصال بالخادم', 'error');
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
 
 // ===================== INIT =====================
@@ -1250,7 +1414,7 @@ function initOrders() {
   // The individual load functions will handle switching to the correct tab
   const urlParams = new URLSearchParams(window.location.search);
   const reqIdParam = urlParams.get('req_id');
-  const typeParam  = urlParams.get('type');
+  const typeParam = urlParams.get('type');
 
   if (!reqIdParam) {
     // No deep-link — go to the default tab
@@ -1264,14 +1428,14 @@ function initOrders() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  const m=document.getElementById('modal');
-  if(m) m.addEventListener('click',e=>{if(e.target===m)closeModal();});
-  const am=document.getElementById('action-modal');
-  if(am) am.addEventListener('click',e=>{if(e.target===am)closeActionModal();});
-  const ap=document.getElementById('approve-modal');
-  if(ap) ap.addEventListener('click',e=>{if(e.target===ap)closeApproveModal();});
-  const acm=document.getElementById('add-cat-modal');
-  if(acm) acm.addEventListener('click',e=>{if(e.target===acm)closeAddCategoryModal();});
+  const m = document.getElementById('modal');
+  if (m) m.addEventListener('click', e => { if (e.target === m) closeModal(); });
+  const am = document.getElementById('action-modal');
+  if (am) am.addEventListener('click', e => { if (e.target === am) closeActionModal(); });
+  const ap = document.getElementById('approve-modal');
+  if (ap) ap.addEventListener('click', e => { if (e.target === ap) closeApproveModal(); });
+  const acm = document.getElementById('add-cat-modal');
+  if (acm) acm.addEventListener('click', e => { if (e.target === acm) closeAddCategoryModal(); });
   const colorInput = document.getElementById('cat-color-input');
   if (colorInput) {
     colorInput.addEventListener('input', (e) => {
@@ -1288,18 +1452,18 @@ let srSearch = '';
 let selectedSrId = null;
 
 const srTypeLabels = {
-  units:       'بناء وحدات/أنظمة',
-  training:    'تدريب المتطوعين',
+  units: 'بناء وحدات/أنظمة',
+  training: 'تدريب المتطوعين',
   initiatives: 'تنسيق المبادرات',
-  consulting:  'استشارات متخصصة',
-  other:       'طلب آخر',
+  consulting: 'استشارات متخصصة',
+  other: 'طلب آخر',
 };
 
 const srStatusMap = {
-  pending:    { label: 'جديد',          cls: 'badge-pending'  },
-  processing: { label: 'قيد المعالجة', cls: 'badge-review'   },
-  approved:   { label: 'مقبول',         cls: 'badge-approved' },
-  rejected:   { label: 'مرفوض',         cls: 'badge-rejected' },
+  pending: { label: 'جديد', cls: 'badge-pending' },
+  processing: { label: 'قيد المعالجة', cls: 'badge-review' },
+  approved: { label: 'مقبول', cls: 'badge-approved' },
+  rejected: { label: 'مرفوض', cls: 'badge-rejected' },
 };
 
 async function loadServiceRequests() {
@@ -1312,7 +1476,7 @@ async function loadServiceRequests() {
     });
     if (!res.ok) {
       const txt = await res.text();
-      if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="sr-empty">خطأ ${res.status}: ${txt.substring(0,120)}</td></tr>`;
+      if (tbody) tbody.innerHTML = `<tr><td colspan="5" class="sr-empty">خطأ ${res.status}: ${txt.substring(0, 120)}</td></tr>`;
       return;
     }
     allServiceReqs = await res.json();
@@ -1347,7 +1511,7 @@ function renderSrTable() {
   const term = srSearch.toLowerCase();
   const filtered = allServiceReqs.filter(sr => {
     if (srFilter !== 'all' && sr.status !== srFilter) return false;
-    const name  = (sr.requester_name || sr.association_name || '').toLowerCase();
+    const name = (sr.requester_name || sr.association_name || '').toLowerCase();
     const title = (sr.title || '').toLowerCase();
     return !term || name.includes(term) || title.includes(term);
   });
@@ -1358,9 +1522,9 @@ function renderSrTable() {
   }
 
   tbody.innerHTML = filtered.map(sr => {
-    const s    = srStatusMap[sr.status] || srStatusMap.pending;
+    const s = srStatusMap[sr.status] || srStatusMap.pending;
     const name = sr.requester_name || sr.association_name || 'مجهول';
-    const col  = avatarColors[sr.id % avatarColors.length];
+    const col = avatarColors[sr.id % avatarColors.length];
     return `
       <tr>
         <td>
@@ -1395,9 +1559,9 @@ function updateSrStats() {
 }
 
 function updateServiceStats() {
-  const data     = allServiceReqs;
-  const total    = data.length;
-  const pending  = data.filter(r => r.status === 'pending').length;
+  const data = allServiceReqs;
+  const total = data.length;
+  const pending = data.filter(r => r.status === 'pending').length;
   const approved = data.filter(r => r.status === 'approved').length;
   const rejected = data.filter(r => r.status === 'rejected').length;
 
@@ -1407,16 +1571,16 @@ function updateServiceStats() {
     return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
   }).length;
 
-  const approvalRate  = total > 0 ? ((approved / total) * 100).toFixed(1) : 0;
+  const approvalRate = total > 0 ? ((approved / total) * 100).toFixed(1) : 0;
   const rejectionRate = total > 0 ? ((rejected / total) * 100).toFixed(1) : 0;
 
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-  set('ss-total',          total);
-  set('ss-month',          thisMonth > 0 ? `↑ ${thisMonth} هذا الشهر` : 'لا طلبات هذا الشهر');
-  set('ss-pending',        pending);
-  set('ss-approved',       approved);
-  set('ss-approval-rate',  total > 0 ? `↑ ${approvalRate}% نسبة القبول` : '—');
-  set('ss-rejected',       rejected);
+  set('ss-total', total);
+  set('ss-month', thisMonth > 0 ? `↑ ${thisMonth} هذا الشهر` : 'لا طلبات هذا الشهر');
+  set('ss-pending', pending);
+  set('ss-approved', approved);
+  set('ss-approval-rate', total > 0 ? `↑ ${approvalRate}% نسبة القبول` : '—');
+  set('ss-rejected', rejected);
   set('ss-rejection-rate', total > 0 ? `${rejectionRate}% نسبة الرفض` : '—');
 }
 
@@ -1435,37 +1599,44 @@ function searchSr(val) {
 }
 
 // ── SR Detail Modal ───────────────────────────────────────────────────────────
-let _currentSrStatus = null;
 
 function openSrModal(id) {
   const sr = allServiceReqs.find(r => r.id === id);
   if (!sr) return;
   selectedSrId = id;
-  _currentSrStatus = sr.status;
 
-  const name  = sr.requester_name || sr.association_name || 'مجهول';
+  const name = sr.requester_name || sr.association_name || 'مجهول';
   const email = sr.requester_email || sr.association_email || '';
-  const s     = srStatusMap[sr.status] || srStatusMap.pending;
+  const s = srStatusMap[sr.status] || srStatusMap.pending;
 
-  document.getElementById('srm-av').textContent    = initials(name);
-  document.getElementById('srm-name').textContent  = name;
+  document.getElementById('srm-av').textContent = initials(name);
+  document.getElementById('srm-name').textContent = name;
   document.getElementById('srm-email').textContent = email;
-  document.getElementById('srm-type').textContent  = srTypeLabels[sr.service_type] || 'طلب عام';
+  document.getElementById('srm-type').textContent = srTypeLabels[sr.service_type] || 'طلب عام';
   document.getElementById('srm-title').textContent = sr.title;
   document.getElementById('srm-details').textContent = sr.details || '—';
-  document.getElementById('srm-budget').textContent  = sr.budget ? sr.budget + ' ر.س' : '—';
-  document.getElementById('srm-date').textContent    = sr.preferred_date || '—';
+  document.getElementById('srm-budget').textContent = sr.budget ? sr.budget + ' ر.س' : '—';
+  document.getElementById('srm-date').textContent = sr.preferred_date || '—';
   document.getElementById('srm-created').textContent = sr.created_at || '—';
 
   const statusEl = document.getElementById('srm-status');
   statusEl.textContent = s.label;
-  statusEl.className   = 'badge ' + s.cls;
+  statusEl.className = 'badge ' + s.cls;
 
-  // Highlight the currently selected status button
-  document.querySelectorAll('.sr-status-btn').forEach(btn => {
-    const active = btn.dataset.status === sr.status;
-    btn.classList.toggle('sr-status-active', active);
-  });
+  const actionSection = document.getElementById('sr-action-section');
+  if (actionSection) {
+    if (sr.status === 'pending') {
+      actionSection.style.display = 'block';
+      const procBtn = document.querySelector('#sr-action-section .btn-pill-process');
+      if (procBtn) procBtn.style.display = 'flex';
+    } else if (sr.status === 'processing') {
+      actionSection.style.display = 'block';
+      const procBtn = document.querySelector('#sr-action-section .btn-pill-process');
+      if (procBtn) procBtn.style.display = 'none';
+    } else {
+      actionSection.style.display = 'none';
+    }
+  }
 
   document.getElementById('sr-modal').classList.add('open');
 }
@@ -1473,27 +1644,25 @@ function openSrModal(id) {
 function closeSrModal() {
   document.getElementById('sr-modal')?.classList.remove('open');
   selectedSrId = null;
-  _currentSrStatus = null;
 }
 
-function selectSrStatus(status) {
-  _currentSrStatus = status;
-  document.querySelectorAll('.sr-status-btn').forEach(btn => {
-    btn.classList.toggle('sr-status-active', btn.dataset.status === status);
-  });
-}
-
-async function saveSrStatus() {
-  if (!selectedSrId || !_currentSrStatus) return;
+async function submitSrStatus(status) {
+  if (!selectedSrId) return;
   const CSRF = document.querySelector('meta[name="csrf-token"]')?.content || '';
-  const btn  = document.getElementById('sr-save-btn');
-  if (btn) { btn.disabled = true; btn.textContent = 'جاري الحفظ...'; }
+
+  let btnClass = '.btn-pill-approve';
+  if (status === 'processing') btnClass = '.btn-pill-process';
+  if (status === 'rejected') btnClass = '.btn-pill-reject';
+
+  const btn = document.querySelector(`#sr-action-section ${btnClass}`);
+  if (btn) btn.disabled = true;
+
   try {
     const res = await fetch(`/api/orders/services/${selectedSrId}/status`, {
       method: 'POST',
       credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
-      body: JSON.stringify({ status: _currentSrStatus }),
+      body: JSON.stringify({ status: status }),
     });
     const data = await res.json();
     if (res.ok && (data.success || data.success !== false)) {
@@ -1504,15 +1673,21 @@ async function saveSrStatus() {
       showOrdersToast(data.message || 'حدث خطأ', 'error');
     }
   } catch (e) {
-    showOrdersToast('تعذّر الاتصال', 'error');
+    showOrdersToast('تعذّر الاتصال بالخادم', 'error');
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'حفظ الحالة'; }
+    if (btn) btn.disabled = false;
   }
 }
 
-// close SR modal on backdrop click
+// close modals on backdrop click
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('sr-modal')?.addEventListener('click', e => {
     if (e.target.id === 'sr-modal') closeSrModal();
+  });
+  document.getElementById('opp-req-modal')?.addEventListener('click', e => {
+    if (e.target.id === 'opp-req-modal') closeOppReqModal();
+  });
+  document.getElementById('proj-req-modal')?.addEventListener('click', e => {
+    if (e.target.id === 'proj-req-modal') closeProjReqModal();
   });
 });
