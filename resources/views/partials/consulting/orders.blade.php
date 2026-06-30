@@ -3,7 +3,8 @@
     <div class="page-head">
       <div>
         <h1 id="orders-page-title"><i class="fa-solid fa-clipboard-list" style="margin-left:8px;color:var(--teal)"></i>
-          <span id="orders-page-title-text">صفحة الطلبات</span></h1>
+          <span id="orders-page-title-text">صفحة الطلبات</span>
+        </h1>
         <p id="orders-page-sub">إدارة طلبات إنشاء الحسابات وعرض تصنيفات الجمعيات المسجلة</p>
       </div>
     </div>
