@@ -57,6 +57,24 @@
     .form-input, .form-textarea { background: var(--input-bg); border: 1.5px solid var(--input-border); border-radius: 10px; padding: 10px 13px; font-family: 'Tajawal', sans-serif; font-size: 0.88rem; color: var(--ink); transition: border-color 0.17s, box-shadow 0.17s; outline: none; width: 100%; }
     .form-input:focus, .form-textarea:focus { border-color: var(--btn-bg); box-shadow: 0 0 0 3px var(--input-focus); }
     .form-input[readonly] { opacity: 0.55; cursor: not-allowed; }
+    .contact-field-row { display: flex; align-items: center; gap: 8px; }
+    .contact-field-row .form-input { flex: 1; }
+    .btn-edit-contact { display: inline-flex; align-items: center; gap: 6px; padding: 10px 14px; background: transparent; color: var(--btn-bg); border: 1.5px solid var(--input-border); border-radius: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; font-family: 'Tajawal', sans-serif; white-space: nowrap; transition: all 0.17s; }
+    .btn-edit-contact:hover { background: var(--btn-bg); color: #fff; border-color: var(--btn-bg); }
+    .contact-modal-overlay { position: fixed; inset: 0; background: rgba(10, 25, 35, 0.55); backdrop-filter: blur(6px); z-index: 400; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .contact-modal-overlay.open { display: flex; }
+    .contact-modal { background: var(--card-bg); border-radius: 20px; width: 100%; max-width: 420px; box-shadow: var(--shadow-lg); overflow: hidden; }
+    .contact-modal-head { background: linear-gradient(135deg, var(--btn-bg), #0ea5c9); padding: 18px 22px; display: flex; align-items: center; justify-content: space-between; }
+    .contact-modal-head h3 { color: #fff; font-size: 1.02rem; font-weight: 800; margin: 0; }
+    .contact-modal-close { background: rgba(255,255,255,0.2); border: none; width: 30px; height: 30px; border-radius: 50%; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .contact-modal-body { padding: 22px; display: flex; flex-direction: column; gap: 14px; }
+    .contact-modal-hint { font-size: 0.78rem; color: var(--muted-c); margin-top: -6px; }
+    .contact-modal-error { font-size: 0.8rem; color: var(--danger-c); display: none; }
+    .contact-modal-error.show { display: block; }
+    .contact-modal-footer { padding: 16px 22px; border-top: 1px solid var(--border-c); display: flex; gap: 10px; }
+    .btn-contact-cancel { flex: 1; background: #f1f5f9; color: #64748b; border: none; border-radius: 10px; padding: 11px; font-family: 'Tajawal', sans-serif; font-weight: 700; cursor: pointer; font-size: 0.88rem; }
+    .btn-contact-save { flex: 1.4; background: var(--btn-bg); color: #fff; border: none; border-radius: 10px; padding: 11px; font-family: 'Tajawal', sans-serif; font-weight: 800; cursor: pointer; font-size: 0.88rem; }
+    .btn-contact-save:disabled { opacity: 0.6; cursor: not-allowed; }
     .form-input::placeholder, .form-textarea::placeholder { color: #9ca3af; }
     .form-textarea { resize: vertical; min-height: 90px; }
     .toggle-row { display: flex; align-items: center; justify-content: space-between; background: var(--input-bg); border: 1.5px solid var(--input-border); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; transition: border-color 0.17s; }
@@ -206,8 +224,13 @@
             </div>
             <div class="form-group">
               <label class="form-label">البريد الإلكتروني</label>
-              <input type="email" class="form-input" id="email"
-                     value="{{ $profileEmail }}" placeholder="أدخل البريد الإلكتروني">
+              <div class="contact-field-row">
+                <input type="email" class="form-input" id="email"
+                       value="{{ $profileEmail }}" readonly>
+                <button type="button" class="btn-edit-contact" onclick="openContactModal('email')">
+                  <i class="fa-regular fa-pen-to-square"></i> تعديل
+                </button>
+              </div>
             </div>
             <div class="form-group">
               <label class="form-label">الدور</label>
@@ -215,7 +238,12 @@
             </div>
             <div class="form-group">
               <label class="form-label">رقم الهاتف</label>
-              <input type="tel" class="form-input" id="phone" value="{{ $profilePhone }}" placeholder="+966 5X XXX XXXX">
+              <div class="contact-field-row">
+                <input type="tel" class="form-input" id="phone" value="{{ $profilePhone }}" readonly>
+                <button type="button" class="btn-edit-contact" onclick="openContactModal('phone')">
+                  <i class="fa-regular fa-pen-to-square"></i> تعديل
+                </button>
+              </div>
             </div>
             <div class="form-group full">
               <label class="form-label">نبذة تعريفية</label>
@@ -325,6 +353,34 @@
 </div>{{-- /main --}}
 </div>{{-- /layout --}}
 
+<!-- ── Contact Edit Confirmation Modal ── -->
+<div class="contact-modal-overlay" id="contact-modal-overlay">
+  <div class="contact-modal" onclick="event.stopPropagation()">
+    <div class="contact-modal-head">
+      <h3 id="contact-modal-title">تعديل البريد الإلكتروني</h3>
+      <button class="contact-modal-close" type="button" onclick="closeContactModal()">✕</button>
+    </div>
+    <div class="contact-modal-body">
+      <div class="form-group">
+        <label class="form-label" id="contact-modal-field-label">البريد الإلكتروني الجديد</label>
+        <input type="text" class="form-input" id="contact-modal-value" placeholder="">
+      </div>
+      <div class="form-group">
+        <label class="form-label">كلمة المرور الحالية</label>
+        <input type="password" class="form-input" id="contact-modal-password" placeholder="أدخل كلمة المرور الحالية للتأكيد" autocomplete="current-password">
+        <span class="contact-modal-hint">نطلب كلمة المرور للتأكد من هويتك قبل تعديل بيانات التواصل.</span>
+      </div>
+      <div class="contact-modal-error" id="contact-modal-error"></div>
+    </div>
+    <div class="contact-modal-footer">
+      <button class="btn-contact-cancel" type="button" onclick="closeContactModal()">إلغاء</button>
+      <button class="btn-contact-save" id="contact-modal-save-btn" type="button" onclick="saveContactChange()">
+        <i class="fa-regular fa-floppy-disk"></i> حفظ
+      </button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"><span id="t-icon"></span><span id="t-msg"></span></div>
 
 <script src="{{ asset('js/menu.js') }}"></script>
@@ -362,6 +418,66 @@
     } catch { showToast('تعذر الاتصال بالخادم', 'error'); }
   }
 
+  let _contactField = null; // 'email' or 'phone'
+
+  function openContactModal(field) {
+    _contactField = field;
+    const isEmail = field === 'email';
+    document.getElementById('contact-modal-title').textContent = isEmail ? 'تعديل البريد الإلكتروني' : 'تعديل رقم الهاتف';
+    document.getElementById('contact-modal-field-label').textContent = isEmail ? 'البريد الإلكتروني الجديد' : 'رقم الهاتف الجديد';
+    const valueInput = document.getElementById('contact-modal-value');
+    valueInput.type = isEmail ? 'email' : 'tel';
+    valueInput.placeholder = isEmail ? 'example@email.com' : '+966 5X XXX XXXX';
+    valueInput.value = document.getElementById(field)?.value || '';
+    document.getElementById('contact-modal-password').value = '';
+    document.getElementById('contact-modal-error').classList.remove('show');
+    document.getElementById('contact-modal-overlay').classList.add('open');
+  }
+
+  function closeContactModal() {
+    document.getElementById('contact-modal-overlay').classList.remove('open');
+    _contactField = null;
+  }
+
+  async function saveContactChange() {
+    if (!_contactField) return;
+    const newValue = document.getElementById('contact-modal-value')?.value.trim() || '';
+    const password = document.getElementById('contact-modal-password')?.value || '';
+    const errorEl = document.getElementById('contact-modal-error');
+    errorEl.classList.remove('show');
+
+    if (!newValue) { errorEl.textContent = 'يرجى إدخال القيمة الجديدة'; errorEl.classList.add('show'); return; }
+    if (!password) { errorEl.textContent = 'يرجى إدخال كلمة المرور الحالية'; errorEl.classList.add('show'); return; }
+
+    const payload = { current_password: password };
+    payload[_contactField] = newValue;
+
+    const btn = document.getElementById('contact-modal-save-btn');
+    btn.disabled = true;
+    try {
+      const res = await fetch('/api/user/settings/contact', {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (!res.ok || data.success === false) {
+        errorEl.textContent = data?.errors?.current_password?.[0] || data?.errors?.email?.[0] || data?.errors?.phone?.[0] || data?.message || 'تعذر حفظ التغيير';
+        errorEl.classList.add('show');
+        return;
+      }
+      const field = document.getElementById(_contactField);
+      if (field && data.user) field.value = data.user[_contactField] ?? newValue;
+      showToast(data.message || 'تم تحديث بيانات التواصل بنجاح', 'success');
+      closeContactModal();
+    } catch {
+      errorEl.textContent = 'تعذر الاتصال بالخادم';
+      errorEl.classList.add('show');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
   function selectSwatch(el) {
     document.querySelectorAll('.swatch').forEach(s => s.classList.remove('selected'));
     el.classList.add('selected');
@@ -379,10 +495,10 @@
         const res = await fetch('/api/user/settings/profile', {
           method: 'POST',
           headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '' },
-          body: JSON.stringify({ full_name: document.getElementById('full-name')?.value || '', email: document.getElementById('email')?.value || '', phone: document.getElementById('phone')?.value || '', bio: document.getElementById('bio')?.value || '' }),
+          body: JSON.stringify({ full_name: document.getElementById('full-name')?.value || '', bio: document.getElementById('bio')?.value || '' }),
         });
         const data = await res.json();
-        if (!res.ok || data.success === false) { showToast(data?.errors?.full_name?.[0] || data?.errors?.email?.[0] || data?.message || 'تعذر حفظ البيانات', 'error'); return; }
+        if (!res.ok || data.success === false) { showToast(data?.errors?.full_name?.[0] || data?.message || 'تعذر حفظ البيانات', 'error'); return; }
         if (data.user?.full_name) {
           document.getElementById('tu-name') && (document.getElementById('tu-name').textContent = data.user.full_name);
           if (data.user?.avatar_url) { document.getElementById('tu-av') && (document.getElementById('tu-av').innerHTML = `<img src="${data.user.avatar_url}" alt="avatar">`); }

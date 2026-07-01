@@ -13,7 +13,7 @@ class UploadAvatarRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return Auth::check();
+        return Auth::check() || session()->has('association');
     }
 
     /**

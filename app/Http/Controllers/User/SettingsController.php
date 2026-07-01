@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\UploadAvatarRequest;
 use App\Http\Requests\Settings\UpdateProfileRequest;
 use App\Http\Requests\Settings\UpdatePasswordRequest;
+use App\Http\Requests\Settings\UpdateContactRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -15,16 +16,36 @@ class SettingsController extends Controller
 {
     public function uploadAvatar(UploadAvatarRequest $request)
     {
-        $user = Auth::user();
         $path = $request->file('avatar')->store('avatars', 'public');
 
-        // Delete old avatar if exists
-        if (!empty($user->avatar_path)) {
-            Storage::disk('public')->delete($user->avatar_path);
-        }
+        if (Auth::check()) {
+            $user = Auth::user();
 
-        $user->avatar_path = $path;
-        $user->save();
+            // Delete old avatar if exists
+            if (!empty($user->avatar_path)) {
+                Storage::disk('public')->delete($user->avatar_path);
+            }
+
+            $user->avatar_path = $path;
+            $user->save();
+        } elseif (session()->has('association')) {
+            $assoc = \App\Models\Association::find(session('association')['id']);
+            if (!$assoc) {
+                Storage::disk('public')->delete($path);
+                return response()->json(['message' => 'Unauthenticated.'], 401);
+            }
+
+            // Delete old avatar if exists
+            if (!empty($assoc->avatar)) {
+                Storage::disk('public')->delete($assoc->avatar);
+            }
+
+            $assoc->avatar = $path;
+            $assoc->save();
+        } else {
+            Storage::disk('public')->delete($path);
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
 
         return response()->json([
             'success'    => true,
@@ -40,8 +61,6 @@ class SettingsController extends Controller
         if (Auth::check()) {
             $user = Auth::user();
             $user->full_name = $validated['full_name'];
-            $user->email     = $validated['email'];
-            $user->phone     = $validated['phone'] ?? null;
             $user->bio       = $validated['bio']   ?? null;
             $user->save();
 
@@ -60,14 +79,11 @@ class SettingsController extends Controller
                 return response()->json(['message' => 'Unauthenticated.'], 401);
             }
             $assoc->association_name = $validated['full_name'];
-            $assoc->email            = $validated['email'];
-            $assoc->phone            = $validated['phone'] ?? null;
             $assoc->save();
 
             // Update session data
             $sessionData = session('association');
             $sessionData['name'] = $assoc->association_name;
-            $sessionData['email'] = $assoc->email;
             session(['association' => $sessionData]);
 
             $responseData = [
@@ -84,6 +100,64 @@ class SettingsController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'تم حفظ بيانات الملف الشخصي',
+            'user'    => $responseData,
+        ]);
+    }
+
+    /**
+     * تعديل البريد الإلكتروني و/أو رقم الجوال، ويتطلب تأكيد كلمة المرور الحالية.
+     */
+    public function updateContact(UpdateContactRequest $request)
+    {
+        $validated = $request->validated();
+
+        if (Auth::check()) {
+            $user = Auth::user();
+            if (!Hash::check($validated['current_password'], $user->password_hash)) {
+                return response()->json(['success' => false, 'errors' => ['current_password' => ['كلمة المرور الحالية غير صحيحة']]], 422);
+            }
+
+            if (array_key_exists('email', $validated) && $validated['email']) {
+                $user->email = $validated['email'];
+            }
+            if (array_key_exists('phone', $validated)) {
+                $user->phone = $validated['phone'] ?? null;
+            }
+            $user->save();
+
+            $responseData = [
+                'email' => $user->email,
+                'phone' => $user->phone ?? null,
+            ];
+        } elseif (session()->has('association')) {
+            $assoc = \App\Models\Association::find(session('association')['id']);
+            if (!$assoc || !Hash::check($validated['current_password'], $assoc->password_hash)) {
+                return response()->json(['success' => false, 'errors' => ['current_password' => ['كلمة المرور الحالية غير صحيحة']]], 422);
+            }
+
+            if (array_key_exists('email', $validated) && $validated['email']) {
+                $assoc->email = $validated['email'];
+            }
+            if (array_key_exists('phone', $validated)) {
+                $assoc->phone = $validated['phone'] ?? null;
+            }
+            $assoc->save();
+
+            $sessionData = session('association');
+            $sessionData['email'] = $assoc->email;
+            session(['association' => $sessionData]);
+
+            $responseData = [
+                'email' => $assoc->email,
+                'phone' => $assoc->phone ?? null,
+            ];
+        } else {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'تم تحديث بيانات التواصل بنجاح',
             'user'    => $responseData,
         ]);
     }
