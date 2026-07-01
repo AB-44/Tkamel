@@ -1,42 +1,42 @@
 /**
- * user-meetings.js — User Meetings Page
+ * user-umtgMeetings.js — User Meetings Page
  * Fully connected to backend data via window.meetingsList
  */
 
-const TODAY = new Date().toISOString().split('T')[0];
-const CSRF  = document.querySelector('meta[name="csrf-token"]')?.content || '';
+const umtgToday = new Date().toISOString().split('T')[0];
+const umtgCsrf  = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
 // Data from server (injected via Blade)
-let meetings     = (window.meetingsList || []).map(m => ({
+let umtgMeetings     = (window.meetingsList || []).map(m => ({
     ...m,
     catItem: (window.categoriesList || []).find(c => c.name === m.cat)
 }));
-let attendingIds = new Set(window.attendingIdsList || []);
-let typeFilter   = 'all';
-let viewingId    = null;
+let umtgAttendingIds = new Set(window.attendingIdsList || []);
+let umtgTypeFilter   = 'all';
+let umtgViewingId    = null;
 
-/* ── ACCENT COLOURS ── */
-const ACCENT = {
+/* ── umtgAccent COLOURS ── */
+const umtgAccent = {
     خيرية: '#2ab8d0', ثقافية: '#7b4ea6', صحية: '#2eaa78',
     رياضية: '#3a72b8', تنموية: '#e65100', دينية: '#7b4ea6'
 };
-const CAT_BADGE = {
+const umtgCatBadge = {
     خيرية: 'b-xairy', ثقافية: 'b-thaqafi', صحية: 'b-seha',
     رياضية: 'b-riyadhi', تنموية: 'b-tanmawi', دينية: 'b-dini'
 };
 
 /* ── HELPERS ── */
-function isCurrent(m) {
-    if (isCancelled(m)) return false;
+function umtgIsCurrent(m) {
+    if (umtgIsCancelled(m)) return false;
     return m.status === 'upcoming';
 }
-function isPast(m) {
-    if (isCancelled(m)) return false;
+function umtgIsPast(m) {
+    if (umtgIsCancelled(m)) return false;
     return m.status === 'past';
 }
-function isCancelled(m) { return m.status === 'cancelled' || m.status === 'canceled'; }
+function umtgIsCancelled(m) { return m.status === 'cancelled' || m.status === 'canceled'; }
 
-function renderCatBadges(catStr) {
+function umtgRenderCatBadges(catStr) {
     if (!catStr) return '<span class="badge" style="background:#e2e8f0;color:#64748b;font-size:0.65rem">📁 بدون تصنيف</span>';
     if (catStr === 'all') return '<span class="badge" style="background:#f0f9ff;color:#0ea5e9;border:1px solid #bae6fd;font-size:0.65rem">🌐 لكل الجمعيات</span>';
 
@@ -51,96 +51,96 @@ function renderCatBadges(catStr) {
     }).join(' ');
 }
 
-function getFirstCat(catStr) {
+function umtgGetFirstCat(catStr) {
     if (!catStr || catStr === 'all') return null;
     const firstCatId = catStr.split(',')[0].trim();
     return (window.categoriesList || []).find(c => String(c.id) === firstCatId || c.name === firstCatId);
 }
 
-function fmtDate(d) {
+function umtgFmtDate(d) {
     if (!d) return '—';
     return new Date(d + 'T00:00:00').toLocaleDateString('ar-SA', {
         weekday: 'short', year: 'numeric', month: 'long', day: 'numeric'
     });
 }
-function fmtDateShort(d) {
+function umtgFmtDateShort(d) {
     if (!d) return { day: '—', month: '' };
     const dt = new Date(d + 'T00:00:00');
     return { day: dt.getDate(), month: dt.toLocaleDateString('ar-SA', { month: 'short' }) };
 }
-function ini(n) {
+function umtgIni(n) {
     n = (n || '?').trim();
     const p = n.split(' ');
     return p.length >= 2 ? (p[0][0] || '') + (p[1][0] || '') : n[0];
 }
-function domainShort(url) {
+function umtgDomainShort(url) {
     try { return new URL(url).hostname.replace('www.', ''); } catch { return url; }
 }
 
 /* ── FILTER ── */
-function getFiltered() {
+function umtgGetFiltered() {
     const q  = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
-    return meetings.filter(m => {
+    return umtgMeetings.filter(m => {
         const mq = !q  || m.title.toLowerCase().includes(q) || (m.presenter || '').toLowerCase().includes(q);
-        const mt = typeFilter === 'all' || m.type === typeFilter;
+        const mt = umtgTypeFilter === 'all' || m.type === umtgTypeFilter;
         return mq && mt;
     });
 }
 
 /* ── STATS ── */
-function updateStats() {
+function umtgUpdateStats() {
     const s = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
-    s('s-total',     meetings.length);
-    s('s-cur',       meetings.filter(isCurrent).length);
-    s('s-attending', attendingIds.size);
-    s('s-online',    meetings.filter(m => m.type === 'online').length);
+    s('s-total',     umtgMeetings.length);
+    s('s-cur',       umtgMeetings.filter(umtgIsCurrent).length);
+    s('s-attending', umtgAttendingIds.size);
+    s('s-online',    umtgMeetings.filter(m => m.type === 'online').length);
 }
 
 /* ── RENDER ALL ── */
-window.renderAll = function renderAll() {
-    const list = getFiltered();
-    const cur  = list.filter(isCurrent).sort((a, b) => a.date.localeCompare(b.date));
-    const past = list.filter(isPast).sort((a, b) => b.date.localeCompare(a.date));
-    const canc = list.filter(isCancelled).sort((a, b) => b.date.localeCompare(a.date));
+window.umtgRenderAll = function umtgRenderAll() {
+    const list = umtgGetFiltered();
+    const cur  = list.filter(umtgIsCurrent).sort((a, b) => a.date.localeCompare(b.date));
+    const past = list.filter(umtgIsPast).sort((a, b) => b.date.localeCompare(a.date));
+    const canc = list.filter(umtgIsCancelled).sort((a, b) => b.date.localeCompare(a.date));
 
     const s = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
     s('bc-cur',  cur.length);
     s('bc-past', past.length);
     s('bc-canc', canc.length);
 
-    // Current meetings — full cards
+    // Current umtgMeetings — full cards
     const cg = document.getElementById('grid-cur');
     if (cg) cg.innerHTML = cur.length
-        ? cur.map((m, i) => fullCard(m, i)).join('')
+        ? cur.map((m, i) => umtgFullCard(m, i)).join('')
         : '<div class="empty"><span class="empty-emoji">📋</span><h3>لا توجد اجتماعات قادمة</h3><p>ستظهر الاجتماعات الجديدة هنا فور إضافتها</p></div>';
 
-    // Past meetings — compact rows
+    // Past umtgMeetings — compact rows
     const lp = document.getElementById('list-past');
     if (lp) lp.innerHTML = past.length
-        ? past.map((m, i) => compactRow(m, false, i)).join('')
+        ? past.map((m, i) => umtgCompactRow(m, false, i)).join('')
         : '<div class="compact-empty"><span class="compact-empty-emoji">📁</span><p>لا توجد اجتماعات سابقة</p></div>';
 
-    // Cancelled meetings — compact rows
+    // Cancelled umtgMeetings — compact rows
     const lc = document.getElementById('list-canc');
     if (lc) lc.innerHTML = canc.length
-        ? canc.map((m, i) => compactRow(m, true, i)).join('')
+        ? canc.map((m, i) => umtgCompactRow(m, true, i)).join('')
         : '<div class="compact-empty"><span class="compact-empty-emoji">✅</span><p>لا توجد اجتماعات ملغاة</p></div>';
 
-    updateStats();
+    umtgUpdateStats();
 };
 
 /* ── FULL CARD ── */
-function fullCard(m, i) {
-    const firstCat = getFirstCat(m.cat);
+function umtgFullCard(m, i) {
+    const firstCat = umtgGetFirstCat(m.cat);
     const acc = firstCat ? (firstCat.color || '#2ab8d0') : '#2ab8d0';
-    const isAtt  = attendingIds.has(m.id);
+    const isAtt  = umtgAttendingIds.has(m.id);
     const tLabel = m.type === 'online' ? '💻 عن بعد' : '📍 حضوري';
     const tBadge = m.type === 'online' ? 'b-online' : 'b-onsite';
 
     const locationRow = (m.type === 'onsite' && m.location)
         ? `<div class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>${m.location}</div>` : '';
     const linkRow = (m.type === 'online' && m.link)
-        ? `<div class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg><a class="link-pill" href="${m.link}" target="_blank">🔗 ${domainShort(m.link)}</a></div>` : '';
+        ? `<div class="meta-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg><a class="link-pill" href="${m.link}" target="_blank">🔗 ${umtgDomainShort(m.link)}</a></div>` : '';
 
     return `
     <div class="meeting-card" style="animation-delay:${i * 0.06}s">
@@ -148,38 +148,38 @@ function fullCard(m, i) {
       <div class="card-inner">
         <div class="card-badges">
           <span class="badge ${tBadge}">${tLabel}</span>
-          ${renderCatBadges(m.cat)}
+          ${umtgRenderCatBadges(m.cat)}
         </div>
         <div class="card-title">${m.title}</div>
         <div class="card-meta">
           <div class="meta-item">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-            ${fmtDate(m.date)}${m.time ? ' — ' + m.time : ''}
+            ${umtgFmtDate(m.date)}${m.time ? ' — ' + m.time : ''}
           </div>
           ${locationRow}${linkRow}
         </div>
       </div>
       <div class="card-foot">
         <div class="presenter">
-          <div class="p-av">${ini(m.presenter)}</div>
+          <div class="p-av">${umtgIni(m.presenter)}</div>
           <div><div class="p-name">${m.presenter}</div><div class="p-role">المقدم</div></div>
         </div>
         <div class="card-foot-actions">
           ${isAtt
-            ? `<button class="btn-attending" onclick="quickToggleAttend(${m.id})">✅ سأحضر</button>`
-            : `<button class="btn-attend-card" onclick="quickToggleAttend(${m.id})">＋ سأحضر</button>`}
-          <button class="btn-view" onclick="openDetails(${m.id})">التفاصيل</button>
+            ? `<button class="btn-attending" onclick="umtgQuickToggleAttend(${m.id})">✅ سأحضر</button>`
+            : `<button class="btn-attend-card" onclick="umtgQuickToggleAttend(${m.id})">＋ سأحضر</button>`}
+          <button class="btn-view" onclick="umtgOpenDetails(${m.id})">التفاصيل</button>
         </div>
       </div>
     </div>`;
 }
 
 /* ── COMPACT ROW ── */
-function compactRow(m, isCnc, i) {
-    const firstCat = getFirstCat(m.cat);
+function umtgCompactRow(m, isCnc, i) {
+    const firstCat = umtgGetFirstCat(m.cat);
     const catColor = firstCat ? (firstCat.color || '#2ab8d0') : '#2ab8d0';
     const acc    = isCnc ? '#c62828' : catColor;
-    const ds     = fmtDateShort(m.date);
+    const ds     = umtgFmtDateShort(m.date);
     const hasRep = !isCnc && m.report;
 
     return `
@@ -196,12 +196,12 @@ function compactRow(m, isCnc, i) {
         </div>
       </div>
       <div class="ci-badges">
-        ${renderCatBadges(m.cat)}
+        ${umtgRenderCatBadges(m.cat)}
         ${isCnc ? '<span class="ci-cancelled-badge">🚫 ملغي</span>' : ''}
         ${hasRep ? '<span class="badge b-has-report" style="font-size:0.65rem">📋 تقرير</span>' : ''}
       </div>
       <div class="ci-actions">
-        <button class="icn-btn" onclick="openDetails(${m.id})" title="التفاصيل">
+        <button class="icn-btn" onclick="umtgOpenDetails(${m.id})" title="التفاصيل">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         </button>
       </div>
@@ -209,22 +209,22 @@ function compactRow(m, isCnc, i) {
 }
 
 /* ── TYPE FILTER ── */
-function setTypeF(f) {
-    typeFilter = f;
+function umtgSetTypeF(f) {
+    umtgTypeFilter = f;
     ['all', 'online', 'onsite'].forEach(x => {
         document.getElementById('chip-' + x)?.classList.toggle('on', x === f);
     });
-    renderAll();
+    umtgRenderAll();
 }
 
 /* ── COLLAPSE SECTIONS ── */
-const secState = { past: true, canc: true };
-function toggleSec(key) {
-    secState[key] = !secState[key];
+const umtgSecState = { past: true, canc: true };
+function umtgToggleSec(key) {
+    umtgSecState[key] = !umtgSecState[key];
     const el  = document.getElementById('sec-' + key);
     const tog = document.getElementById('tog-' + key);
     if (!el) return;
-    if (secState[key]) {
+    if (umtgSecState[key]) {
         el.style.maxHeight = el.scrollHeight + 'px';
         el.style.overflow  = 'visible';
         tog?.classList.remove('collapsed');
@@ -244,24 +244,24 @@ document.querySelectorAll('#sec-past, #sec-canc').forEach(el => {
 });
 
 /* ── DETAILS MODAL ── */
-function openDetails(id) {
-    const m = meetings.find(x => x.id === id);
+function umtgOpenDetails(id) {
+    const m = umtgMeetings.find(x => x.id === id);
     if (!m) return;
-    viewingId = id;
-    const isC   = isCancelled(m);
-    const isCur = isCurrent(m);
+    umtgViewingId = id;
+    const isC   = umtgIsCancelled(m);
+    const isCur = umtgIsCurrent(m);
 
     document.getElementById('d-title').textContent    = m.title;
     
     // Convert IDs to HTML for modal category
-    const modalCatObj = getFirstCat(m.cat);
+    const modalCatObj = umtgGetFirstCat(m.cat);
     const modalCatStr = m.cat === 'all' ? '🌐 لكل الجمعيات' : (modalCatObj ? (modalCatObj.icon || '📁') + ' ' + modalCatObj.name : '📁 ' + m.cat);
     document.getElementById('d-cat').textContent      = modalCatStr;
-    document.getElementById('d-date').textContent     = fmtDate(m.date);
+    document.getElementById('d-date').textContent     = umtgFmtDate(m.date);
     document.getElementById('d-time').textContent     = (m.time || '—') + (m.end_time ? ' - ' + m.end_time : '');
-    document.getElementById('d-banner-bg').className  = 'det-banner-bg' + (isC ? ' red-bg' : isPast(m) ? ' grey-bg' : '');
+    document.getElementById('d-banner-bg').className  = 'det-banner-bg' + (isC ? ' red-bg' : umtgIsPast(m) ? ' grey-bg' : '');
     document.getElementById('d-type-badge').textContent = m.type === 'online' ? '💻 عن بعد' : '📍 حضوري';
-    document.getElementById('d-av').textContent       = ini(m.presenter);
+    document.getElementById('d-av').textContent       = umtgIni(m.presenter);
     document.getElementById('d-pname').textContent    = m.presenter;
 
     // Location
@@ -318,7 +318,7 @@ function openDetails(id) {
     // Attend button + navigate button
     const aw = document.getElementById('d-attend-wrap');
     if (aw) aw.style.display = (isCur && !isC) ? '' : 'none';
-    updateAttendBtn();
+    umtgUpdateAttendBtn();
 
     // Navigate button — opens location URL (onsite) or meeting link (online)
     const navBtn   = document.getElementById('btn-navigate');
@@ -348,70 +348,70 @@ function openDetails(id) {
         navBtn.style.display = 'none';
     }
 
-    openOv('ov-details');
+    umtgOpenOv('ov-details');
 }
 
-function updateAttendBtn() {
+function umtgUpdateAttendBtn() {
     const btn = document.getElementById('btn-attend');
-    if (!btn || viewingId === null) return;
-    const isAtt = attendingIds.has(viewingId);
+    if (!btn || umtgViewingId === null) return;
+    const isAtt = umtgAttendingIds.has(umtgViewingId);
     btn.textContent  = isAtt ? '✅ سأحضر — إلغاء الحضور' : '🗓 تسجيل الحضور';
     btn.className    = isAtt ? 'btn-attend att' : 'btn-attend';
 }
 
 /* ── ATTENDANCE TOGGLE ── */
-async function toggleAttend() {
-    if (viewingId === null) return;
-    await doToggle(viewingId);
-    updateAttendBtn();
-    renderAll();
+async function umtgToggleAttend() {
+    if (umtgViewingId === null) return;
+    await umtgDoToggle(umtgViewingId);
+    umtgUpdateAttendBtn();
+    umtgRenderAll();
 }
 
-async function quickToggleAttend(id) {
-    await doToggle(id);
-    if (viewingId === id) updateAttendBtn();
-    renderAll();
+async function umtgQuickToggleAttend(id) {
+    await umtgDoToggle(id);
+    if (umtgViewingId === id) umtgUpdateAttendBtn();
+    umtgRenderAll();
 }
 
-async function doToggle(id) {
-    const wasAtt = attendingIds.has(id);
+async function umtgDoToggle(id) {
+    const wasAtt = umtgAttendingIds.has(id);
     // Optimistic
-    wasAtt ? attendingIds.delete(id) : attendingIds.add(id);
-    updateStats();
+    wasAtt ? umtgAttendingIds.delete(id) : umtgAttendingIds.add(id);
+    umtgUpdateStats();
     try {
         const res = await fetch(`/user/meetings/${id}/attendance`, {
             method: 'POST', credentials: 'same-origin',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF, 'Accept': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': umtgCsrf, 'Accept': 'application/json' },
         });
         if (!res.ok) throw new Error('Server error');
         const data = await res.json();
-        showToast(data.status === 'attached' ? '✅' : '↩️', data.message);
+        umtgShowToast(data.status === 'attached' ? '✅' : '↩️', data.message);
     } catch {
         // Rollback
-        wasAtt ? attendingIds.add(id) : attendingIds.delete(id);
-        updateStats();
-        showToast('❌', 'حدث خطأ، حاول مجدداً');
+        wasAtt ? umtgAttendingIds.add(id) : umtgAttendingIds.delete(id);
+        umtgUpdateStats();
+        umtgShowToast('❌', 'حدث خطأ، حاول مجدداً');
     }
 }
 
-function joinMeeting() {
-    const m = meetings.find(x => x.id === viewingId);
+function umtgJoinMeeting() {
+    const m = umtgMeetings.find(x => x.id === umtgViewingId);
     if (m && m.link) window.open(m.link, '_blank');
 }
 
-function navigateMeeting() {
+function umtgNavigateMeeting() {
     const btn = document.getElementById('btn-navigate');
     if (btn && btn.dataset.url) window.open(btn.dataset.url, '_blank');
 }
 
 /* ── MODAL UTILS ── */
-function openOv(id)     { document.getElementById(id)?.classList.add('open'); }
-function closeOv(id)    { document.getElementById(id)?.classList.remove('open'); }
-function bgClose(e, id) { if (e.target === document.getElementById(id)) closeOv(id); }
+function umtgOpenOv(id)     { document.getElementById(id)?.classList.add('open'); }
+function umtgCloseOv(id)    { document.getElementById(id)?.classList.remove('open'); }
+function umtgBgClose(e, id) { if (e.target === document.getElementById(id)) umtgCloseOv(id); }
 
 /* ── TOAST ── */
-let tTimer;
-function showToast(icon, msg) {
+let umtgToastTimer;
+function umtgShowToast(icon, msg) {
     const el = document.getElementById('toast');
     if (!el) return;
     const ic = document.getElementById('t-icon');
@@ -419,27 +419,27 @@ function showToast(icon, msg) {
     if (ic) ic.textContent = icon;
     if (tx) tx.textContent = msg;
     el.classList.add('show');
-    clearTimeout(tTimer);
-    tTimer = setTimeout(() => el.classList.remove('show'), 3000);
+    clearTimeout(umtgToastTimer);
+    umtgToastTimer = setTimeout(() => el.classList.remove('show'), 3000);
 }
 
 /* ── KEYBOARD ── */
 document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeOv('ov-details');
+    if (e.key === 'Escape') umtgCloseOv('ov-details');
 });
 
 /* ── INIT ── */
-renderAll();
+umtgRenderAll();
 
 // Auto-open specific meeting if req_id is present in URL
-const urlParams = new URLSearchParams(window.location.search);
-const reqIdParam = urlParams.get('req_id');
-const typeParam = urlParams.get('type');
-if (reqIdParam && typeParam === 'meeting_created') {
-    const targetMeeting = meetings.find(m => String(m.id) === String(reqIdParam));
+const umtgUrlParams = new URLSearchParams(window.location.search);
+const umtgReqIdParam = umtgUrlParams.get('req_id');
+const umtgTypeParam = umtgUrlParams.get('type');
+if (umtgReqIdParam && umtgTypeParam === 'meeting_created') {
+    const targetMeeting = umtgMeetings.find(m => String(m.id) === String(umtgReqIdParam));
     if (targetMeeting) {
         setTimeout(() => {
-            openDetails(targetMeeting.id);
+            umtgOpenDetails(targetMeeting.id);
             window.history.replaceState({}, document.title, window.location.pathname);
         }, 300);
     }

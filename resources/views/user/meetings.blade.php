@@ -64,13 +64,13 @@
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
-            <input class="search-input" id="searchInput" type="text" placeholder="ابحث عن اجتماع أو مقدم..." oninput="renderAll()">
+            <input class="search-input" id="searchInput" type="text" placeholder="ابحث عن اجتماع أو مقدم..." oninput="umtgRenderAll()">
           </div>
           <div class="tb-div"></div>
           <div class="chips">
-            <div class="chip on" id="chip-all" onclick="setTypeF('all')">الكل</div>
-            <div class="chip" id="chip-online" onclick="setTypeF('online')">💻 عن بعد</div>
-            <div class="chip" id="chip-onsite" onclick="setTypeF('onsite')">📍 حضوري</div>
+            <div class="chip on" id="chip-all" onclick="umtgSetTypeF('all')">الكل</div>
+            <div class="chip" id="chip-online" onclick="umtgSetTypeF('online')">💻 عن بعد</div>
+            <div class="chip" id="chip-onsite" onclick="umtgSetTypeF('onsite')">📍 حضوري</div>
           </div>
         </div>
 
@@ -86,7 +86,7 @@
 
         <!-- PAST meetings -->
         <div class="sec-wrap">
-          <div class="sec-header collapsible" onclick="toggleSec('past')">
+          <div class="sec-header collapsible" onclick="umtgToggleSec('past')">
             <div class="sec-icon" style="background:rgba(106,132,148,0.1)">📁</div>
             <div class="sec-title">الاجتماعات السابقة</div>
             <span class="sec-count sc-past" id="bc-past">0</span>
@@ -103,7 +103,7 @@
 
         <!-- CANCELLED meetings -->
         <div class="sec-wrap">
-          <div class="sec-header collapsible" onclick="toggleSec('canc')">
+          <div class="sec-header collapsible" onclick="umtgToggleSec('canc')">
             <div class="sec-icon" style="background:rgba(198,40,40,0.08)">🚫</div>
             <div class="sec-title">الاجتماعات الملغاة</div>
             <span class="sec-count sc-cancelled" id="bc-canc">0</span>
@@ -123,7 +123,7 @@
   </div><!-- /layout -->
 
   <!-- ══ DETAILS MODAL ══ -->
-  <div class="overlay" id="ov-details" onclick="bgClose(event,'ov-details')">
+  <div class="overlay" id="ov-details" onclick="umtgBgClose(event,'ov-details')">
     <div class="det-modal" onclick="event.stopPropagation()">
       <div class="det-banner">
         <div class="det-banner-bg" id="d-banner-bg"></div>
@@ -131,7 +131,7 @@
         <div class="det-banner-content">
           <div class="det-type-badge" id="d-type-badge"></div>
         </div>
-        <button class="det-close" onclick="closeOv('ov-details')">
+        <button class="det-close" onclick="umtgCloseOv('ov-details')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
@@ -181,8 +181,8 @@
         <!-- أزرار الحضور والانتقال (للاجتماعات القادمة فقط) -->
         <div id="d-attend-wrap" class="det-attend-wrap">
           <div class="det-action-row">
-            <button class="btn-attend" id="btn-attend" onclick="toggleAttend()"></button>
-            <button class="btn-navigate" id="btn-navigate" style="display:none" onclick="navigateMeeting()">
+            <button class="btn-attend" id="btn-attend" onclick="umtgToggleAttend()"></button>
+            <button class="btn-navigate" id="btn-navigate" style="display:none" onclick="umtgNavigateMeeting()">
               <span id="btn-navigate-icon"></span>
               <span id="btn-navigate-label"></span>
             </button>
@@ -190,8 +190,8 @@
         </div>
       </div>
       <div class="det-ft">
-        <button class="btn-cancel-modal" onclick="closeOv('ov-details')">إغلاق</button>
-        <button class="btn-join" id="btn-join-det" style="display:none" onclick="joinMeeting()">
+        <button class="btn-cancel-modal" onclick="umtgCloseOv('ov-details')">إغلاق</button>
+        <button class="btn-join" id="btn-join-det" style="display:none" onclick="umtgJoinMeeting()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
             <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
             <polyline points="15 3 21 3 21 9" />
