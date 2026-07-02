@@ -43,7 +43,15 @@ class AppServiceProvider extends ServiceProvider
             $key = $request->user()?->id
                 ?: ($request->session()->get('association')['id'] ?? null)
                 ?: $request->ip();
-            return Limit::perMinute(5)->by($key);
+            return Limit::perMinute(20)->by($key);
+        });
+
+        // رفع الصورة: حد مستقل أعلى قليلاً عند التجربة المتكررة
+        RateLimiter::for('avatar', function (Request $request) {
+            $key = $request->user()?->id
+                ?: ($request->session()->get('association')['id'] ?? null)
+                ?: $request->ip();
+            return Limit::perMinute(10)->by($key);
         });
     }
 }

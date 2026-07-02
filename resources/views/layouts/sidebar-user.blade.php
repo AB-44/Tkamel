@@ -161,10 +161,23 @@ aside.sidebar .nav-item:hover {
 }
 
 aside.sidebar .nav-item.active {
-  background: linear-gradient(135deg, rgba(42,184,208,0.16), rgba(46,170,120,0.1)) !important;
-  color: #7de8f5 !important;
-  border: 1px solid rgba(42,184,208,0.18) !important;
+  background: linear-gradient(90deg, rgba(14,165,201,0.25) 0%, rgba(14,165,201,0.12) 100%) !important;
+  color: #38d9f0 !important;
   font-weight: 700 !important;
+  border: none !important;
+}
+
+/* Active indicator bar on right — same as admin sidebar */
+aside.sidebar .nav-item.active::before {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  border-radius: 3px 0 0 3px;
+  background: #0ea5c9;
 }
 
 /* ── NAV ICON ── */

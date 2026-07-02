@@ -396,12 +396,15 @@
     const file = e.target.files[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) { alert('الحد الأقصى للحجم هو 2 ميجابايت'); return; }
+
+    // عرض معاينة محلية فورية
     const reader = new FileReader();
     reader.onload = ev => {
       const el = document.getElementById('avatar-preview');
       el.innerHTML = `<img src="${ev.target.result}" alt="avatar">`;
     };
     reader.readAsDataURL(file);
+
     try {
       const fd = new FormData();
       fd.append('avatar', file);
@@ -411,11 +414,26 @@
         body: fd,
       });
       const data = await res.json();
-      if (!res.ok || data.success === false) { showToast(data?.errors?.avatar?.[0] || data?.message || 'تعذر رفع الصورة', 'error'); return; }
-      const av = document.getElementById('tu-av');
-      if (av && data.avatar_url) av.innerHTML = `<img src="${data.avatar_url}" alt="avatar">`;
+      if (!res.ok || data.success === false) {
+        showToast(data?.errors?.avatar?.[0] || data?.message || 'تعذر رفع الصورة', 'error');
+        return;
+      }
+
+      // إضافة timestamp لكسر الـ cache في المتصفح
+      const cacheBustedUrl = data.avatar_url + '?t=' + Date.now();
+
+      // تحديث صورة المعاينة في صفحة الإعدادات بالـ URL الحقيقي
+      const previewEl = document.getElementById('avatar-preview');
+      if (previewEl) previewEl.innerHTML = `<img src="${cacheBustedUrl}" alt="avatar">`;
+
+      // تحديث صورة الـ topbar
+      const topbarAv = document.getElementById('tu-av');
+      if (topbarAv) topbarAv.innerHTML = `<img src="${cacheBustedUrl}" alt="avatar">`;
+
       showToast(data.message || 'تم تحديث الصورة', 'success');
-    } catch { showToast('تعذر الاتصال بالخادم', 'error'); }
+    } catch {
+      showToast('تعذر الاتصال بالخادم', 'error');
+    }
   }
 
   let _contactField = null; // 'email' or 'phone'

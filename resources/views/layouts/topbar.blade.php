@@ -15,7 +15,17 @@
   $resolvedRole = $userRole ?? (session()->has('association') && !$authUser ? 'جمعية معتمدة' : 'مسؤول المنصة');
   $resolvedAvatarHtml = null;
   if ($authUser && !empty($authUser->avatar_path)) {
+    // مستخدم عادي لديه صورة
     $resolvedAvatarHtml = '<img src="' . e(asset('storage/' . $authUser->avatar_path)) . '" alt="avatar">';
+  } elseif (!$authUser && session()->has('association')) {
+    // جمعية — نجلب الصورة من قاعدة البيانات
+    $assocSession = session('association');
+    $assocModel = \App\Models\Association::find($assocSession['id'] ?? null);
+    if ($assocModel && !empty($assocModel->avatar)) {
+      $resolvedAvatarHtml = '<img src="' . e(asset('storage/' . $assocModel->avatar)) . '" alt="avatar">';
+    } else {
+      $resolvedAvatarHtml = $userAv ?? mb_substr($resolvedName ?? 'م', 0, 1);
+    }
   } else {
     $resolvedAvatarHtml = $userAv ?? mb_substr($resolvedName ?? 'م', 0, 1);
   }
@@ -23,7 +33,8 @@
 
 <style>
   /* Allow avatar circle to show uploaded image */
-  .user-av img { width:100%; height:100%; border-radius:8px; object-fit:cover; display:block; }
+  .user-av { overflow: hidden !important; position: relative !important; }
+  .user-av img { width:100%; height:100%; border-radius:8px; object-fit:cover; display:block; position:absolute; top:0; left:0; }
 </style>
 
 <div class="topbar">
