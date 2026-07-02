@@ -833,6 +833,8 @@ function switchTab(id, btn) {
     if (titleEl) titleEl.textContent = 'صفحة الطلبات';
     if (subEl) subEl.textContent = 'إدارة طلبات إنشاء الحسابات';
     if (gridReq) gridReq.style.display = '';
+    // تحميل البيانات إذا لم تكن محملة بعد
+    if (!dbAssocRequests.length) loadAssociationRequests();
   } else if (id === 'my-associations') {
     if (titleEl) titleEl.textContent = 'الجمعيات';
     if (subEl) subEl.textContent = 'إدارة كافة الجمعيات المضافة في النظام';
@@ -1403,7 +1405,8 @@ function initOrders() {
   fetchOrderCategories().finally(() => {
     renderCategories();
   });
-  renderAssoc(associations);
+  renderAssoc([]);
+  filterAssocByCat('');
   loadAssociationRequests();
   loadServiceRequests();
   loadMyAssociations();
@@ -1414,17 +1417,18 @@ function initOrders() {
   // The individual load functions will handle switching to the correct tab
   const urlParams = new URLSearchParams(window.location.search);
   const reqIdParam = urlParams.get('req_id');
-  const typeParam = urlParams.get('type');
 
   if (!reqIdParam) {
-    // No deep-link — go to the default tab
-    const defaultTabBtn = document.querySelector('.tab-btn[onclick*="my-associations"]');
-    if (defaultTabBtn) {
-      switchTab('my-associations', defaultTabBtn);
+    // No deep-link — go to the requests tab (الطلبات) as default
+    const requestsTabBtn = document.querySelector('.tab-btn[onclick*="\'requests\'"], .tab-btn[onclick*="\"requests\""]');
+    if (requestsTabBtn) {
+      requestsTabBtn.click();
+    } else {
+      // fallback: activate directly
+      _activateTab('requests');
     }
   }
-  // else: let loadAssociationRequests / loadServiceRequests / loadOppRequests / loadProjRequests
-  // handle switchTab + openModal via their own setTimeout blocks
+  // else: let loadAssociationRequests handle switchTab + openModal via setTimeout
 }
 
 document.addEventListener('DOMContentLoaded', () => {
