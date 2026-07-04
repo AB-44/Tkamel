@@ -53,5 +53,8 @@ class AppServiceProvider extends ServiceProvider
                 ?: $request->ip();
             return Limit::perMinute(10)->by($key);
         });
+        if (config('app.env') === 'production') {
+        URL::forceScheme('https');
+    }
     }
 }
