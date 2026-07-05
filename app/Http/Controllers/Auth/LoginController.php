@@ -18,7 +18,7 @@ class LoginController extends Controller
         $categories = \App\Models\AssociationCategory::where('is_active', true)->get();
         return view('auth.login', compact('categories'));
     }
-
+    
     public function login(Request $request)
     {
         $request->validate([

@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
         );
 
         // ── 2. Create admin user ───────────────────────────────────────────
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'admin@tkamel.sa'],
             [
                 'role_id' => $adminRole->id,
@@ -33,7 +33,7 @@ class DatabaseSeeder extends Seeder
         );
 
         // ── 3. Create regular user ─────────────────────────────────────────
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'user@tkamel.sa'],
             [
                 'role_id' => $userRole->id,

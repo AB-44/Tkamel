@@ -21,3 +21,4 @@ database/*.sqlite
 test*.php
 test*.html
 test*.txt
+storage/app/public
