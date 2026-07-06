@@ -1,12 +1,14 @@
 /**
- * user-umtgMeetings.js — User Meetings Page
- * Fully connected to backend data via window.meetingsList
+ * user-meetings.js — User Meetings Section
+ * Fully connected to backend data via /api/user/meetings (fetched dynamically for the SPA)
  */
 
 const umtgToday = new Date().toISOString().split('T')[0];
 const umtgCsrf  = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
-// Data from server (injected via Blade)
+// Data is loaded dynamically via mtgUserInit() / mtgUserRefresh() — see bottom of file.
+// Kept as `window.meetingsList` / `window.categoriesList` for backward compatibility
+// with pages that still inject data via Blade (if any).
 let umtgMeetings     = (window.meetingsList || []).map(m => ({
     ...m,
     catItem: (window.categoriesList || []).find(c => c.name === m.cat)
@@ -14,6 +16,7 @@ let umtgMeetings     = (window.meetingsList || []).map(m => ({
 let umtgAttendingIds = new Set(window.attendingIdsList || []);
 let umtgTypeFilter   = 'all';
 let umtgViewingId    = null;
+
 
 /* ── umtgAccent COLOURS ── */
 const umtgAccent = {
@@ -428,19 +431,53 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Escape') umtgCloseOv('ov-details');
 });
 
-/* ── INIT ── */
-umtgRenderAll();
+/* ══════════════════════════════════════════════════
+   SPA DATA LOADING — fetches /api/user/meetings
+   Called by spa-nav.js: mtgUserInit() on first visit,
+   mtgUserRefresh() on subsequent visits to the section.
+══════════════════════════════════════════════════ */
+async function umtgFetchMeetings() {
+    try {
+        const [meetingsRes, categoriesRes] = await Promise.all([
+            fetch('/api/user/meetings', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } }),
+            fetch('/api/association-categories', { credentials: 'same-origin', headers: { 'Accept': 'application/json' } }),
+        ]);
+
+        const meetingsData   = meetingsRes.ok ? await meetingsRes.json() : [];
+        const categoriesData = categoriesRes.ok ? await categoriesRes.json() : [];
+
+        window.meetingsList   = Array.isArray(meetingsData) ? meetingsData : (meetingsData.meetings || []);
+        window.categoriesList = Array.isArray(categoriesData) ? categoriesData : (categoriesData.categories || []);
+
+        umtgMeetings = (window.meetingsList || []).map(m => ({
+            ...m,
+            catItem: (window.categoriesList || []).find(c => c.name === m.cat)
+        }));
+
+        umtgRenderAll();
+    } catch (e) { /* silently fail */ }
+}
+
+function mtgUserInit() {
+    umtgFetchMeetings();
+}
+
+function mtgUserRefresh() {
+    umtgFetchMeetings();
+}
 
 // Auto-open specific meeting if req_id is present in URL
 const umtgUrlParams = new URLSearchParams(window.location.search);
 const umtgReqIdParam = umtgUrlParams.get('req_id');
 const umtgTypeParam = umtgUrlParams.get('type');
 if (umtgReqIdParam && umtgTypeParam === 'meeting_created') {
-    const targetMeeting = umtgMeetings.find(m => String(m.id) === String(umtgReqIdParam));
-    if (targetMeeting) {
+    document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
-            umtgOpenDetails(targetMeeting.id);
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }, 300);
-    }
+            const targetMeeting = umtgMeetings.find(m => String(m.id) === String(umtgReqIdParam));
+            if (targetMeeting) {
+                umtgOpenDetails(targetMeeting.id);
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }, 500);
+    });
 }

@@ -5,39 +5,34 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="csrf-token" content="{{ csrf_token() }}">
-  <title>تكامل — فرص التطوع</title>
+  <title>تكامل | لوحة المستخدم</title>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ asset('css/consulting.css') }}">
-  <link rel="stylesheet" href="{{ asset('css/meeting-scoped.css') }}">
-  <link rel="stylesheet" href="{{ asset('css/orders-scoped.css') }}">
-  <link rel="stylesheet" href="{{ asset('css/jp-scoped.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  {{-- ── Shell / shared ── --}}
+  <link rel="stylesheet" href="{{ asset('css/consulting.css') }}">
+
+  {{-- ── Per-section styles ── --}}
+  <link rel="stylesheet" href="{{ asset('css/user-dashboard.css') }}?v={{ time() }}">
+  <link rel="stylesheet" href="{{ asset('css/user-meetings.css') }}?v={{ time() }}">
+  <link rel="stylesheet" href="{{ asset('css/user-my-requests.css') }}?v={{ time() }}">
+  <link rel="stylesheet" href="{{ asset('css/jp-scoped.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/services.css') }}">
+
   <style>
-    /* ── Read-only notice banner ── */
+    /* ── Read-only notice banner (فرص التطوع) ── */
     .readonly-notice {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(245, 158, 11, 0.08);
-      border: 1px solid rgba(245, 158, 11, 0.25);
-      border-radius: 10px;
-      padding: 10px 16px;
-      font-size: 0.82rem;
-      color: #92400e;
-      font-weight: 600;
-      margin-bottom: 18px;
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(245, 158, 11, 0.08); border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: 10px; padding: 10px 16px; font-size: 0.82rem; color: #92400e;
+      font-weight: 600; margin-bottom: 18px;
     }
     .role-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: rgba(245, 158, 11, 0.12);
-      color: #b45309;
-      border: 1px solid rgba(245, 158, 11, 0.3);
-      border-radius: 20px;
-      padding: 3px 10px;
-      font-size: 0.72rem;
-      font-weight: 700;
+      display: inline-flex; align-items: center; gap: 5px;
+      background: rgba(245, 158, 11, 0.12); color: #b45309;
+      border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 20px;
+      padding: 3px 10px; font-size: 0.72rem; font-weight: 700;
     }
   </style>
   <style>
@@ -80,7 +75,7 @@
     .toolbar .sw svg { flex-shrink:0; color:#94a3b8; }
     .toolbar .s-inp { border:none; outline:none; background:transparent; font-family:inherit; font-size:0.88rem; width:100%; color:#374151; }
 
-    /* ── Modal Overlay ── */
+    /* ── Modal Overlay (shared by volunteer/projects/meetings/services) ── */
     .overlay { display:none; position:fixed; inset:0; background:rgba(15,23,42,0.45); backdrop-filter:blur(4px); z-index:1000; align-items:center; justify-content:center; padding:20px; }
     .overlay.open { display:flex; }
     .modal { background:#fff; border-radius:20px; overflow:hidden; max-width:520px; width:100%; box-shadow:0 24px 64px rgba(0,0,0,0.18); }
@@ -108,40 +103,45 @@
     .btn-cancel:hover { background:#f8fafc; }
     .btn-save { flex:2; padding:11px; border:none; border-radius:12px; background:linear-gradient(135deg,#0d3d49,#2ab8d0); font-family:inherit; font-size:0.88rem; font-weight:800; cursor:pointer; color:#fff; }
     .btn-save:hover { opacity:0.92; }
+
+    /* ── toast (shared) ── */
+    .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--ink,#0f172a); color: white; padding: 11px 22px; border-radius: 13px; font-size: 0.86rem; font-weight: 600; box-shadow: 0 8px 30px rgba(0,0,0,0.25); z-index: 600; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1); display: flex; align-items: center; gap: 8px; white-space: nowrap; pointer-events: none; }
+    .toast.show { transform: translateX(-50%) translateY(0); }
   </style>
-<style>#nb-reqs:empty{display:none!important}</style>
+  <style>#nb-reqs:empty{display:none!important}</style>
 </head>
 
 <body>
   <div class="layout">
 
     <!-- ══ SIDEBAR ══ -->
-    @include('layouts.sidebar-user', ['activeNav' => 'volunteer'])
-
+    @include('layouts.sidebar-user', ['activeNav' => 'dashboard'])
 
     <!-- ══ MAIN ══ -->
     <div class="main">
 
       <!-- TOPBAR -->
-      @include('layouts.topbar', ['title' => 'فرص التطوع', 'userName' => (Auth::user()?->full_name ?? session('association.name') ?? 'مستخدم'), 'userAv' => mb_substr((Auth::user()?->full_name ?? session('association.name') ?? 'مستخدم'), 0, 1), 'showNotif' => true])
+      @include('layouts.topbar', ['title' => 'لوحة التحكم', 'userName' => (Auth::user()?->full_name ?? session('association.name') ?? 'مستخدم'), 'userAv' => mb_substr((Auth::user()?->full_name ?? session('association.name') ?? 'مستخدم'), 0, 1), 'showNotif' => true])
       @include('layouts.notif-panel-user')
 
-
-      <!-- CONTENT -->
+      <!-- CONTENT: كل الأقسام محمّلة مسبقًا، والتبديل بينها يتم عبر JS بدون إعادة تحميل -->
       <div class="content">
 
+        @include('partials.user-consulting.dashboard')
+        @include('partials.user-consulting.meetings')
         @include('partials.user-consulting.volunteer')
+        @include('partials.user-consulting.services')
+        @include('partials.user-consulting.orders')
+        @include('partials.user-consulting.projects')
+        @include('partials.user-consulting.settings')
 
-        {{-- ══ SERVICE VIEWS ══ --}}
+        {{-- ══ خدمات مبادرون — الأقسام الفرعية ══ --}}
         @include('partials.user-consulting.units')
         @include('partials.user-consulting.systems')
         @include('partials.user-consulting.initiatives')
         @include('partials.user-consulting.training')
         @include('partials.user-consulting.consulting-svc')
         @include('partials.user-consulting.contact')
-
-        {{-- ══ PROJECTS — عرض فقط ══ --}}
-        @include('partials.user-consulting.projects')
 
       </div><!-- /content -->
     </div><!-- /main -->
@@ -232,10 +232,18 @@
 
   <div class="toast" id="toast"><span id="t-icon"></span><span id="t-msg"></span></div>
 
+  {{-- ══ SECTION SCRIPTS ══ --}}
   <script src="{{ asset('js/consulting.js') }}"></script>
-  <script src="{{ asset('js/orders.js') }}?v={{ rand() }}"></script>
   <script src="{{ asset('js/joint-projects.js') }}"></script>
-  <script src="{{ asset('js/spa-nav.js') }}?v={{ rand() }}"></script>
+  <script src="{{ asset('js/services.js') }}"></script>
+  <script src="{{ asset('js/user-meetings.js') }}?v={{ time() }}"></script>
+  <script src="{{ asset('js/user-dashboard-spa.js') }}?v={{ time() }}"></script>
+  <script src="{{ asset('js/user-orders-spa.js') }}?v={{ time() }}"></script>
+  <script src="{{ asset('js/user-settings-spa.js') }}?v={{ time() }}"></script>
+
+  {{-- ══ NAVIGATION ENGINE (يجب أن يُحمَّل أخيرًا) ══ --}}
+  <script src="{{ asset('js/user-spa-nav.js') }}?v={{ time() }}"></script>
+
   <script>
     window.AppRole = 'user';
     window.AppApplicantName = '{{ Auth::user()?->full_name ?? session("association.name") ?? "مستخدم" }}';
@@ -259,8 +267,6 @@
     window.openAddOpp  = () => showReadOnlyToast();
     window.editFromDet = () => showReadOnlyToast();
 
-    // Block the "new project" button by ID
-    // Trigger user opps render after JS loads
     document.addEventListener('DOMContentLoaded', () => {
       const btn = document.getElementById('openNew');
       if (btn) btn.addEventListener('click', e => { e.stopImmediatePropagation(); showReadOnlyToast(); });
@@ -270,7 +276,7 @@
       if (typeof _orig === 'function') {
         window.fetchOpportunities = async function() {
           await _orig();
-          renderUserOpps();
+          if (typeof renderUserOpps === 'function') renderUserOpps();
         };
       }
     });

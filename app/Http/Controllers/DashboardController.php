@@ -212,6 +212,120 @@ class DashboardController extends Controller
         ));
     }
 
+    /**
+     * Volunteer / Regular User Dashboard — JSON
+     * (used by the SPA dashboard section inside user/consulting.blade.php)
+     */
+    public function userDashboardApi()
+    {
+        $authUser     = Auth::user();
+        $assocSession = session('association');
+
+        if (!$authUser && !$assocSession) {
+            throw new UnauthorizedException();
+        }
+
+        $serviceReqs = \App\Models\ServiceRequest::query()
+            ->when($authUser,  fn ($q) => $q->where('user_id', $authUser->id))
+            ->when(!$authUser, fn ($q) => $q->where('association_id', $assocSession['id']))
+            ->get();
+
+        $oppReqs = OpportunityRequest::with(['opportunity', 'project'])
+            ->when($authUser,  fn ($q) => $q->where('user_id', $authUser->id))
+            ->when(!$authUser, fn ($q) => $q->where('association_id', $assocSession['id']))
+            ->get();
+
+        $totalReqs = $serviceReqs->count() + $oppReqs->count();
+        $pendingReqs = $serviceReqs->whereIn('status', ['pending', 'review'])->count() + $oppReqs->where('status', 'pending')->count();
+        $approvedReqs = $serviceReqs->whereIn('status', ['approved', 'completed'])->count() + $oppReqs->where('status', 'approved')->count();
+        $rejectedReqs = $serviceReqs->where('status', 'rejected')->count() + $oppReqs->where('status', 'rejected')->count();
+
+        $stats = [
+            'associations_count'      => Association::where('status', 'approved')->count(),
+            'opportunities_count'     => Opportunity::count(),
+            'projects_count'          => JointProject::count(),
+            'upcoming_meetings_count' => $this->getUpcomingMeetings()->count(),
+            'total_requests'          => $totalReqs,
+            'pending_requests'        => $pendingReqs,
+            'approved_requests'       => $approvedReqs,
+            'rejected_requests'       => $rejectedReqs,
+        ];
+
+        $upcomingMeetings = $this->getUpcomingMeetings()->map(function ($m) {
+            return [
+                'title'          => $m->title,
+                'date_time'      => $m->date_time,
+                'meeting_type'   => $m->meeting_type,
+                'end_date_time'  => $m->end_date_time,
+                'link'           => $m->link,
+            ];
+        })->values();
+
+        $activeProjects = JointProject::with('category')->orderBy('created_at', 'desc')->take(2)->get()
+            ->map(function ($p) {
+                return [
+                    'name'          => $p->name,
+                    'category_name' => $p->category->name ?? null,
+                    'category_icon' => $p->category->icon ?? '🏢',
+                    'progress'      => $p->progress ?? 0,
+                ];
+            })->values();
+
+        $latestOpportunities = Opportunity::orderBy('created_at', 'desc')->take(2)->get()
+            ->map(function ($o) {
+                return [
+                    'title'        => $o->title,
+                    'organization' => $o->organization ?? 'تكامل',
+                ];
+            })->values();
+
+        $latestOppReqs = $oppReqs->map(function ($req) {
+            if ($req->project_id) {
+                $title = $req->project->name ?? 'طلب مشروع محذوف';
+                $sub = 'طلب انضمام لمشروع';
+                $color = '#10b981';
+                $icon = 'fa-diagram-project';
+            } else {
+                $title = $req->opportunity->title ?? 'طلب فرصة محذوفة';
+                $sub = 'طلب فرصة تطوع';
+                $color = '#f59e0b';
+                $icon = 'fa-hand-holding-heart';
+            }
+            return [
+                'title'      => $title,
+                'sub'        => $sub,
+                'color'      => $color,
+                'typeIcon'   => $icon,
+                'status'     => $req->status,
+                'created_at' => $req->created_at,
+            ];
+        });
+
+        $latestServiceReqs = $serviceReqs->map(function ($req) {
+            return [
+                'title'      => $req->title ?? 'طلب خدمة',
+                'sub'        => 'طلب خدمة مبادرون',
+                'color'      => '#3b82f6',
+                'typeIcon'   => 'fa-screwdriver-wrench',
+                'status'     => $req->status,
+                'created_at' => $req->created_at,
+            ];
+        });
+
+        $latestRequests = $latestOppReqs->concat($latestServiceReqs)
+            ->sortByDesc('created_at')
+            ->take(4)
+            ->values();
+
+        return response()->json([
+            'stats'                => $stats,
+            'upcoming_meetings'    => $upcomingMeetings,
+            'active_projects'      => $activeProjects,
+            'latest_opportunities' => $latestOpportunities,
+            'latest_requests'      => $latestRequests,
+        ]);
+    }
+
     private function getUpcomingMeetings()
     {
         // First sync past meetings to ensure status is up to date

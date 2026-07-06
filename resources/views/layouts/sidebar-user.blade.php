@@ -291,7 +291,8 @@ aside.sidebar .sb-foot .logout-btn:hover {
 
     <a href="{{ route('user.dashboard') }}"
        class="nav-item {{ $nav==='dashboard' ? 'active' : '' }}"
-       id="nav-dashboard">
+       id="unav-dashboard"
+       onclick="if(typeof showSection==='function'){showSection('dashboard');return false;}">
       <div class="nav-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round">
@@ -308,7 +309,8 @@ aside.sidebar .sb-foot .logout-btn:hover {
 
     <a href="{{ route('user.meetings') }}"
        class="nav-item {{ $nav==='meetings' ? 'active' : '' }}"
-       id="nav-meetings">
+       id="unav-meetings"
+       onclick="if(typeof showSection==='function'){showSection('meetings');return false;}">
       <div class="nav-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round">
@@ -321,7 +323,8 @@ aside.sidebar .sb-foot .logout-btn:hover {
 
     <a href="{{ route('user.consulting') }}"
        class="nav-item {{ $nav==='volunteer' ? 'active' : '' }}"
-       id="nav-volunteer">
+       id="unav-volunteer"
+       onclick="if(typeof showSection==='function'){showSection('volunteer');return false;}">
       <div class="nav-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round">
@@ -336,7 +339,8 @@ aside.sidebar .sb-foot .logout-btn:hover {
 
     <a href="{{ route('user.services') }}"
        class="nav-item {{ $nav==='services' ? 'active' : '' }}"
-       id="nav-services">
+       id="unav-services"
+       onclick="if(typeof showSection==='function'){showSection('services');return false;}">
       <div class="nav-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round">
@@ -350,7 +354,8 @@ aside.sidebar .sb-foot .logout-btn:hover {
 
     <a href="{{ route('user.orders') ?? '#' }}"
        class="nav-item {{ $nav==='orders' ? 'active' : '' }}"
-       id="nav-orders">
+       id="unav-orders"
+       onclick="if(typeof showSection==='function'){showSection('orders');return false;}">
       <div class="nav-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round">
@@ -363,7 +368,8 @@ aside.sidebar .sb-foot .logout-btn:hover {
 
     <a href="{{ route('user.joint-projects') }}"
        class="nav-item {{ $nav==='projects' ? 'active' : '' }}"
-       id="nav-projects">
+       id="unav-projects"
+       onclick="if(typeof showSection==='function'){showSection('projects');return false;}">
       <div class="nav-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round">
@@ -379,7 +385,8 @@ aside.sidebar .sb-foot .logout-btn:hover {
 
     <a href="{{ route('user.settings') }}"
        class="nav-item {{ $nav==='settings' ? 'active' : '' }}"
-       id="nav-settings">
+       id="unav-settings"
+       onclick="if(typeof showSection==='function'){showSection('settings');return false;}">
       <div class="nav-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
              stroke-linecap="round" stroke-linejoin="round">

@@ -59,9 +59,18 @@ Route::middleware(AuthMiddleware::class)->group(function () {
 
     // ── Regular user routes ───────────────────────────────────────────────────
     Route::middleware(RoleMiddleware::class . ':user,association')->group(function () {
-        Route::get('/user/dashboard', [App\Http\Controllers\DashboardController::class, 'userDashboard'])->name('user.dashboard');
+        // ── SPA shell: single page, all sections load dynamically inside it ──
         Route::get('/user/consulting', fn() => view('user.consulting'))->name('user.consulting');
-        Route::get('/user/services', fn() => view('user.services'))->name('user.services');
+
+        // Legacy/full-page routes now redirect into the SPA shell with a hash
+        Route::get('/user/dashboard', fn() => redirect('/user/consulting#dashboard'))->name('user.dashboard');
+        Route::get('/user/meetings', fn() => redirect('/user/consulting#meetings'))->name('user.meetings');
+        Route::get('/user/services', fn() => redirect('/user/consulting#services'))->name('user.services');
+        Route::get('/user/my-requests', fn() => redirect('/user/consulting#orders'))->name('user.orders');
+        Route::get('/user/joint-projects', fn() => redirect('/user/consulting#projects'))->name('user.joint-projects');
+        Route::get('/user/settings', fn() => redirect('/user/consulting#settings'))->name('user.settings');
+
+        // ── Service requests (Mubadiroon services) ───────────────────────────
         Route::get('/user/service-requests', [App\Http\Controllers\User\ServiceRequestController::class, 'index']);
         Route::post('/user/service-requests', [App\Http\Controllers\User\ServiceRequestController::class, 'store']);
         Route::put('/user/service-requests/{id}', [App\Http\Controllers\User\ServiceRequestController::class, 'update']);
@@ -73,11 +82,11 @@ Route::middleware(AuthMiddleware::class)->group(function () {
         // Meetings list for users (read-only)
         Route::get('/api/user/meetings', [MeetingController::class, 'listForUser'])->name('user.meetings.list');
 
-        Route::get('/user/meetings', [MeetingController::class, 'userIndex'])->name('user.meetings');
         Route::post('/user/meetings/{id}/attendance', [MeetingController::class, 'toggleAttendance'])->name('user.meetings.attendance');
-        Route::get('/user/my-requests', [App\Http\Controllers\User\MyRequestController::class, 'index'])->name('user.orders');
-        Route::get('/user/joint-projects', fn() => redirect('/user/consulting#projects'))->name('user.joint-projects');
-        Route::get('/user/settings', fn() => view('user.settings'))->name('user.settings');
+
+        // Dashboard + My Requests — JSON for the SPA sections inside user/consulting.blade.php
+        Route::get('/api/user/dashboard', [App\Http\Controllers\DashboardController::class, 'userDashboardApi'])->name('user.dashboard.api');
+        Route::get('/api/user/my-requests', [App\Http\Controllers\User\MyRequestController::class, 'apiIndex'])->name('user.orders.api');
     });
 
 });
