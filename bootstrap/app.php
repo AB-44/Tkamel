@@ -76,15 +76,18 @@ return Application::configure(basePath: dirname(__DIR__))
         );
     });
     $exceptions->render(function (\Throwable $e, $request) {
-    // فقط الأخطاء اللي مو HTTP errors عادية
-    if (!$e instanceof \Symfony\Component\HttpKernel\Exception\HttpException) {
-        if ($request->expectsJson() || $request->is('api/*')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'حدث خطأ في النظام، حاول مرة أخرى'
-            ], 500);
+        if ($e instanceof \Illuminate\Validation\ValidationException || $e instanceof \Illuminate\Auth\AuthenticationException) {
+            return null;
         }
-        // لو طلب عادي (مو API) يروح لصفحة خطأ
-    }
-});
+        // فقط الأخطاء اللي مو HTTP errors عادية
+        if (!$e instanceof \Symfony\Component\HttpKernel\Exception\HttpException) {
+            if ($request->expectsJson() || $request->is('api/*')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'حدث خطأ في النظام، حاول مرة أخرى'
+                ], 500);
+            }
+            // لو طلب عادي (مو API) يروح لصفحة خطأ
+        }
+    });
     })->create();
