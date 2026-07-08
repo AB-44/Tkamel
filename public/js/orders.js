@@ -73,7 +73,7 @@ async function loadAssociationRequests() {
     }));
 
     _allData = [...dbAssocRequests];
-    renderRequests(_allData);
+    renderOrdRequests(_allData);
     updateOrderStats();
     updateSidebarBadgesWithDb();
 
@@ -125,7 +125,7 @@ function updateOrderStats() {
 }
 
 // ===================== RENDER TABLE =====================
-function renderRequests(data) {
+function renderOrdRequests(data) {
   const tbody = document.getElementById('requestsTbody');
   if (!tbody) return;
 
@@ -202,7 +202,7 @@ function applyFilter() {
     (r.email || '').toLowerCase().includes(searchVal) ||
     (r.assoc || '').toLowerCase().includes(searchVal)
   );
-  renderRequests(data);
+  renderOrdRequests(data);
 }
 
 // ===================== ACTION MODAL (reject / review with notes) =====================
@@ -977,13 +977,9 @@ function renderMyAssociations(data) {
 }
 
 // ===================== SIDEBAR =====================
-function toggleServices() {
-  const p = document.getElementById('np-services'), s = document.getElementById('submenu-services');
-  if (!s) return; const o = s.classList.contains('open');
-  s.classList.toggle('open', !o); if (p) p.classList.toggle('open', !o);
-}
+// toggleServices — defined once in menu.js to avoid redefinition conflicts
 function showAdminRequests(el) { switchTab('requests', document.querySelectorAll('.tab-btn')[0]); }
-function showToast(i, m) { } function toggleNotifs() { if (typeof window._realToggleNotifs === 'function') window._realToggleNotifs(); } function openMeetingsPage() { } function backToVolunteer() { }
+// toggleNotifs / openMeetingsPage / backToVolunteer — defined once in menu.js
 
 // ===================== VOLUNTEER OPPORTUNITY REQUESTS =====================
 let allOppReqs = [], oppReqFilter = 'all';
@@ -1401,7 +1397,7 @@ async function submitProjReqStatus(action) {
 
 // ===================== INIT =====================
 function initOrders() {
-  renderRequests([]);
+  renderOrdRequests([]);
   fetchOrderCategories().finally(() => {
     renderCategories();
   });

@@ -99,7 +99,7 @@ async function fetchRequests() {
       assocCity: r.association?.city || '', message: r.notes || '',
       date: r.created_at.split('T')[0], status: r.status
     }));
-    renderRequests();
+    renderVolRequests();
     updateStats();
   } catch (e) { console.error("Error fetching requests", e); }
 }
@@ -426,7 +426,7 @@ function showAdminMain() {
 function showAdminOppRequests() {
   showView('view-admin-reqs');
   updateTopbar('طلبات التقديم', 'طلبات التقديم');
-  renderRequests();
+  renderVolRequests();
 }
 
 function openCatAdmin(catId) {
@@ -602,10 +602,10 @@ function filterReqs(f) {
   ['pending', 'approved', 'rejected'].forEach(x =>
     document.getElementById('rtab-' + x).classList.toggle('active', x === f)
   );
-  renderRequests();
+  renderVolRequests();
 }
 
-function renderRequests() {
+function renderVolRequests() {
   const filtered = requests.filter(r => r.status === reqFilter);
   const list = document.getElementById('req-list');
   if (!filtered.length) {
@@ -665,7 +665,7 @@ function approveReq(id) {
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        showToast('', 'تم قبول الطلب بنجاح');
+        volToast('', 'تم قبول الطلب بنجاح');
         fetchRequests();
       }
     });
@@ -674,7 +674,7 @@ function approveReq(id) {
 function rejectReq(id) {
   const reason = prompt("يرجى إدخال سبب الرفض:");
   if (!reason || reason.trim() === '') {
-    showToast('', 'سبب الرفض مطلوب');
+    volToast('', 'سبب الرفض مطلوب');
     return;
   }
 
@@ -689,10 +689,10 @@ function rejectReq(id) {
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        showToast('', 'تم رفض الطلب');
+        volToast('', 'تم رفض الطلب');
         fetchRequests();
       } else {
-        showToast('', data.message || 'حدث خطأ');
+        volToast('', data.message || 'حدث خطأ');
       }
     });
 }
@@ -707,7 +707,7 @@ function openAddOpp(mode) {
     currentCatId = oppForAll ? oppForAll.id : CATEGORIES[0].id;
   }
   const cat = CATEGORIES.find(c => c.id === currentCatId) || CATEGORIES[0];
-  if (!cat) { showToast('', 'يرجى إضافة تصنيف أولاً'); return; }
+  if (!cat) { volToast('', 'يرجى إضافة تصنيف أولاً'); return; }
   
   document.getElementById('opp-m-icon').innerHTML = '<i class="fa-solid fa-star"></i>';
   document.getElementById('opp-m-title').textContent = 'إضافة فرصة تطوع';
@@ -866,16 +866,16 @@ function saveOpp() {
   .then(res => res.json())
   .then(data => {
     if (data.success) {
-      showToast('', data.message);
+      volToast('', data.message);
       closeOv('ov-opp');
       fetchOpportunities();
     } else {
-      showToast('', 'حدث خطأ أثناء الحفظ');
+      volToast('', 'حدث خطأ أثناء الحفظ');
     }
   })
   .catch(err => {
     console.error(err);
-    showToast('', 'حدث خطأ في الاتصال بالخادم');
+    volToast('', 'حدث خطأ في الاتصال بالخادم');
   });
 }
 
@@ -890,7 +890,7 @@ function doDelete() {
     .then(res => res.json())
     .then(data => {
       if (data.success) {
-        showToast('', data.message);
+        volToast('', data.message);
         closeOv('ov-del');
         fetchOpportunities();
       }
@@ -927,17 +927,17 @@ function submitApply() {
   .then(res => res.json())
   .then(data => {
     if (data.success) {
-      showToast('', data.message);
+      volToast('', data.message);
       closeOv('ov-apply');
       fetchOpportunities();
       fetchRequests();
     } else {
-      showToast('', data.message);
+      volToast('', data.message);
     }
   })
   .catch(err => {
     console.error(err);
-    showToast('', 'حدث خطأ في الاتصال بالخادم');
+    volToast('', 'حدث خطأ في الاتصال بالخادم');
   });
 }
 
@@ -984,17 +984,7 @@ function updateApplicantStats() {
 function updateAssocStats() { updateApplicantStats(); }
 
 /* ══ NOTIFICATIONS ══ */
-function toggleNotifs() {
-  // Deferred to the notification system initialized in the page's inline script
-  if (typeof window._realToggleNotifs === 'function') window._realToggleNotifs();
-}
-
-function showNotifBanner(title, sub) {
-  const b = document.getElementById('assoc-notif-banner');
-  document.getElementById('notif-banner-title').textContent = title;
-  document.getElementById('notif-banner-sub').textContent = sub;
-  b.style.display = 'flex';
-}
+// toggleNotifs / showNotifBanner — defined once in menu.js to avoid redefinition conflicts
 
 /* ══ OVERLAY ══ */
 function openOv(id) { document.getElementById(id).classList.add('open'); }
@@ -1003,7 +993,7 @@ function bgClose(e, id) { if (e.target === document.getElementById(id)) closeOv(
 
 /* ══ TOAST ══ */
 let tTimer;
-function showToast(icon, msg) {
+function volToast(icon, msg) {
   const el = document.getElementById('toast');
   document.getElementById('t-icon').textContent = icon;
   document.getElementById('t-msg').textContent = msg;
@@ -1013,23 +1003,11 @@ function showToast(icon, msg) {
 }
 
 /* ══ MEETINGS PANEL ══ */
-/* ══ SERVICES SUBMENU ══ */
-function toggleServices() {
-  const parent = document.getElementById('np-services');
-  const submenu = document.getElementById('submenu-services');
-  const isOpen = submenu.classList.contains('open');
-  if (isOpen) {
-    submenu.classList.remove('open');
-    parent.classList.remove('open');
-  } else {
-    submenu.classList.add('open');
-    parent.classList.add('open');
-  }
-}
+/* ══ SERVICES SUBMENU — defined once in menu.js to avoid redefinition conflicts ══ */
 
 /* ══ CONTACT ══ */
 function sendContactMsg() {
-  showToast('', 'تم إرسال رسالتك! سنردّ خلال 24 ساعة');
+  volToast('', 'تم إرسال رسالتك! سنردّ خلال 24 ساعة');
 }
 
 /* ══ KEYBOARD ══ */

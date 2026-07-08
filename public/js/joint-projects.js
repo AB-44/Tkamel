@@ -19,7 +19,7 @@ async function apiFetch(url, opts = {}) {
   return data;
 }
 
-function showToast(msg, type = 'success') {
+function jpToast(msg, type = 'success') {
   let t = document.getElementById('jp-toast');
   if (!t) {
     t = document.createElement('div');
@@ -92,7 +92,7 @@ async function loadAll() {
     populateCategorySelects();
   } catch (e) {
     console.error('loadAll error', e);
-    showToast('تعذّر تحميل البيانات', 'error');
+    jpToast('تعذّر تحميل البيانات', 'error');
   }
 }
 
@@ -337,8 +337,8 @@ function buildCard(p, mode = 'admin') {
 /* ═══════════════════════════════════════════════════════
    MODALS
 ═══════════════════════════════════════════════════════ */
-function openOv(id) { document.getElementById(id)?.classList.add('open'); }
-function closeOv(id) { document.getElementById(id)?.classList.remove('open'); }
+function jpOpenOv(id) { document.getElementById(id)?.classList.add('open'); }
+function jpCloseOv(id) { document.getElementById(id)?.classList.remove('open'); }
 
 function populateCategorySelects() {
   // Create CatPicker for New Project modal
@@ -379,7 +379,7 @@ function openNewModal() {
       multi       : true,
     });
   }
-  openOv('ovNew');
+  jpOpenOv('ovNew');
 }
 
 /* ── EDIT PROJECT ── */
@@ -387,7 +387,7 @@ function openEdit(id) {
   try {
     const p = _projects.find(x => x.id == id);
     if (!p) {
-      showToast('خطأ: لم يتم العثور على المشروع', 'error');
+      jpToast('خطأ: لم يتم العثور على المشروع', 'error');
       return;
     }
     _editingId = id;
@@ -417,10 +417,10 @@ function openEdit(id) {
       });
     }
 
-    openOv('ovEdit');
+    jpOpenOv('ovEdit');
   } catch (err) {
     console.error('Error opening edit modal:', err);
-    showToast('حدث خطأ أثناء فتح شاشة التعديل', 'error');
+    jpToast('حدث خطأ أثناء فتح شاشة التعديل', 'error');
   }
 }
 
@@ -429,7 +429,7 @@ function confirm2(ttl, msg, fn) {
   document.getElementById('cTtl').textContent = ttl;
   document.getElementById('cMsg').textContent = msg;
   _pendingFn = fn;
-  openOv('ovConfirm');
+  jpOpenOv('ovConfirm');
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -442,12 +442,12 @@ async function createProject(payload) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    showToast(data.message || 'تم إنشاء المشروع');
-    closeOv('ovNew');
+    jpToast(data.message || 'تم إنشاء المشروع');
+    jpCloseOv('ovNew');
     await loadAll();
   } catch (e) {
     const msg = e?.errors ? Object.values(e.errors)[0][0] : (e?.message || 'حدث خطأ');
-    showToast(msg, 'error');
+    jpToast(msg, 'error');
   }
 }
 
@@ -458,33 +458,33 @@ async function saveEdit(payload) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    showToast(data.message || 'تم التحديث');
-    closeOv('ovEdit');
+    jpToast(data.message || 'تم التحديث');
+    jpCloseOv('ovEdit');
     _editingId = null;
     await loadAll();
   } catch (e) {
     const msg = e?.errors ? Object.values(e.errors)[0][0] : (e?.message || 'حدث خطأ');
-    showToast(msg, 'error');
+    jpToast(msg, 'error');
   }
 }
 
 async function cancelProject(id) {
   try {
     const data = await apiFetch(`/api/joint-projects/${id}/cancel`, { method: 'POST' });
-    showToast(data.message || 'تم الإلغاء');
+    jpToast(data.message || 'تم الإلغاء');
     await loadAll();
   } catch (e) {
-    showToast('حدث خطأ', 'error');
+    jpToast('حدث خطأ', 'error');
   }
 }
 
 async function deleteProject(id) {
   try {
     const data = await apiFetch(`/api/joint-projects/${id}`, { method: 'DELETE' });
-    showToast(data.message || 'تم الحذف');
+    jpToast(data.message || 'تم الحذف');
     await loadAll();
   } catch (e) {
-    showToast('حدث خطأ', 'error');
+    jpToast('حدث خطأ', 'error');
   }
 }
 
@@ -544,15 +544,15 @@ async function submitProjectApply() {
     });
 
     if (data.success) {
-      showToast(data.message || 'تم إرسال طلبك بنجاح!', 'success');
+      jpToast(data.message || 'تم إرسال طلبك بنجاح!', 'success');
       myProjRequests.push({ projId: _applyingProjectId, status: 'pending' });
       closeProjectApplyModal();
       renderAll();
     } else {
-      showToast(data.message || 'لم يتم إرسال الطلب', 'error');
+      jpToast(data.message || 'لم يتم إرسال الطلب', 'error');
     }
   } catch (e) {
-    showToast(e?.message || 'حدث خطأ أثناء إرسال الطلب', 'error');
+    jpToast(e?.message || 'حدث خطأ أثناء إرسال الطلب', 'error');
   }
 }
 
@@ -573,15 +573,7 @@ function initTabs() {
 /* ═══════════════════════════════════════════════════════
    SIDEBAR HELPERS (kept for compatibility)
 ═══════════════════════════════════════════════════════ */
-function toggleSubmenu(id) {
-  const menu = document.getElementById('submenu-' + id);
-  const parent = document.getElementById('np-' + id);
-  document.querySelectorAll('.nav-submenu').forEach(m => {
-    if (m.id !== 'submenu-' + id) { m.classList.remove('open'); m.previousElementSibling?.classList.remove('open'); }
-  });
-  if (menu) { menu.classList.toggle('open'); parent?.classList.toggle('open'); }
-}
-function toggleServices() { toggleSubmenu('services'); }
+// toggleServices — defined once in menu.js to avoid redefinition conflicts
 
 /* ═══════════════════════════════════════════════════════
    INIT
@@ -607,24 +599,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* New Project button */
   document.getElementById('openNew')?.addEventListener('click', openNewModal);
-  document.getElementById('clNew')?.addEventListener('click', () => closeOv('ovNew'));
+  document.getElementById('clNew')?.addEventListener('click', () => jpCloseOv('ovNew'));
 
   /* Edit close */
-  document.getElementById('clEdit')?.addEventListener('click', () => { closeOv('ovEdit'); _editingId = null; });
+  document.getElementById('clEdit')?.addEventListener('click', () => { jpCloseOv('ovEdit'); _editingId = null; });
 
   /* Confirm modal */
   document.getElementById('cY')?.addEventListener('click', () => {
     if (_pendingFn) _pendingFn();
-    closeOv('ovConfirm');
+    jpCloseOv('ovConfirm');
     _pendingFn = null;
   });
-  document.getElementById('cN')?.addEventListener('click', () => { closeOv('ovConfirm'); _pendingFn = null; });
+  document.getElementById('cN')?.addEventListener('click', () => { jpCloseOv('ovConfirm'); _pendingFn = null; });
 
   /* Close modals on backdrop click */
   ['ovNew','ovEdit','ovConfirm'].forEach(id => {
     document.getElementById(id)?.addEventListener('click', e => {
       if (e.target === document.getElementById(id)) {
-        closeOv(id);
+        jpCloseOv(id);
         if (id === 'ovEdit') _editingId = null;
         if (id === 'ovConfirm') _pendingFn = null;
       }

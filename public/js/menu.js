@@ -46,9 +46,9 @@ function openMeetingsPage() {
     document.getElementById('nav-meetings')?.classList.add('active');
 }
 
-function backToVolunteer() {
-    closeMeetingsPage();
-}
+// backToVolunteer — defined in spa-nav.js / user-spa-nav.js for pages using the SPA nav engine.
+// (Kept out of menu.js to avoid redefinition conflicts; legacy standalone pages that still
+//  need the old iframe-based behavior can call closeMeetingsPage() directly instead.)
 
 function closeMeetingsPage() {
     document.getElementById('meetings-panel')?.classList.remove('open');
@@ -72,37 +72,5 @@ function toggleServices() {
     }
 }
 
-function showService(key) {
-    document.getElementById('meetings-panel')?.classList.remove('open');
-    document.getElementById('meetings-overlay')?.classList.remove('open');
-
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    const target = document.getElementById('view-' + key);
-    if (target) target.classList.add('active');
-
-    const labels = {
-        units: 'بناء وحدات',
-        systems: 'بناء أنظمة',
-        initiatives: 'تنسيق مبادرات',
-        training: 'تدريب تطوعي',
-        consulting: 'الاستشارات',
-        contact: 'التواصل معنا',
-    };
-
-    const titleEl = document.querySelector('.topbar-title') || document.getElementById('topbar-title');
-    const crumbEl = document.querySelector('.topbar-crumb span') || document.getElementById('topbar-crumb');
-
-    if (titleEl && crumbEl && labels[key]) {
-        titleEl.textContent = labels[key];
-        crumbEl.textContent = labels[key];
-    }
-
-    document.querySelectorAll('.nav-item, .nav-sub-item').forEach(el => el.classList.remove('active'));
-    const subEl = document.getElementById('sub-' + key);
-    if (subEl) subEl.classList.add('active');
-
-    const submenu = document.getElementById('submenu-services');
-    const parent = document.getElementById('np-services');
-    if (submenu) submenu.classList.add('open');
-    if (parent) parent.classList.add('open');
-}
+// showService — defined in spa-nav.js / user-spa-nav.js for pages that load the SPA nav engine.
+// (Kept out of menu.js to avoid redefinition conflicts on pages loading both scripts.)
