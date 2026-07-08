@@ -138,42 +138,169 @@
       </button>
     </div>
 
-    {{-- ══ MY ASSOCIATIONS TAB (Now Categories + Associations) ══ --}}
+    {{-- ══ MY ASSOCIATIONS TAB ══ --}}
     <div class="tab-content active" id="tab-my-associations">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+
+      {{-- ── Page Header ── --}}
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem">
         <div style="text-align:right">
           <h2 style="color:var(--ink);font-weight:800;font-size:1.3rem;margin:0 0 4px 0">
-            <i class="fa-solid fa-layer-group" style="margin-left:8px;color:var(--teal)"></i>
-            تصنيفات الجمعيات
+            <i class="fa-solid fa-building-user" style="margin-left:8px;color:var(--teal)"></i>
+            الجمعيات
           </h2>
-          <p style="color:var(--muted);font-size:0.9rem;margin:0">إدارة التصنيفات والجمعيات المرتبطة بها</p>
+          <p style="color:var(--muted);font-size:0.9rem;margin:0">إدارة كافة الجمعيات وتصنيفاتها في النظام</p>
         </div>
-        <button class="btn-primary" onclick="openAddCategoryModal()"
-          style="padding:10px 16px;font-size:0.9rem;border-radius:10px;display:flex;align-items:center;gap:6px">
-          <i class="fa-solid fa-plus"></i> إضافة تصنيف
-        </button>
+        <div>
+          <button class="btn-primary" onclick="openAddCategoryModal()"
+            style="padding:9px 14px;font-size:0.86rem;border-radius:10px;display:flex;align-items:center;gap:6px">
+            <i class="fa-solid fa-plus"></i> إضافة تصنيف
+          </button>
+        </div>
       </div>
 
-      <div class="categories-grid" id="categoriesGrid"
-        style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;margin-bottom:28px">
+      <div class="assoc-dual-layout">
+
+        {{-- ── Right: Associations Grid ── --}}
+        <div class="assoc-main-panel">
+          {{-- Search bar --}}
+          <div style="background:#fff;border-radius:14px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:10px;border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,0.03)">
+            <div style="display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:7px 12px;flex:1">
+              <i class="fa-solid fa-magnifying-glass" style="color:#94a3b8;font-size:0.82rem"></i>
+              <input type="text" id="assocMainSearch" placeholder="ابحث عن جمعية بالاسم أو البريد..."
+                oninput="filterAssocMain()"
+                style="border:none;outline:none;background:transparent;font-family:inherit;font-size:0.85rem;width:100%;direction:rtl">
+            </div>
+            <div id="assoc-active-cat-badge" style="display:none;align-items:center;gap:6px;background:rgba(42,184,208,0.1);border:1px solid rgba(42,184,208,0.3);border-radius:10px;padding:6px 12px;font-size:0.82rem;font-weight:700;color:var(--teal)">
+              <span id="assoc-active-cat-label"></span>
+              <button onclick="selectAssocCat('')" style="background:none;border:none;cursor:pointer;color:#94a3b8;display:flex;align-items:center;padding:0;font-size:0.9rem">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </div>
+
+          {{-- Associations list --}}
+          <div id="assocMainGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px">
+            {{-- Filled by JS --}}
+          </div>
+
+          {{-- Pagination --}}
+          <div id="assocPaginationWrap" style="display:none;margin-top:20px;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap">
+            <button id="assoc-prev-btn" onclick="changeAssocPage(-1)"
+              style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:1.5px solid #e2e8f0;background:#fff;font-family:inherit;font-size:0.83rem;font-weight:700;cursor:pointer;color:#374151;transition:all 0.18s">
+              <i class="fa-solid fa-chevron-right"></i> السابق
+            </button>
+            <div id="assocPageNumbers" style="display:flex;gap:4px;align-items:center">
+              {{-- Page numbers filled by JS --}}
+            </div>
+            <button id="assoc-next-btn" onclick="changeAssocPage(1)"
+              style="display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;border:1.5px solid #e2e8f0;background:#fff;font-family:inherit;font-size:0.83rem;font-weight:700;cursor:pointer;color:#374151;transition:all 0.18s">
+              التالي <i class="fa-solid fa-chevron-left"></i>
+            </button>
+          </div>
+        </div>
+
+        {{-- ── Left: Categories Sidebar ── --}}
+        <aside class="assoc-cats-sidebar">
+          <div class="assoc-sidebar-header">
+            <span class="assoc-sidebar-title">
+              <i class="fa-solid fa-tag" style="color:var(--teal)"></i> التصنيفات
+            </span>
+            <span class="vt-pill-count" id="assoc-sidebar-cats-count" style="margin-right:6px"></span>
+          </div>
+          <div id="assocSidebarCats" class="assoc-sidebar-cats-list">
+            {{-- Filled by JS --}}
+          </div>
+        </aside>
+
       </div>
 
-      <div class="section-head"
-        style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <div id="assoc-section-head">
-          <div style="font-weight:800;font-size:1.05rem;color:var(--text)"><i class="fa-solid fa-building"
-              style="color:var(--teal);margin-left:8px"></i>الجمعيات المسجلة</div>
-        </div>
-        <div class="filter-group">
-          <select id="catFilter" onchange="filterAssoc()"
-            style="padding:7px 12px;border-radius:10px;border:1.5px solid #e2e8f0;font-family:inherit;font-size:.85rem">
-            <option value="">كل التصنيفات</option>
-          </select>
-        </div>
-      </div>
-      <div class="assoc-list" id="assocList"
-        style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;margin-top:12px"></div>
     </div>
+
+    <style>
+      /* ── Dual layout ── */
+      .assoc-dual-layout { display:flex; gap:18px; align-items:flex-start; }
+
+      /* ── Categories Sidebar ── */
+      .assoc-cats-sidebar {
+        width:220px; flex-shrink:0;
+        background:#fff; border-radius:16px;
+        border:1.5px solid #e2e8f0;
+        box-shadow:0 2px 10px rgba(0,0,0,0.04);
+        overflow:hidden; position:sticky; top:80px;
+      }
+      .assoc-sidebar-header {
+        display:flex; align-items:center; justify-content:space-between;
+        padding:14px 16px; background:#f8fafc;
+        border-bottom:1px solid #e2e8f0; font-weight:800;
+        font-size:0.9rem; color:#0f172a;
+      }
+      .assoc-sidebar-title { display:flex; align-items:center; gap:8px; }
+      .assoc-sidebar-cats-list { padding:8px; display:flex; flex-direction:column; gap:4px; }
+
+      .assoc-sidebar-cat-item {
+        display:flex; align-items:center; gap:10px;
+        padding:10px 12px; border-radius:10px; cursor:pointer;
+        font-size:0.85rem; font-weight:600; color:#374151;
+        transition:all 0.18s; border:1.5px solid transparent;
+      }
+      .assoc-sidebar-cat-item:hover { background:#f1f5f9; border-color:#e2e8f0; }
+      .assoc-sidebar-cat-item.active {
+        background:rgba(42,184,208,0.08);
+        border-color:rgba(42,184,208,0.35);
+        color:#0e7490; font-weight:800;
+      }
+      .assoc-sidebar-cat-icon { font-size:1.15rem; width:22px; text-align:center; flex-shrink:0; }
+      .assoc-sidebar-cat-count {
+        margin-right:auto; background:#f1f5f9; color:#64748b;
+        border-radius:20px; padding:2px 8px; font-size:0.72rem; font-weight:800;
+      }
+      .assoc-sidebar-cat-item.active .assoc-sidebar-cat-count {
+        background:rgba(42,184,208,0.15); color:#0e7490;
+      }
+
+      /* ── Main panel ── */
+      .assoc-main-panel { flex:1; min-width:0; }
+
+      /* ── Assoc card (main grid) ── */
+      .assoc-main-card {
+        background:#fff; border:1.5px solid #e2e8f0; border-radius:16px;
+        padding:16px; display:flex; align-items:center; gap:14px;
+        transition:all 0.2s; cursor:default;
+      }
+      .assoc-main-card:hover { box-shadow:0 6px 20px rgba(0,0,0,0.08); border-color:#c7d2fe; transform:translateY(-2px); }
+      .assoc-main-card-avatar {
+        width:48px; height:48px; border-radius:14px; display:flex;
+        align-items:center; justify-content:center; font-size:1.4rem; flex-shrink:0;
+      }
+      .assoc-main-card-info { flex:1; min-width:0; }
+      .assoc-main-card-name { font-weight:800; font-size:0.92rem; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .assoc-main-card-cat { font-size:0.75rem; color:#64748b; margin-top:2px; }
+      .assoc-main-card-contact { font-size:0.72rem; color:#94a3b8; margin-top:3px; direction:ltr; text-align:right; }
+      .assoc-main-card-meta { display:flex; flex-direction:column; align-items:flex-end; gap:5px; flex-shrink:0; }
+
+      /* ── Pagination buttons ── */
+      .assoc-page-btn {
+        width:36px; height:36px; border-radius:10px; border:1.5px solid #e2e8f0;
+        background:#fff; font-family:inherit; font-size:0.85rem; font-weight:700;
+        cursor:pointer; color:#374151; transition:all 0.18s;
+        display:flex; align-items:center; justify-content:center;
+      }
+      .assoc-page-btn:hover { background:#f1f5f9; border-color:#cbd5e1; }
+      .assoc-page-btn.active-page {
+        background:linear-gradient(135deg,#0d3d49,#2ab8d0);
+        border-color:transparent; color:#fff;
+        box-shadow:0 3px 10px rgba(42,184,208,0.35);
+      }
+      #assoc-prev-btn:hover, #assoc-next-btn:hover { background:#f1f5f9; border-color:#cbd5e1; }
+      #assoc-prev-btn:disabled, #assoc-next-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+      @media (max-width: 800px) {
+        .assoc-dual-layout { flex-direction:column; }
+        .assoc-cats-sidebar { width:100%; position:static; }
+        .assoc-sidebar-cats-list { flex-direction:row; flex-wrap:wrap; padding:8px; }
+        .assoc-sidebar-cat-item { flex-shrink:0; }
+      }
+    </style>
 
     {{-- ══ ACCOUNT CREATION REQUESTS TAB ══ --}}
     <div class="tab-content" id="tab-requests">

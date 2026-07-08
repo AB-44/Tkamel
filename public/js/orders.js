@@ -1691,3 +1691,278 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target.id === 'proj-req-modal') closeProjReqModal();
   });
 });
+
+// =====================================================================
+//  NEW ASSOCIATIONS VIEW  (Toggle Pill + Sidebar + Grid + Pagination)
+// =====================================================================
+
+const ASSOC_PAGE_SIZE = 10;
+let _assocCurrentPage = 1;
+let _assocSelectedCat = '';       // '' = all
+let _assocCurrentView = 'list';   // 'list' | 'cats'
+let _assocFilteredData = [];      // filtered slice displayed
+
+/**
+ * Switch between الجمعيات (list+sidebar) and التصنيفات (category cards grid)
+ */
+function switchAssocView(view) {
+  _assocCurrentView = view;
+  const panelList = document.getElementById('assoc-panel-list');
+  const panelCats = document.getElementById('assoc-panel-cats');
+  const pillList  = document.getElementById('assoc-pill-list');
+  const pillCats  = document.getElementById('assoc-pill-cats');
+
+  if (view === 'list') {
+    if (panelList) panelList.style.display = '';
+    if (panelCats) panelCats.style.display = 'none';
+    if (pillList) pillList.classList.add('active');
+    if (pillCats) pillCats.classList.remove('active');
+    // Make sure data is loaded
+    if (!allMyAssociations.length) {
+      loadMyAssociations();
+    } else {
+      filterAssocMain();
+    }
+  } else {
+    if (panelList) panelList.style.display = 'none';
+    if (panelCats) panelCats.style.display = '';
+    if (pillList) pillList.classList.remove('active');
+    if (pillCats) pillCats.classList.add('active');
+    // Ensure category cards are rendered
+    renderCategories();
+  }
+}
+
+/**
+ * Render the left sidebar with category items
+ */
+function renderAssocSidebar() {
+  const container = document.getElementById('assocSidebarCats');
+  if (!container) return;
+
+  // Count pill
+  const cntEl = document.getElementById('assoc-cats-pill-count');
+  const sidebarCntEl = document.getElementById('assoc-sidebar-cats-count');
+  if (cntEl) cntEl.textContent = categories.length || '';
+  if (sidebarCntEl) sidebarCntEl.textContent = categories.length || '';
+
+  const allCount = allMyAssociations.length;
+
+  const allItem = `
+    <div class="assoc-sidebar-cat-item ${_assocSelectedCat === '' ? 'active' : ''}" onclick="selectAssocCat('')">
+      <span class="assoc-sidebar-cat-icon">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 21h18M7 21V7a2 2 0 012-2h6a2 2 0 012 2v14M10 9h4M10 13h4M10 17h4"/>
+        </svg>
+      </span>
+      <span style="flex:1">جميع الجمعيات</span>
+      <span class="assoc-sidebar-cat-count">${allCount}</span>
+    </div>`;
+
+  const catsHtml = categories.map(c => {
+    const catCount = allMyAssociations.filter(a => (a.category || a.cat) === c.name).length;
+    const isActive = _assocSelectedCat === c.name;
+    return `
+      <div class="assoc-sidebar-cat-item ${isActive ? 'active' : ''}" onclick="selectAssocCat('${c.name.replace(/'/g, "\\'")}')">
+        <span class="assoc-sidebar-cat-icon" style="color:${c.color || '#2ab8d0'}">${c.icon || '<i class="fa-solid fa-tag"></i>'}</span>
+        <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name}</span>
+        <span class="assoc-sidebar-cat-count">${catCount}</span>
+      </div>`;
+  }).join('');
+
+  container.innerHTML = allItem + catsHtml;
+}
+
+/**
+ * Select a category from the sidebar
+ */
+function selectAssocCat(cat) {
+  _assocSelectedCat = cat;
+  _assocCurrentPage = 1;
+
+  // Update badge display
+  const badge = document.getElementById('assoc-active-cat-badge');
+  const label = document.getElementById('assoc-active-cat-label');
+  if (badge && label) {
+    if (cat) {
+      const catObj = categories.find(c => c.name === cat);
+      label.textContent = (catObj?.icon ? catObj.icon + ' ' : '') + cat;
+      badge.style.display = 'flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  // Re-highlight sidebar
+  renderAssocSidebar();
+  filterAssocMain();
+}
+
+/**
+ * Filter associations by search text + selected category, then paginate
+ */
+function filterAssocMain() {
+  const search = (document.getElementById('assocMainSearch')?.value || '').toLowerCase();
+
+  _assocFilteredData = allMyAssociations.filter(a => {
+    const matchCat = !_assocSelectedCat || (a.category || a.cat) === _assocSelectedCat;
+    if (!matchCat) return false;
+    if (!search) return true;
+    return (
+      (a.association_name || '').toLowerCase().includes(search) ||
+      (a.email || '').toLowerCase().includes(search) ||
+      (a.phone || '').toLowerCase().includes(search) ||
+      (a.manager_name || '').toLowerCase().includes(search)
+    );
+  });
+
+  // Reset to page 1 when filter changes
+  if (_assocCurrentPage > Math.ceil(_assocFilteredData.length / ASSOC_PAGE_SIZE)) {
+    _assocCurrentPage = 1;
+  }
+
+  renderAssocMainGrid();
+  renderAssocPagination();
+}
+
+/**
+ * Render association cards for the current page
+ */
+function renderAssocMainGrid() {
+  const grid = document.getElementById('assocMainGrid');
+  if (!grid) return;
+
+  const start = (_assocCurrentPage - 1) * ASSOC_PAGE_SIZE;
+  const pageData = _assocFilteredData.slice(start, start + ASSOC_PAGE_SIZE);
+
+  if (!_assocFilteredData.length) {
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:48px 20px;color:#94a3b8">
+        <div style="font-size:2.5rem;margin-bottom:12px">🏢</div>
+        <div style="font-size:1rem;font-weight:700;margin-bottom:4px">لا توجد جمعيات</div>
+        <div style="font-size:0.83rem">${_assocSelectedCat ? 'لا توجد جمعيات في هذا التصنيف' : 'لا توجد جمعيات مسجلة بعد'}</div>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = pageData.map((a, idx) => {
+    const globalIdx = start + idx;
+    const cat = categories.find(c => c.name === (a.category || a.cat)) || {};
+    const bg = cat.color ? cat.color + '22' : '#2ab8d022';
+    const icon = cat.icon || '🏢';
+    const col = avatarColors[globalIdx % avatarColors.length];
+    const name = a.association_name || '—';
+    const manager = a.manager_name || '—';
+    const email = a.email || '';
+    const phone = a.phone || '';
+    const catName = a.category || a.cat || '—';
+    const date = formatDate(a.created_at || new Date());
+
+    return `
+      <div class="assoc-main-card">
+        <div class="assoc-main-card-avatar" style="background:${bg};color:${cat.color || '#2ab8d0'}">
+          ${icon}
+        </div>
+        <div class="assoc-main-card-info">
+          <div class="assoc-main-card-name" title="${name}">${name}</div>
+          <div class="assoc-main-card-cat">
+            <i class="fa-solid fa-tag" style="font-size:0.7rem;margin-left:3px;color:${cat.color || '#94a3b8'}"></i>${catName}
+          </div>
+          <div class="assoc-main-card-contact">
+            ${email ? `<span><i class="fa-regular fa-envelope" style="margin-left:3px;color:#94a3b8"></i>${email}</span>` : ''}
+            ${phone ? `<span style="margin-right:8px"><i class="fa-solid fa-phone" style="margin-left:3px;color:#94a3b8"></i>${phone}</span>` : ''}
+          </div>
+        </div>
+        <div class="assoc-main-card-meta">
+          <span class="badge badge-approved" style="background:rgba(16,185,129,0.12);color:#059669;border:1px solid rgba(16,185,129,0.2);white-space:nowrap">
+            <span style="display:inline-block;width:6px;height:6px;background:#059669;border-radius:50%;margin-left:4px"></span>نشطة
+          </span>
+          <span style="font-size:0.72rem;color:#94a3b8">${date}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/**
+ * Render pagination controls
+ */
+function renderAssocPagination() {
+  const wrap    = document.getElementById('assocPaginationWrap');
+  const numWrap = document.getElementById('assocPageNumbers');
+  const prevBtn = document.getElementById('assoc-prev-btn');
+  const nextBtn = document.getElementById('assoc-next-btn');
+  if (!wrap || !numWrap) return;
+
+  const totalPages = Math.ceil(_assocFilteredData.length / ASSOC_PAGE_SIZE);
+
+  if (totalPages <= 1) {
+    wrap.style.display = 'none';
+    return;
+  }
+
+  wrap.style.display = 'flex';
+
+  if (prevBtn) prevBtn.disabled = _assocCurrentPage <= 1;
+  if (nextBtn) nextBtn.disabled = _assocCurrentPage >= totalPages;
+
+  // Build page number buttons (show max 7 with ellipsis)
+  let pages = [];
+  if (totalPages <= 7) {
+    pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+  } else {
+    pages = [1];
+    if (_assocCurrentPage > 3) pages.push('…');
+    for (let p = Math.max(2, _assocCurrentPage - 1); p <= Math.min(totalPages - 1, _assocCurrentPage + 1); p++) {
+      pages.push(p);
+    }
+    if (_assocCurrentPage < totalPages - 2) pages.push('…');
+    pages.push(totalPages);
+  }
+
+  numWrap.innerHTML = pages.map(p => {
+    if (p === '…') return `<span style="padding:0 4px;color:#94a3b8;font-size:0.85rem;font-weight:700">…</span>`;
+    const isActive = p === _assocCurrentPage;
+    return `<button class="assoc-page-btn ${isActive ? 'active-page' : ''}" onclick="goAssocPage(${p})">${p}</button>`;
+  }).join('');
+}
+
+/**
+ * Go to a specific page
+ */
+function goAssocPage(page) {
+  _assocCurrentPage = page;
+  renderAssocMainGrid();
+  renderAssocPagination();
+  // Scroll to top of grid
+  document.getElementById('assocMainGrid')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/**
+ * Change page by delta (+1 / -1)
+ */
+function changeAssocPage(delta) {
+  const totalPages = Math.ceil(_assocFilteredData.length / ASSOC_PAGE_SIZE);
+  const newPage = _assocCurrentPage + delta;
+  if (newPage < 1 || newPage > totalPages) return;
+  goAssocPage(newPage);
+}
+
+// ── Patch loadMyAssociations to also call new sidebar + grid render ──
+const _origLoadMyAssociations = loadMyAssociations;
+loadMyAssociations = async function() {
+  await _origLoadMyAssociations();
+  renderAssocSidebar();
+  filterAssocMain();
+};
+
+// ── Also patch renderCategories to update pill count ──
+const _origRenderCategories = renderCategories;
+renderCategories = function() {
+  _origRenderCategories();
+  const el = document.getElementById('assoc-cats-pill-count');
+  if (el) el.textContent = categories.length || '';
+  const sel = document.getElementById('assoc-sidebar-cats-count');
+  if (sel) sel.textContent = categories.length || '';
+  // Re-render sidebar if in list view
+  if (_assocCurrentView === 'list') renderAssocSidebar();
+};

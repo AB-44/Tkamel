@@ -319,6 +319,17 @@
     .toggle input:checked + .toggle-track { background: var(--btn-bg); }
     .toggle input:checked + .toggle-track::after { transform: translateX(-20px); }
 
+    /* ── Locked toggle (الوضع الداكن مقفل مؤقتًا) ── */
+    .toggle-row.toggle-locked { opacity: 0.5; }
+    .toggle-row.toggle-locked .toggle-track { cursor: not-allowed; }
+    .toggle-row.toggle-locked .toggle { cursor: not-allowed; }
+    .toggle-sub-locked {
+      font-size: 0.72rem;
+      color: #c0392b;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
     /* ── Accent colors ── */
     .accent-row {
       margin: 1.2rem 0;
@@ -431,6 +442,12 @@
       border-color: var(--btn-bg);
       background: rgba(13, 127, 159, 0.06);
       box-shadow: 0 0 0 3px rgba(13, 127, 159, 0.1);
+    }
+
+    .lang-card.lang-locked {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
     }
 
     .lang-flag { font-size: 1.4rem; }
@@ -673,13 +690,19 @@
         <section class="settings-panel" id="panel-appearance">
           <div class="panel-title">المظهر</div>
 
-          <div class="toggle-row">
+          {{--
+            ملاحظة: زر الوضع الداكن مقفل مؤقتًا (معطل) بناءً على طلب صريح.
+            لتفعيله لاحقًا: احذف class="toggle-row toggle-locked" وخليها class="toggle-row" فقط،
+            واحذف كلمة disabled من الـ <input>، وأزل السطر الخاص بـ toggle-sub-locked إذا رغبت.
+          --}}
+          <div class="toggle-row toggle-locked">
             <div class="toggle-info">
               <span class="toggle-label">الوضع الداكن</span>
               <span class="toggle-sub">التبديل بين الثيم الفاتح والداكن</span>
+              <span class="toggle-sub-locked">هذه الميزة غير متاحة حاليًا</span>
             </div>
             <label class="toggle">
-              <input type="checkbox" id="dark-mode-toggle">
+              <input type="checkbox" id="dark-mode-toggle" disabled>
               <span class="toggle-track"></span>
             </label>
           </div>
@@ -693,7 +716,7 @@
 
         {{-- ── Language ── --}}
         <section class="settings-panel" id="panel-language">
-          <div class="panel-title">اللغة والمنطقة الزمنية</div>
+          <div class="panel-title">اللغة</div>
 
           <div class="accent-label" style="margin-bottom:10px">لغة الواجهة</div>
           <div class="lang-grid">
@@ -705,7 +728,11 @@
               </div>
               <div class="lang-check"></div>
             </div>
-            <div class="lang-card" onclick="selectLang(this)">
+            {{--
+              ملاحظة: خيار الإنجليزية مقفل مؤقتًا (معطل) بناءً على طلب صريح.
+              لتفعيله لاحقًا: أعد onclick="selectLang(this)" وأزل class="lang-locked".
+            --}}
+            <div class="lang-card lang-locked">
               <span class="lang-flag">🇺🇸</span>
               <div class="lang-info">
                 <span class="lang-name">الإنجليزية</span>
@@ -713,16 +740,6 @@
               </div>
               <div class="lang-check"></div>
             </div>
-          </div>
-
-          <div class="form-group" style="margin-top:.5rem">
-            <label class="form-label">المنطقة الزمنية</label>
-            <select class="form-input" style="cursor:pointer">
-              <option value="Asia/Riyadh" selected>توقيت الرياض (GMT+3)</option>
-              <option value="Asia/Dubai">توقيت دبي (GMT+4)</option>
-              <option value="Africa/Cairo">توقيت القاهرة (GMT+2)</option>
-              <option value="UTC">UTC (GMT+0)</option>
-            </select>
           </div>
 
           <div class="panel-footer">
@@ -810,7 +827,7 @@
       notifications: 'تم حفظ إعدادات الإشعارات',
       security:      'تم تحديث كلمة المرور بنجاح',
       appearance:    'تم حفظ إعدادات المظهر',
-      language:      'تم تحديث اللغة والمنطقة الزمنية',
+      language:      'تم تحديث اللغة',
     };
     try {
       if (section === 'profile') {

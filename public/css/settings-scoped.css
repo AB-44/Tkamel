@@ -261,6 +261,18 @@
     }
 #view-settings .toggle input:checked + .toggle-track { background: var(--btn-bg); }
 #view-settings .toggle input:checked + .toggle-track::after { transform: translateX(-20px); }
+
+    /* ── Locked toggle (الوضع الداكن مقفل مؤقتًا) ── */
+    #view-settings .toggle-row.toggle-locked { opacity: 0.5; }
+    #view-settings .toggle-row.toggle-locked .toggle-track { cursor: not-allowed; }
+    #view-settings .toggle-row.toggle-locked .toggle { cursor: not-allowed; }
+    #view-settings .toggle-sub-locked {
+      font-size: 0.72rem;
+      color: #c0392b;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
     /* ── Accent colors ── */
     #view-settings .accent-row {
       margin: 1.2rem 0;
@@ -359,6 +371,7 @@
       background: rgba(13, 127, 159, 0.06);
       box-shadow: 0 0 0 3px rgba(13, 127, 159, 0.1);
     }
+#view-settings .lang-card.lang-locked { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
 #view-settings .lang-flag { font-size: 1.4rem; }
 #view-settings .lang-info { display: flex; flex-direction: column; gap: 1px; }
 #view-settings .lang-name {

@@ -89,6 +89,10 @@
   .toggle-track::after { content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%; background: #fff; top: 3px; right: 3px; transition: transform 0.22s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
   .toggle input:checked + .toggle-track { background: var(--btn-bg, #0c6080); }
   .toggle input:checked + .toggle-track::after { transform: translateX(-20px); }
+  .toggle-row.toggle-locked { opacity: 0.5; }
+  .toggle-row.toggle-locked .toggle-track { cursor: not-allowed; }
+  .toggle-row.toggle-locked .toggle { cursor: not-allowed; }
+  .toggle-sub-locked { font-size: 0.72rem; color: #c0392b; font-weight: 600; margin-top: 2px; }
   .accent-row { margin: 1.2rem 0; }
   .accent-label { font-size: 0.82rem; font-weight: 700; color: var(--label-c, #374151); margin-bottom: 10px; }
   .accent-swatches { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -104,6 +108,7 @@
   .lang-card { display: flex; align-items: center; gap: 12px; padding: 13px 15px; border-radius: 12px; border: 2px solid var(--input-border, rgba(13,127,159,.18)); cursor: pointer; transition: all 0.18s; background: var(--input-bg, #f4fafc); }
   .lang-card:hover { border-color: rgba(13, 127, 159, 0.3); }
   .lang-card.selected { border-color: var(--btn-bg, #0c6080); background: rgba(13, 127, 159, 0.06); box-shadow: 0 0 0 3px rgba(13, 127, 159, 0.1); }
+  .lang-card.lang-locked { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
   .lang-flag { font-size: 1.4rem; }
   .lang-info { display: flex; flex-direction: column; gap: 1px; }
   .lang-name { font-size: 0.88rem; font-weight: 700; color: var(--ink); }
@@ -256,12 +261,18 @@
         <section class="settings-panel" id="upanel-appearance">
           <div class="panel-title">المظهر</div>
 
-          <div class="toggle-row">
+          {{--
+            ملاحظة: زر الوضع الداكن مقفل مؤقتًا (معطل) بناءً على طلب صريح.
+            لتفعيله لاحقًا: احذف class="toggle-row toggle-locked" وخليها class="toggle-row" فقط،
+            واحذف كلمة disabled من الـ <input>، وأزل السطر الخاص بـ toggle-sub-locked إذا رغبت.
+          --}}
+          <div class="toggle-row toggle-locked">
             <div class="toggle-info">
               <span class="toggle-label">الوضع الداكن</span>
               <span class="toggle-sub">التبديل بين الثيم الفاتح والداكن</span>
+              <span class="toggle-sub-locked">هذه الميزة غير متاحة حاليًا</span>
             </div>
-            <label class="toggle"><input type="checkbox" id="uset-dark-mode-toggle"><span class="toggle-track"></span></label>
+            <label class="toggle"><input type="checkbox" id="uset-dark-mode-toggle" disabled><span class="toggle-track"></span></label>
           </div>
 
           <div class="panel-footer">
@@ -273,7 +284,7 @@
 
         {{-- ── Language ── --}}
         <section class="settings-panel" id="upanel-language">
-          <div class="panel-title">اللغة والمنطقة الزمنية</div>
+          <div class="panel-title">اللغة</div>
 
           <div class="accent-label" style="margin-bottom:10px">لغة الواجهة</div>
           <div class="lang-grid">
@@ -282,21 +293,15 @@
               <div class="lang-info"><span class="lang-name">العربية</span><span class="lang-native">Arabic</span></div>
               <div class="lang-check"></div>
             </div>
-            <div class="lang-card" onclick="usetSelectLang(this)">
+            {{--
+              ملاحظة: خيار الإنجليزية مقفل مؤقتًا (معطل) بناءً على طلب صريح.
+              لتفعيله لاحقًا: أعد onclick="usetSelectLang(this)" وأزل class="lang-locked".
+            --}}
+            <div class="lang-card lang-locked">
               <span class="lang-flag">🇺🇸</span>
               <div class="lang-info"><span class="lang-name">الإنجليزية</span><span class="lang-native">English</span></div>
               <div class="lang-check"></div>
             </div>
-          </div>
-
-          <div class="form-group" style="margin-top:.5rem">
-            <label class="form-label">المنطقة الزمنية</label>
-            <select class="form-input" style="cursor:pointer">
-              <option value="Asia/Riyadh" selected>توقيت الرياض (GMT+3)</option>
-              <option value="Asia/Dubai">توقيت دبي (GMT+4)</option>
-              <option value="Africa/Cairo">توقيت القاهرة (GMT+2)</option>
-              <option value="UTC">UTC (GMT+0)</option>
-            </select>
           </div>
 
           <div class="panel-footer">
